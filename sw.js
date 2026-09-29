@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hallo-welt-v1';
+const CACHE_NAME = 'hallo-welt-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (event) => {

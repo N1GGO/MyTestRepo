@@ -38,24 +38,38 @@
   button:active {
     background: #3730a3;
   }
-  #count {
+  #lines {
     margin-top: 1rem;
     font-size: 1.1rem;
+    text-align: center;
+  }
+  #lines p {
+    margin: 0.25rem 0;
+  }
+  button:disabled {
+    background: #a5a5a5;
+    cursor: default;
   }
 </style>
 </head>
 <body>
   <h1>Hallo Welt</h1>
   <button id="btn">Klick mich</button>
-  <p id="count">Noch nicht geklickt</p>
+  <div id="lines"></div>
 
   <script>
+    const messages = ['Ich liebe dich, Sandy.', 'Wirklich.', 'Sicher.', 'Absolut.'];
     let clicks = 0;
     const btn = document.getElementById('btn');
-    const count = document.getElementById('count');
+    const lines = document.getElementById('lines');
     btn.addEventListener('click', () => {
+      const line = document.createElement('p');
+      line.textContent = messages[clicks];
+      lines.appendChild(line);
       clicks++;
-      count.textContent = `Geklickt: ${clicks}x`;
+      if (clicks >= messages.length) {
+        btn.disabled = true;
+      }
     });
 
     if ('serviceWorker' in navigator) {

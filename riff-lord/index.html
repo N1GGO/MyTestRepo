@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Riff Lord — Idle Metal</title>
+<link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0708; --panel:rgba(22,15,17,.82); --line:#3a2226; --text:#f1e6dc; --dim:#a08c84;
+  --fire:#ff5a1f; --fire2:#ffb300; --blood:#c4122f; --gold:#ffd76a; --plat:#cfe6ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Oswald,system-ui,sans-serif;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 50% 110%,rgba(255,90,31,.28),transparent 60%),radial-gradient(ellipse at 15% -10%,rgba(196,18,47,.25),transparent 50%),radial-gradient(ellipse at 90% 0%,rgba(120,60,255,.12),transparent 45%);
+  background-attachment:fixed}
+#embers{position:fixed;inset:0;pointer-events:none;z-index:0}
+header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:linear-gradient(#150c0e,rgba(21,12,14,.6));backdrop-filter:blur(6px)}
+h1{font-family:"Metal Mania",serif;font-size:clamp(26px,4vw,42px);letter-spacing:2px;font-weight:400;
+  background:linear-gradient(180deg,#fff3c4,var(--fire2) 40%,var(--fire) 70%,var(--blood));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,90,31,.5))}
+.hbtns{display:flex;gap:8px}
+.hbtns button{background:#1c1214;border:1px solid var(--line);color:var(--dim);font:inherit;font-size:13px;padding:6px 12px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
+.hbtns button:hover{color:var(--text);border-color:var(--fire)}
+main{position:relative;z-index:1;display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,1.1fr) minmax(320px,1.2fr);gap:18px;padding:18px 22px;max-width:1500px;margin:0 auto}
+@media(max-width:1050px){main{grid-template-columns:1fr;padding:14px 16px}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;backdrop-filter:blur(8px);box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04)}
+h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.col{display:flex;flex-direction:column;gap:18px}
+
+/* stage */
+.stage{text-align:center;position:relative;overflow:hidden}
+.stage:before{content:"";position:absolute;inset:-40% -20% auto;height:120%;background:conic-gradient(from 160deg at 50% 0,transparent 0 8deg,rgba(255,179,0,.10) 12deg,transparent 18deg 32deg,rgba(196,18,47,.14) 37deg,transparent 43deg);animation:sweep 7s ease-in-out infinite alternate;pointer-events:none}
+@keyframes sweep{to{transform:rotate(-14deg)}}
+.rank{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+#fans{font-size:clamp(38px,5vw,58px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;text-shadow:0 0 24px rgba(255,120,40,.55)}
+.sub{color:var(--dim);font-size:15px;letter-spacing:1px}
+.sub b{color:var(--fire2);font-weight:500}
+#pick{position:relative;width:min(240px,60vw);margin:14px auto 6px;cursor:pointer;display:block;background:none;border:0;transition:transform .08s;filter:drop-shadow(0 0 28px rgba(255,90,31,.55));-webkit-tap-highlight-color:transparent}
+#pick:hover{transform:scale(1.04)}
+#pick:active,#pick.hit{transform:scale(.93) rotate(-3deg)}
+#pick svg{width:100%;display:block;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{filter:brightness(1.18)}}
+.eq{display:flex;gap:4px;justify-content:center;align-items:flex-end;height:44px;margin-top:8px}
+.eq i{width:7px;border-radius:2px 2px 0 0;background:linear-gradient(var(--fire2),var(--fire),var(--blood));animation:eq .9s ease-in-out infinite alternate;height:20%}
+@keyframes eq{to{height:100%}}
+.float{position:fixed;pointer-events:none;z-index:5;font-weight:700;font-size:22px;color:var(--gold);text-shadow:0 0 10px var(--fire);animation:up 1s ease-out forwards}
+@keyframes up{to{transform:translateY(-90px) scale(1.3);opacity:0}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px}
+.stats div{background:#140c0e;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stats span{display:block;color:var(--dim);font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.stats b{font-weight:500;font-size:17px}
+
+/* shop */
+.qty{display:flex;gap:4px}
+.qty button{font:inherit;font-size:12px;background:#1c1214;color:var(--dim);border:1px solid var(--line);padding:3px 9px;border-radius:5px;cursor:pointer}
+.qty button.on{color:#120a05;background:var(--fire2);border-color:var(--fire2)}
+.gen{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:linear-gradient(90deg,#1b1113,#140c0e);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px;cursor:pointer;transition:.12s;position:relative;overflow:hidden}
+.gen .ico{font-size:30px;text-align:center;filter:drop-shadow(0 0 6px rgba(255,90,31,.5))}
+.gen .nm{font-size:17px;font-weight:500;letter-spacing:.5px}
+.gen .ds{font-size:12.5px;color:var(--dim)}
+.gen .cost{font-size:14px;color:var(--fire2);font-variant-numeric:tabular-nums}
+.gen .own{font-family:"Metal Mania",serif;font-size:30px;color:rgba(255,255,255,.22);min-width:44px;text-align:right}
+.gen.ok{border-color:#7a3a1c}
+.gen.ok:hover{border-color:var(--fire);transform:translateX(3px);box-shadow:0 0 18px rgba(255,90,31,.3)}
+.gen.ok .own{color:var(--gold)}
+.gen:not(.ok){opacity:.55;cursor:not-allowed}
+.gen.locked{display:none}
+.gen .ms{font-size:12px;color:var(--gold);letter-spacing:.5px}
+.gen .ms b{background:linear-gradient(var(--fire2),var(--fire));color:#160a04;border-radius:4px;padding:0 5px;font-weight:700;margin-right:4px}
+.gen .mbar{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--blood),var(--fire),var(--fire2));box-shadow:0 0 8px var(--fire);transition:width .25s}
+.gen.boom{animation:boom .7s ease-out}
+@keyframes boom{0%{box-shadow:0 0 0 0 rgba(255,215,106,.9);border-color:var(--gold)}100%{box-shadow:0 0 0 22px rgba(255,215,106,0)}}
+
+/* upgrades */
+#ups{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.up{font:inherit;color:inherit;text-align:left;background:#170e10;border:1px solid var(--line);border-radius:9px;padding:9px;cursor:pointer;transition:.12s}
+.up .t{font-size:14px;font-weight:500}
+.up .d{font-size:12px;color:var(--dim);margin:2px 0 4px}
+.up .c{font-size:13px;color:var(--fire2)}
+.up.ok{border-color:#8a6a1c;background:linear-gradient(160deg,#2a1c0c,#170e10)}
+.up.ok:hover{border-color:var(--gold);box-shadow:0 0 16px rgba(255,215,106,.3);transform:translateY(-2px)}
+.up:not(.ok){opacity:.55;cursor:not-allowed}
+.empty{color:var(--dim);font-size:14px;font-style:italic}
+
+/* ascend */
+.asc{border-color:#4a5a78;background:linear-gradient(170deg,rgba(30,36,56,.85),rgba(22,15,17,.85))}
+.asc h2{color:var(--plat)}
+.disc{width:74px;height:74px;border-radius:50%;flex:none;background:repeating-radial-gradient(circle,#dfeeff 0 1px,#8fa6c4 2px 3px),conic-gradient(#fff,#8fa6c4,#fff,#8fa6c4,#fff);background-blend-mode:multiply;position:relative;animation:spin 6s linear infinite;box-shadow:0 0 22px rgba(190,220,255,.5)}
+.disc:after{content:"";position:absolute;inset:36%;border-radius:50%;background:var(--blood);border:2px solid #111}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ascrow{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.ascrow p{font-size:14px;color:#c9d4e6;line-height:1.45}
+.ascrow b{color:#fff}
+.bar{height:8px;background:#0e0a10;border-radius:5px;overflow:hidden;border:1px solid #2c3550;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7fa8e0,#fff);box-shadow:0 0 10px #9cc4ff;transition:width .3s}
+#ascBtn{width:100%;font-family:"Metal Mania",serif;font-size:20px;letter-spacing:2px;padding:11px;border-radius:9px;border:1px solid #9cc4ff;color:#0b1020;background:linear-gradient(#fff,#a9c6ee);cursor:pointer;transition:.15s}
+#ascBtn:hover:not(:disabled){box-shadow:0 0 26px rgba(170,205,255,.7);transform:translateY(-1px)}
+#ascBtn:disabled{opacity:.35;cursor:not-allowed}
+#perks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.perk{font:inherit;color:inherit;text-align:left;background:#12141f;border:1px solid #2c3550;border-radius:9px;padding:9px;cursor:pointer}
+.perk .t{font-size:14px;font-weight:500;color:var(--plat)}
+.perk .d{font-size:12px;color:#93a0b8;margin:2px 0 4px}
+.perk .c{font-size:13px;color:#fff}
+.perk.ok:hover{border-color:var(--plat);box-shadow:0 0 14px rgba(170,205,255,.35)}
+.perk:not(.ok){opacity:.5;cursor:not-allowed}
+
+/* modal / toast */
+#modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:16px}
+#modal.show{display:flex}
+#modal .box{max-width:420px;width:100%;text-align:center}
+#modal h2{justify-content:center;font-size:28px}
+#modal p{color:#d8ccc4;line-height:1.5;margin-bottom:16px}
+#modal .btns{display:flex;gap:10px;justify-content:center}
+#modal button{font:inherit;font-size:15px;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border-radius:8px;border:1px solid var(--line);background:#1c1214;color:var(--text);cursor:pointer}
+#modal button.go{background:linear-gradient(var(--fire2),var(--fire));color:#160a04;border-color:var(--fire2);font-weight:700}
+#flash{position:fixed;inset:0;background:#fff;z-index:30;pointer-events:none;opacity:0}
+#flash.go{animation:flash 1.4s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="embers"></canvas>
+<header>
+  <h1>⚡ Riff Lord</h1>
+  <div class="hbtns"><button id="mute">🔊 Sound</button><button id="wipe">Wipe save</button></div>
+</header>
+<main>
+  <div class="col">
+    <section class="panel stage">
+      <div class="rank" id="rank">Garage Band</div>
+      <div id="fans">0</div>
+      <div class="sub">fans &nbsp;·&nbsp; <b id="fps">0</b> / sec</div>
+      <button id="pick" aria-label="Shred">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf4a"/><stop offset=".45" stop-color="#ff5a1f"/><stop offset="1" stop-color="#7a0b1c"/></linearGradient>
+            <radialGradient id="sh" cx=".35" cy=".25" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path d="M100 194C60 152 14 92 20 50 25 14 60 6 100 6s75 8 80 44c6 42-40 102-80 144Z" fill="url(#pg)" stroke="#2a0a0a" stroke-width="5"/>
+          <path d="M100 194C60 152 14 92 20 50 25 14 60 6 100 6s75 8 80 44c6 42-40 102-80 144Z" fill="url(#sh)"/>
+          <path d="M112 30 68 104h28l-12 62 50-82h-30l8-54Z" fill="#160a08" stroke="#ffe9a8" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="sub">Shred for <b id="cp">1</b> fans per riff</div>
+      <div class="eq" id="eq"></div>
+    </section>
+    <section class="panel">
+      <h2>Tour Stats</h2>
+      <div class="stats">
+        <div><span>This tour</span><b id="sRun">0</b></div>
+        <div><span>All time</span><b id="sTot">0</b></div>
+        <div><span>Riffs shredded</span><b id="sClk">0</b></div>
+        <div><span>Ascensions</span><b id="sAsc">0</b></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel asc">
+      <h2>Go Platinum</h2>
+      <div class="ascrow"><div class="disc"></div>
+        <p>You hold <b id="recs">0</b> platinum records (<b id="earned">0</b> earned, each <b>+10%</b> fans forever).<br>Ascend now for <b id="gain">+0</b>.</p></div>
+      <div class="bar"><i id="ascBar"></i></div>
+      <div class="sub" id="ascNext" style="font-size:13px;margin-bottom:10px"></div>
+      <button id="ascBtn" disabled>Ascend to Legend</button>
+      <div id="perks"></div>
+    </section>
+    <section class="panel">
+      <h2>Upgrades</h2>
+      <div id="ups"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Gear &amp; Crew <span class="qty" id="qty"><button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="100">×100</button><button data-q="-1">Max</button></span></h2>
+    <div id="gens"></div>
+  </section>
+</main>
+<div id="modal"><div class="panel box"><h2 id="mT"></h2><p id="mP"></p><div class="btns" id="mB"></div></div></div>
+<div id="flash"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const GENS=[
+ ['🎸','Busker Guitar','A battered six-string on a street corner',15,.2],
+ ['🔊','Garage Amp','Loud enough to anger three neighbours',100,1],
+ ['🥁','Double-Kick Drummer','200 BPM and no days off',1100,8],
+ ['🚐','Tour Van','Smells awful. Gets you to the gig',12e3,47],
+ ['🔥','Pyro Rig','Eyebrows are optional',13e4,260],
+ ['💿','Record Deal','Sign here, here, and in blood here',14e5,1400],
+ ['🏟️','Stadium Show','Eighty thousand horns in the air',2e7,7800],
+ ['✈️','World Tour','A private jet named after your ego',33e7,44e3],
+ ['🎪','Festival Headliner','Your name in the biggest font',51e8,26e4],
+ ['🌋','Volcano Amphitheatre','Naturally heated mosh pit',75e9,16e5],
+ ['👹','Underworld Residency','The crowd is literally undying',1e12,1e7],
+ ['🌌','Cosmic Feedback Loop','A riff that echoes across galaxies',14e12,65e6]
+];
+const G=1.15, TIERS=[10,25,50,100,200], TMULT=[10,60,500,8e3,4e5], TN=['Tuned','Overdriven','Blackened','Legendary','Godforged'];
+const CLK=[100,1e3,2e4,5e5,2e7,1e9,1e11,1e13,1e15];
+const CN=['Heavier Strings','Drop-D Tuning','Palm Muting','Sweep Picking','Tapping Solo','Seven Strings','Eight Strings','Shred Mastery','Fingers of Fury'];
+const PERKS=[
+ {id:'crew',n:'Roadie Army',d:'+25% all fans per level',c:l=>2*2**l,max:50},
+ {id:'pick',n:'Golden Pick',d:'Riffs ×3 per level',c:l=>3**l,max:20},
+ {id:'cheap',n:'Endorsement Deal',d:'Gear 5% cheaper per level',c:l=>3*2**l,max:10},
+ {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
+];
+const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false});
+let S=fresh(), qty=1;
+try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d); while(S.gens.length<GENS.length)S.gens.push(0);}}catch(e){}
+const save=()=>{S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
+
+const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
+function fmt(n){ if(n<1000) return n<10&&n%1?n.toFixed(1):Math.floor(n).toString();
+  const e=Math.floor(Math.log10(n)/3); if(e>=SUF.length) return n.toExponential(2).replace('+','');
+  const v=n/10**(e*3); return (v<10?v.toFixed(2):v<100?v.toFixed(1):v.toFixed(0))+SUF[e]; }
+const pl=id=>S.perks[id]||0;
+const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'));
+const tierCount=i=>TIERS.reduce((a,_,t)=>a+(S.ups['g'+i+'t'+t]?1:0),0);
+/* milestones: free ×2 at 10, 25, 50, 100, then every 50 */
+const msCount=n=>(n>=10)+(n>=25)+(n>=50)+(n>=100?1+Math.floor((n-100)/50):0);
+const msPrev=n=>n>=100?100+Math.floor((n-100)/50)*50:n>=50?50:n>=25?25:n>=10?10:0;
+const msNext=n=>n<10?10:n<25?25:n<50?50:n<100?100:msPrev(n)+50;
+const gm=i=>2**(tierCount(i)+msCount(S.gens[i]));
+const genFps=i=>GENS[i][4]*S.gens[i]*gm(i)*gmult();
+const fps=()=>GENS.reduce((a,_,i)=>a+genFps(i),0);
+const clickPow=()=>{const c=CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0);return 2**c*3**pl('pick')*(1+.1*S.earned)+.02*fps();};
+const cdisc=()=>1-.05*pl('cheap');
+function bulk(i){ const b=GENS[i][3]*cdisc()*G**S.gens[i]; let k=qty;
+  if(qty<0){k=Math.max(1,Math.floor(Math.log(S.fans*(G-1)/b+1)/Math.log(G)));}
+  return {k,cost:b*(G**k-1)/(G-1)}; }
+const pending=()=>Math.max(0,Math.floor(Math.sqrt(S.total/1e6))-S.earned);
+
+function gain(n){S.fans+=n;S.run+=n;S.total+=n;}
+
+/* ---------- build DOM ---------- */
+const gensEl=$('gens'), genRows=[];
+GENS.forEach((g,i)=>{const b=document.createElement('button');b.className='gen';
+  b.innerHTML=`<div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div><i class="mbar"></i>`;
+  b.onclick=()=>{const {k,cost}=bulk(i); if(S.fans>=cost){const m0=msCount(S.gens[i]);S.fans-=cost;S.gens[i]+=k;const up=msCount(S.gens[i])-m0;
+    if(up>0){chord(2.5);b.classList.remove('boom');void b.offsetWidth;b.classList.add('boom');
+      const r=b.getBoundingClientRect(),s=document.createElement('div');s.className='float';s.textContent=`${g[1]} ×${2**up}!`;s.style.left=r.left+60+'px';s.style.top=r.top+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(r.left+r.width/2,r.top+r.height/2);}
+    else chord(.5);upsDirty=true;render();}};
+  gensEl.appendChild(b);genRows.push({b,cost:b.querySelector('.cost'),own:b.querySelector('.own'),ms:b.querySelector('.ms'),bar:b.querySelector('.mbar')});});
+$('qty').onclick=e=>{const q=e.target.dataset.q;if(!q)return;qty=+q;[...$('qty').children].forEach(x=>x.classList.toggle('on',x===e.target));render();};
+for(let i=0;i<22;i++){const b=document.createElement('i');b.style.animationDuration=(.35+Math.random()*.7)+'s';b.style.animationDelay=(-Math.random())+'s';$('eq').appendChild(b);}
+
+let upsDirty=true, upBtns=[];
+function upList(){const L=[];
+  CLK.forEach((c,t)=>{if(!S.ups['c'+t]&&S.run>=c/5&&(t==0||S.ups['c'+(t-1)]))L.push({id:'c'+t,t:CN[t],d:'Riff power ×2',c});});
+  GENS.forEach((g,i)=>TIERS.forEach((n,t)=>{if(!S.ups['g'+i+'t'+t]&&S.gens[i]>=n)L.push({id:'g'+i+'t'+t,t:`${g[0]} ${TN[t]}`,d:`${g[1]} ×2`,c:g[3]*TMULT[t]});}));
+  return L.sort((a,b)=>a.c-b.c);}
+function buildUps(){const L=upList();$('ups').innerHTML=L.length?'':'<div class="empty">Buy gear and gather fans to unlock upgrades…</div>';upBtns=[];
+  L.forEach(u=>{const b=document.createElement('button');b.className='up';b.innerHTML=`<div class="t">${u.t}</div><div class="d">${u.d}</div><div class="c">${fmt(u.c)} fans</div>`;
+    b.onclick=()=>{if(S.fans>=u.c){S.fans-=u.c;S.ups[u.id]=1;chord(1.5);upsDirty=true;render();}};$('ups').appendChild(b);upBtns.push({b,c:u.c});});
+  upsDirty=false;}
+let perkBtns=[];
+function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earned)return;
+  PERKS.forEach(p=>{const l=pl(p.id),mx=l>=p.max,c=p.c(l);const b=document.createElement('button');b.className='perk';
+    b.innerHTML=`<div class="t">${p.n} <small>Lv ${l}</small></div><div class="d">${p.d}</div><div class="c">${mx?'MAXED':'💿 '+fmt(c)}</div>`;
+    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.perks[p.id]=l+1;chord(2);buildPerks();render();}};el.appendChild(b);perkBtns.push({b,c,mx});});}
+
+let lastUpCount=-1;
+function render(){
+  const f=fps();
+  $('fans').textContent=fmt(S.fans);$('fps').textContent=fmt(f);$('cp').textContent=fmt(clickPow());
+  $('sRun').textContent=fmt(S.run);$('sTot').textContent=fmt(S.total);$('sClk').textContent=fmt(S.clicks);$('sAsc').textContent=S.asc;
+  let r=RANKS[0][1];for(const [n,t] of RANKS)if(S.run>=n)r=t;$('rank').textContent=(S.asc?`Tour ${S.asc+1} · `:'')+r;
+  genRows.forEach((row,i)=>{const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans>=cost);
+    row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
+    row.cost.textContent=`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(GENS[i][4]*gm(i)*gmult())}/s each`;row.own.textContent=S.gens[i];
+    const n=S.gens[i],a=msPrev(n),z=msNext(n);row.ms.innerHTML=`<b>×${fmt(2**msCount(n))}</b>next ×2 bonus at ${z} owned`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
+  const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
+  upBtns.forEach(u=>u.b.classList.toggle('ok',S.fans>=u.c));
+  perkBtns.forEach(p=>p.b.classList.toggle('ok',!p.mx&&S.records>=p.c));
+  const p=pending(),have=S.earned+p,lo=have**2*1e6,hi=(have+1)**2*1e6;
+  $('recs').textContent=fmt(S.records);$('earned').textContent=fmt(S.earned);$('gain').textContent='+'+fmt(p)+' 💿';
+  $('ascBar').style.width=Math.min(100,Math.max(0,(S.total-lo)/(hi-lo)*100))+'%';
+  $('ascNext').textContent=`Next record at ${fmt(hi)} all-time fans`;
+  $('ascBtn').disabled=p<1;
+}
+
+/* ---------- click ---------- */
+$('pick').onclick=e=>{const v=clickPow();gain(v);S.clicks++;chord(1);
+  const s=document.createElement('div');s.className='float';s.textContent='+'+fmt(v);
+  const r=$('pick').getBoundingClientRect();s.style.left=(e.clientX||r.left+r.width/2)-20+(Math.random()*40-20)+'px';s.style.top=(e.clientY||r.top+40)-20+'px';
+  document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(e.clientX||r.left+r.width/2,e.clientY||r.top+r.height/2);render();};
+
+/* ---------- ascend ---------- */
+function modal(t,p,btns){$('mT').textContent=t;$('mP').innerHTML=p;$('mB').innerHTML='';
+  btns.forEach(([l,fn,go])=>{const b=document.createElement('button');b.textContent=l;if(go)b.className='go';b.onclick=()=>{$('modal').classList.remove('show');fn&&fn();};$('mB').appendChild(b);});
+  $('modal').classList.add('show');}
+$('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
+  modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever and can be spent on legend perks.`,
+  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map(()=>0);S.ups={};
+    $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
+$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();upsDirty=true;buildPerks();render();save();},1]]);
+$('mute').onclick=()=>{S.mute=!S.mute;$('mute').textContent=S.mute?'🔇 Muted':'🔊 Sound';};
+$('mute').textContent=S.mute?'🔇 Muted':'🔊 Sound';
+
+/* ---------- audio: distorted power chords ---------- */
+let AC,dist,riff=0;const NOTES=[82.4,82.4,98,82.4,110,82.4,116.5,110,82.4,82.4,123.5,98];
+function chord(len){ if(S.mute)return; try{
+  if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();dist=AC.createWaveShaper();const c=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;c[i]=Math.tanh(x*6);}dist.curve=c;
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;const out=AC.createGain();out.gain.value=.12;dist.connect(lp).connect(out).connect(AC.destination);}
+  if(AC.state==='suspended')AC.resume();
+  const t=AC.currentTime,f=NOTES[riff++%NOTES.length],d=.16*len+.1,g=AC.createGain();
+  g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+d);g.connect(dist);
+  [1,1.498,2].forEach(m=>{const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=f*m;o.connect(g);o.start(t);o.stop(t+d);});
+ }catch(e){} }
+
+/* ---------- embers ---------- */
+const cv=$('embers'),cx=cv.getContext('2d');let P=[];
+function size(){cv.width=innerWidth;cv.height=innerHeight;}size();addEventListener('resize',size);
+function ember(x,y,b){return {x:x??Math.random()*cv.width,y:y??cv.height+10,vx:(Math.random()-.5)*(b?6:.6),vy:b?-Math.random()*6-1:-Math.random()*1.2-.3,r:Math.random()*2+.6,l:1,d:b?.025:.003+Math.random()*.004};}
+function burst(x,y){for(let i=0;i<10;i++)P.push(ember(x,y,1));}
+function draw(){cx.clearRect(0,0,cv.width,cv.height);if(P.length<70&&Math.random()<.4)P.push(ember());
+  cx.globalCompositeOperation='lighter';
+  P=P.filter(p=>{p.x+=p.vx+Math.sin(p.y/30)*.3;p.y+=p.vy;p.l-=p.d;if(p.l<=0)return false;
+    cx.fillStyle=`rgba(255,${90+p.l*120|0},30,${p.l})`;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill();return true;});
+  requestAnimationFrame(draw);}draw();
+
+/* ---------- loop ---------- */
+(function offline(){const dt=Math.min((Date.now()-S.last)/1000,8*3600),g=fps()*dt*.5;
+  if(dt>60&&g>0){gain(g);modal('Welcome back!',`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`,[['Rock on',null,1]]);}})();
+let prev=performance.now();
+setInterval(()=>{const now=performance.now(),dt=Math.min((now-prev)/1000,5);prev=now;gain(fps()*dt);render();},100);
+setInterval(save,5000);addEventListener('beforeunload',save);
+buildPerks();render();
+</script>
+</body>
+</html>

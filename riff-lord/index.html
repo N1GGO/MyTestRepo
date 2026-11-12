@@ -142,7 +142,14 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 .ac.got b{color:var(--gold)}
 
 /* now playing */
-.song{font-size:12.5px;margin-top:6px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.songbar{position:relative;display:flex;align-items:baseline;gap:8px;width:100%;margin-top:9px;padding:7px 11px 9px;font:inherit;color:var(--text);text-align:left;background:#140c0e;border:1px solid var(--line);border-radius:9px;cursor:pointer;overflow:hidden}
+.songbar:hover{border-color:var(--fire2)}
+.songbar .sl{flex:none;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--fire2)}
+.songbar b{flex:1;min-width:0;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.songbar small{flex:none;font-size:11.5px;color:var(--dim)}
+.songbar i{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--blood),var(--fire),var(--fire2));transition:width .15s}
+.autobtn{font:inherit;font-size:12px;margin-left:4px;padding:2px 10px;border-radius:12px;border:1px solid var(--line);background:#1c1214;color:var(--text);cursor:pointer;position:relative}
+.autobtn:hover{border-color:var(--fire2)}
 
 /* solo skill */
 :root{--sk:#c896ff}
@@ -353,9 +360,9 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
           <path d="M112 30 68 104h28l-12 62 50-82h-30l8-54Z" fill="#160a08" stroke="#ffe9a8" stroke-width="3" stroke-linejoin="round"/>
         </svg>
       </button>
-      <div class="sub">Shred for <b id="cp">1</b> fans per riff<span id="autoTxt"></span></div>
+      <div class="sub">Shred for <b id="cp">1</b> fans per riff<span id="autoTxt"></span> <button id="autoBtn" class="autobtn" hidden></button></div>
       <div class="eq" id="eq"></div>
-      <div class="sub song" id="song"></div>
+      <button class="songbar" id="songBtn" aria-label="Choose song"><span class="sl">♪ Now playing</span><b id="song"></b><small id="songN"></small><i id="songBar"></i></button>
       <div class="hype"><div class="hbar"><i id="hypeBar"></i></div><span id="hypeTxt"></span></div>
       <div class="abil"><button id="aSolo"></button><button id="aEnc"></button></div>
       <div class="sub skmini">🎼 <b id="skMini">0</b> solo skill to spend</div>
@@ -518,7 +525,7 @@ const PERKS=[
  {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
-const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,v:3});
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songSel:-1,autoOff:0,v:3});
 let S=fresh(), qty=1, hype=0, achCount=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -683,7 +690,8 @@ function render(){
   $('buffs').innerHTML=[['frenzy','Mosh Pit · fans ×7'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
   $('hfans').innerHTML=`${fmt(S.fans)} <small>+${fmt(f)}/s</small>`;
   tabBtns[1].classList.toggle('hot',upBtns.some(u=>S.fans>=u.c));
-  const ar=autoRate();$('autoTxt').textContent=ar?` · 🤖 ${ar} clicks/s`:'';
+  const ar=autoRate();$('autoTxt').textContent=ar?(S.autoOff?' · 🤖 paused':` · 🤖 ${ar} clicks/s`):'';$('autoBtn').hidden=!ar;$('autoBtn').textContent=S.autoOff?'▶ Resume':'⏸ Pause';
+  $('songBar').style.width=stepI/SONGS[curSong].seq.length*100+'%';
   $('bsRec').textContent='💿 '+fmt(S.records);$('bossUnlock').disabled=S.records<BOSS_COST;
   const bcd=((S.cd.boss||0)-now)/1e3;$('fightBtn').disabled=bcd>0||!!F;$('fightCd').textContent=bcd>0?'ready in '+fmtT(bcd):'READY';
   bskBtns.forEach(t=>t.b.classList.toggle('ok',!t.mx&&S.records>=t.c));
@@ -693,6 +701,7 @@ function render(){
 }
 const tabBtns=[...$('tabs').children];
 document.body.dataset.tab='gear';
+$('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;render();save();};
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.body.dataset.tab=b.dataset.tab;tabBtns.forEach(x=>x.classList.toggle('on',x===b));scrollTo({top:0,behavior:'smooth'});};
 
 /* ---------- click ---------- */
@@ -700,7 +709,7 @@ function riff(e,auto){let v=clickPow();const crit=Math.random()<.04+.01*tl('prec
   gain(v);S.clicks++;
   hype=Math.min(1,hype+.02);if(hype>=.95)S.hyped=1;
   // an autoclicker riff is a real click; only its sound is rate-limited and its visuals skipped while the tab is hidden
-  if(!auto||sndOk())playStep(crit);
+  fundMusic(crit);
   if(auto&&document.hidden)return;
   const s=document.createElement('div');s.className='float'+(crit?' crit':'');s.textContent=(crit?'CRIT! +':'+')+fmt(v);
   const r=$('pick').getBoundingClientRect();s.style.left=(e.clientX||r.left+r.width/2)-20+(Math.random()*40-20)+'px';s.style.top=(e.clientY||r.top+40)-20+'px';
@@ -715,7 +724,7 @@ $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
   modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever and can be spent on legend perks.`,
   [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map(()=>0);S.ups={};
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
-$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();drawSlots();render();save();tourShow(0);},1]]);
+$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;pickSong();upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();drawSlots();render();save();tourShow(0);},1]]);
 
 /* ---------- toast ---------- */
 let toastT;function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
@@ -760,6 +769,7 @@ function spawnDiver(){const el=diverEl=document.createElement('button');el.class
     if(r<.45){S.buffs.frenzy=now+frenzyDur()*1e3;toast(`🤘 <b>Mosh Pit Frenzy!</b> All fans ×7 for ${frenzyDur()} seconds`);}
     else if(r<.8){const g=Math.max(baseFps()*300,clickPow()*40);gain(g);toast(`🤘 <b>Merch Rush!</b> +${fmt(g)} fans`);}
     else{S.buffs.solo=Math.max(S.buffs.solo||0,now)+soloDur()*1e3;toast(`🤘 <b>Shred Storm!</b> Riffs ×10 for ${soloDur()} seconds`);}
+    if(Math.random()<.005){const sg=unlockSong();if(sg)toast(`🎵 The stage diver hummed you a new song: <b>${sg.n}</b>`);}   // rare song drop
     render();};
   document.body.appendChild(el);setTimeout(()=>{if(diverEl===el){el.remove();diverEl=null;}},13e3);}
 
@@ -778,7 +788,8 @@ const ACH=[
  ['Soloist','Play your first solo',()=>S.solos>=1],['Virtuoso','Reach solo level 20',()=>soloLvl()>=20],
  ['Boss Slayer','Defeat a boss',()=>S.boss.wins>=1],['Epic Loot','Own an epic item',()=>epicOwned()>=1],
  ['Stuff of Legend','Own a legendary item',()=>legOwned()>=1],
- ['More Cowbell','Hire the cowbell player',()=>S.gens[6]>0]];
+ ['More Cowbell','Hire the cowbell player',()=>S.gens[6]>0],
+ ['Setlist','Know 25 songs',()=>unlocked().length>=25],['Full Discography','Know every song',()=>unlocked().length>=SONGS.length]];
 function buildAch(){achCount=ACH.reduce((a,_,i)=>a+(S.ach[i]?1:0),0);$('achN').textContent=`${achCount}/${ACH.length} · +${achCount*3}% fans`;
   $('ach').innerHTML=ACH.map((a,i)=>`<div class="ac${S.ach[i]?' got':''}"><b>${S.ach[i]?'🏆 ':''}${a[0]}</b>${a[1]}</div>`).join('');}
 function checkAch(){let n=0,last;ACH.forEach((a,i)=>{if(!S.ach[i]&&a[2]()){S.ach[i]=1;n++;last=a[0];}});
@@ -842,12 +853,13 @@ function endFight(win,fled){const k=F.k,left=Math.max(0,F.hp)/F.max,b=bossOf(k);
   S.boss.lvl++;S.boss.wins++;const g=Math.max(baseFps()*900,clickPow()*100),sk=5+2*k;gain(g);S.skill+=sk;
   const it=rollLoot(),eqd=giveItem(it),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');drawSlots();
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
-  modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} 🎼${loot}`,[['Rock on',null,1]]);buildBoss();render();save();}
+  const sg=unlockSong();
+  modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} 🎼${loot}${sg?`<br><br>🎵 <b style="color:#d5b0ff">New song for the setlist</b><br>${sg.n}`:''}`,[['Rock on',null,1]]);buildBoss();render();save();}
 $('fightBtn').onclick=startFight;$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
 /* automatic riffs (Auto-Shredder) and automatic boss hits (Auto-Shredder + Backing Band) */
 /* Autoclickers click whatever a mouse would: the pick normally, the boss during a fight (full hits that build combo).
    Backing Band adds its own plain automatic boss hits on top. */
-function autoTick(dt){autoAcc+=dt*autoRate();let n=Math.floor(autoAcc);autoAcc-=n;n=Math.min(n,400);
+function autoTick(dt){autoAcc+=dt*(S.autoOff?0:autoRate());let n=Math.floor(autoAcc);autoAcc-=n;n=Math.min(n,400);
   for(let i=0;i<n;i++){if(F)hitBoss(false,true);else riff({},true);}
   if(F){bandAcc+=dt*bl('band');let m=Math.floor(bandAcc);bandAcc-=m;for(let i=0;i<m&&F;i++)hitBoss(true);}}
 
@@ -868,50 +880,166 @@ function chord(len,freq){ if(!audioOn())return; try{
  }catch(e){} }
 
 /* ---------- the band plays ----------
-   Every riff click plays the next note of a famous theme, and every hired band member joins in with their own part.
-   The themes are all public-domain classics that metal bands love to cover; click speed sets the tempo. */
-const N2M=n=>{const m=/^([A-G])(#?)(\d)$/.exec(n);return 12*(+m[3]+1)+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]?1:0);};
-const SONGS=[
- ['Beethoven · Symphony No. 5','G4 G4 G4 D#4 F4 F4 F4 D4 G4 G4 G4 D#4 G#4 G#4 G#4 G4 D#5 D#5 D#5 C5'],
- ['Grieg · In the Hall of the Mountain King','A3 B3 C4 D4 E4 C4 E4 D#4 B3 D#4 D4 A#3 D4 A3 B3 C4 D4 E4 C4 E4 A4 G4 E4 C4 E4 G4'],
- ['Beethoven · Ode to Joy','E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4 D4 D4 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4 C4 C4'],
- ['Bach · Toccata and Fugue in D minor','A4 G4 A4 G4 F4 E4 D4 C#4 D4 A3 G3 A3 E3 F3 C#3 D3'],
- ['Korobeiniki · Russian folk song','E5 B4 C5 D5 C5 B4 A4 A4 C5 E5 D5 C5 B4 C5 D5 E5 C5 A4 A4'],
- ['Beethoven · Für Elise','E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 G#4 B4 C5 E4 E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 C5 B4 A4'],
- ['Offenbach · Can-Can','D4 D4 E4 G4 F#4 E4 A4 A4 A4 B4 F#4 G4 E4 E4 E4 G4 F#4 E4 D4 D5 C#5 B4 A4 G4 F#4 E4'],
- ['Mozart · Rondo alla Turca','B4 A4 G#4 A4 C5 D5 C5 B4 C5 E5 F5 E5 D#5 E5 B5 A5 G#5 A5 B5 A5 G#5 A5 C6'],
- ['Bizet · Habanera from Carmen','D5 C#5 C5 C5 C5 B4 A#4 A4 A4 A4 G#4 G4 F4 E4 F4 G4 F4 E4'],
- ['Greensleeves · English folk song','A4 C5 D5 E5 F5 E5 D5 B4 G4 A4 B4 C5 A4 A4 G#4 A4 B4 G#4 E4'],
- ['Dies Irae · medieval chant','F4 E4 F4 D4 E4 C4 D4 D4 F4 F4 G4 F4 E4 D4 C4 E4 F4 E4 D4 D4']
-].map(([n,q])=>({n,m:q.split(' ').map(N2M)}));
-let songI=Math.floor(Math.random()*SONGS.length),stepI=0,loopI=0;
+   While you shred, the band plays the current song with its real rhythm. Riffs do not trigger single notes: each riff
+   "funds" a little more playing time, and a scheduler plays the melody at the song's own tempo for as long as the
+   funding lasts. Keep shredding (about two riffs a second) and the song plays through; stop and the band stops.
+   Every hired band member adds a part. All songs are public-domain melodies; five are known from the start, the
+   rest drop from bosses (always) and stage divers (0.5%).
+   Notation: NoteOctave[:beats], default 1 beat, R = rest, # sharp, b flat. [title, beats per minute, notes] */
+const RAW_SONGS=[
+ ["Beethoven · Symphony No. 5", 160, "R:.5 G4:.5 G4:.5 G4:.5 Eb4:2 R:.5 F4:.5 F4:.5 F4:.5 D4:3 R:.5 G4:.5 G4:.5 G4:.5 Eb4:.5 Ab4:.5 Ab4:.5 Ab4:.5 G4:.5 Eb5:.5 Eb5:.5 Eb5:.5 C5:2"],
+ ["Grieg · In the Hall of the Mountain King", 132, "A3:.5 B3:.5 C4:.5 D4:.5 E4:.5 C4:.5 E4 D#4:.5 B3:.5 D#4 D4:.5 Bb3:.5 D4 A3:.5 B3:.5 C4:.5 D4:.5 E4:.5 C4:.5 E4:.5 A4:.5 G4:.5 E4:.5 C4:.5 E4:.5 G4:2"],
+ ["Beethoven · Ode to Joy", 126, "E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2"],
+ ["Korobeiniki · Russian folk song", 144, "E5 B4:.5 C5:.5 D5 C5:.5 B4:.5 A4 A4:.5 C5:.5 E5 D5:.5 C5:.5 B4:1.5 C5:.5 D5 E5 C5 A4 A4:2 R:.5 D5 F5:.5 A5 G5:.5 F5:.5 E5:1.5 C5:.5 E5 D5:.5 C5:.5 B4 B4:.5 C5:.5 D5 E5 C5 A4 A4:2"],
+ ["Beethoven · Für Elise", 140, "E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 G#4:.5 B4:.5 C5:1.5 E4:.5 E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 C5:.5 B4:.5 A4:2"],
+ ["Beethoven · Moonlight Sonata", 84, "G#3:.5 C#4:.5 E4:.5 G#3:.5 C#4:.5 E4:.5 G#3:.5 C#4:.5 E4:.5 G#3:.5 C#4:.5 E4:.5 A3:.5 C#4:.5 E4:.5 A3:.5 C#4:.5 E4:.5 A3:.5 D4:.5 F#4:.5 A3:.5 D4:.5 F#4:.5 G#3:.5 C4:.5 F#4:.5 G#3:.5 C#4:.5 E4:.5 G#3:.5 C#4:.5 D#4:.5 F#3:.5 C4:.5 D#4:.5 E4:2"],
+ ["Mozart · Rondo alla Turca", 126, "B4:.25 A4:.25 G#4:.25 A4:.25 C5 D5:.25 C5:.25 B4:.25 C5:.25 E5 F5:.25 E5:.25 D#5:.25 E5:.25 B5:.25 A5:.25 G#5:.25 A5:.25 B5:.25 A5:.25 G#5:.25 A5:.25 C6:2 A5:.5 C6:.5 B5:.5 A5:.5 G5:.5 A5:.5 B5:.5 A5:.5 G5:.5 A5:.5 B5:.5 A5:.5 G5:.5 F#5:.5 E5:2"],
+ ["Mozart · Eine kleine Nachtmusik", 132, "G4 R:.5 D4:.5 G4 R:.5 D4:.5 G4:.5 D4:.5 G4:.5 B4:.5 D5:2 C5 R:.5 A4:.5 C5 R:.5 A4:.5 C5:.5 A4:.5 F#4:.5 A4:.5 D4:2"],
+ ["Mozart · Symphony No. 40", 112, "Eb5:.5 D5:.5 D5 Eb5:.5 D5:.5 D5 Eb5:.5 D5:.5 D5 Bb5 R Bb5:.5 A5:.5 G5 G5:.5 F5:.5 Eb5 Eb5:.5 D5:.5 C5 C5"],
+ ["Twinkle, Twinkle, Little Star", 110, "C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2"],
+ ["Bach · Toccata and Fugue in D minor", 84, "A5:.25 G5:.25 A5:2.5 G5:.25 F5:.25 E5:.25 D5:.25 C#5 D5:2.5 R:.5 A4:.25 G4:.25 A4:2.5 E4:.5 F4:.5 C#4:.5 D4:2.5"],
+ ["Bach · Minuet in G", 126, "D5 G4:.5 A4:.5 B4:.5 C5:.5 D5 G4 G4 E5 C5:.5 D5:.5 E5:.5 F#5:.5 G5 G4 G4 C5 D5:.5 C5:.5 B4:.5 A4:.5 B4 C5:.5 B4:.5 A4:.5 G4:.5 F#4 G4:.5 A4:.5 B4:.5 G4:.5 B4 A4:2"],
+ ["Bach · Jesu, Joy of Man's Desiring", 112, "G4:.5 A4:.5 B4:.5 D5:.5 C5:.5 C5:.5 E5:.5 D5:.5 D5:.5 G5:.5 F#5:.5 G5:.5 D5:.5 B4:.5 G4:.5 A4:.5 B4:.5 C5:.5 D5:.5 E5:.5 D5:.5 C5:.5 B4:.5 A4:.5 B4:.5 G4:.5 F#4:.5 G4:.5 A4:.5 D4:.5 F#4:.5 A4:.5 C5:.5 B4:.5 A4:.5 B4:.5 G4:1.5"],
+ ["Bach · Prelude in C major", 72, "C4:.25 E4:.25 G4:.25 C5:.25 E5:.25 G4:.25 C5:.25 E5:.25 C4:.25 D4:.25 A4:.25 D5:.25 F5:.25 A4:.25 D5:.25 F5:.25 B3:.25 D4:.25 G4:.25 D5:.25 F5:.25 G4:.25 D5:.25 F5:.25 C4:.25 E4:.25 G4:.25 C5:.25 E5:.25 G4:.25 C5:.25 E5:.25"],
+ ["Bach · Badinerie", 116, "B5:.5 D6:.25 B5:.25 F#5:.5 B5:.25 F#5:.25 D5:.5 F#5:.25 D5:.25 B4 F#4:.25 B4:.25 D5:.25 B4:.25 C#5:.25 B4:.25 C#5:.25 B4:.25 A#4:.25 C#5:.25 E5:.25 C#5:.25 D5:.5 B4:.5"],
+ ["Bach · Bourrée in E minor", 120, "E4:.5 F#4:.5 G4 F#4:.5 E4:.5 D#4 E4:.5 F#4:.5 B3 C#4:.5 D#4:.5 E4 D4:.5 C4:.5 B3 A3:.5 G3:.5 F#3 G3:.5 A3:.5 B3:.5 A3:.5 G3:.5 F#3:.5 E3:2"],
+ ["Bach · Cello Suite No. 1", 76, "G3:.25 D4:.25 B4:.25 A4:.25 B4:.25 D4:.25 B4:.25 D4:.25 G3:.25 D4:.25 B4:.25 A4:.25 B4:.25 D4:.25 B4:.25 D4:.25 G3:.25 E4:.25 C5:.25 B4:.25 C5:.25 E4:.25 C5:.25 E4:.25 G3:.25 E4:.25 C5:.25 B4:.25 C5:.25 E4:.25 C5:.25 E4:.25 G3:.25 F#4:.25 C5:.25 B4:.25 C5:.25 F#4:.25 C5:.25 F#4:.25 G3:.25 F#4:.25 C5:.25 B4:.25 C5:.25 F#4:.25 C5:.25 F#4:.25 G3:.25 G4:.25 B4:.25 A4:.25 B4:.25 G4:.25 B4:.25 G4:.25 G3:.25 G4:.25 B4:.25 A4:.25 B4:.25 G4:.25 B4:.25 F#4:.25"],
+ ["Pachelbel · Canon in D", 100, "F#5:2 E5:2 D5:2 C#5:2 B4:2 A4:2 B4:2 C#5:2 D5:.5 C#5:.5 D5:.5 D4:.5 C#4:.5 A4:.5 E4:.5 F#4:.5 D4:.5 D5:.5 C#5:.5 B4:.5 C#5:.5 F#5:.5 A5:.5 B5:.5 G5:.5 F#5:.5 E5:.5 G5:.5 F#5:.5 E5:.5 D5:.5 C#5:.5 B4:.5 A4:.5 G4:.5 F#4:.5 E4:.5 G4:.5 F#4:.5 E4:.5 D4:2"],
+ ["Vivaldi · Spring", 112, "E4:.5 G#4 G#4 G#4 F#4:.5 E4:.5 B4:1.5 B4:.5 A4:.5 G#4 G#4 G#4 F#4:.5 E4:.5 B4:1.5 B4:.5 A4:.5 G#4 A4:.5 B4:.5 A4 G#4 F#4:2"],
+ ["Grieg · Morning Mood", 130, "G5:.5 E5:.5 D5:.5 C5:.5 D5:.5 E5:.5 G5:.5 E5:.5 D5:.5 C5:.5 D5:.25 E5:.25 D5:.25 E5:.25 G5:.5 E5:.5 G5:.5 A5:.5 E5:.5 A5:.5 G5:.5 E5:.5 D5:.5 C5:1.5"],
+ ["Rossini · William Tell Overture", 152, "D4:.25 D4:.25 D4:.5 D4:.25 D4:.25 D4:.5 D4:.25 D4:.25 G4:.5 A4:.5 B4:.5 D4:.25 D4:.25 D4:.5 D4:.25 D4:.25 G4:.5 B4:.25 B4:.25 A4:.5 F#4:.5 D4:.5 D4:.25 D4:.25 D4:.5 D4:.25 D4:.25 D4:.5 D4:.25 D4:.25 G4:.5 A4:.5 B4:.5 G4:.25 B4:.25 D5 C5:.5 B4:.5 A4:.5 G4:.5 B4:.5 G4"],
+ ["Bizet · Habanera", 112, "D5 C#5:.5 C5:.33 C5:.33 C5:.34 B4:.5 Bb4:.5 A4 A4:.5 Ab4:.33 G4:.33 F4:.34 E4:.5 F4:.5 G4:.5 F4:.5 E4:2"],
+ ["Bizet · Toreador Song", 116, "C5 D5:.75 C5:.25 A4 A4 A4:.75 G4:.25 A4:.75 Bb4:.25 A4:2 Bb4 G4:.75 C5:.25 A4:2 F4 D4:.75 G4:.25 C4:2"],
+ ["Offenbach · Can-Can", 168, "D4:2 E4:.5 G4:.5 F#4:.5 E4:.5 A4 A4 A4:.5 B4:.5 F#4:.5 G4:.5 E4 E4 E4:.5 G4:.5 F#4:.5 E4:.5 D4:.5 D5:.5 C#5:.5 B4:.5 A4:.5 G4:.5 F#4:.5 E4:.5 D4:2"],
+ ["Strauss · The Blue Danube", 180, "D4 D4 F#4 A4 A4:2 A5 A5:2 F#5 F#5:2 D4 D4 F#4 A4 A4:2 A5 A5:2 G5 G5:2 C#4 C#4 E4 B4 B4:2 B5 B5:2 G5 G5:2"],
+ ["Tchaikovsky · Swan Lake", 100, "F#5:2 B4:.5 C#5:.5 D5:.5 E5:.5 F#5:1.5 D5:.5 F#5:1.5 D5:.5 F#5:1.5 B4:.5 D5:.5 B4:.5 G4:.5 D5:.5 B4:3"],
+ ["Wagner · Ride of the Valkyries", 104, "B3:.75 F#4:.25 B4:.5 D5:1.5 B4:1.5 D5:.75 B4:.25 D5:.5 F#5:1.5 D5:1.5 F#5:.75 D5:.25 F#5:.5 A5:1.5 A4:1.5 D5:.75 A4:.25 D5:.5 F#5:3"],
+ ["Wagner · Bridal Chorus", 92, "C4 F4:.75 F4:.25 F4:2 C4 G4:.75 E4:.25 F4:2 C4 F4:.75 Bb4:.25 Bb4 A4:.75 G4:.25 F4 E4:.75 F4:.25 G4:2"],
+ ["Chopin · Funeral March", 60, "Bb3 Bb3:.75 Bb3:.25 Bb3 Db4:.75 C4:.25 C4:.75 Bb3:.25 Bb3:.75 A3:.25 Bb3:2"],
+ ["Chopin · Nocturne Op. 9 No. 2", 120, "Bb4:.5 G5:2 F5:.5 G5:.5 F5:1.5 Eb5 Bb4:.5 G5 C5:.5 C6 G5:.5 Bb5:1.5 Ab5 G5:.5 F5:1.5 G5 D5:.5 Eb5:3"],
+ ["Brahms · Lullaby", 96, "E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5 B4:1.5 A4:.5 A4 G4 D4:.5 E4:.5 F4 D4 D4:.5 E4:.5 F4:2 D4:.5 F4:.5 B4:.5 A4:.5 G4 B4 C5:2"],
+ ["Mussorgsky · Promenade", 104, "G4 F4 Bb4 C5:.5 F5:.5 D5 C5:.5 F5:.5 D5 Bb4 C5 G4 F4"],
+ ["Rimsky-Korsakov · Flight of the Bumblebee", 170, "E6:.25 D#6:.25 D6:.25 C#6:.25 D6:.25 C#6:.25 C6:.25 B5:.25 C6:.25 B5:.25 Bb5:.25 A5:.25 G#5:.25 G5:.25 F#5:.25 F5:.25 E5:.25 D#5:.25 D5:.25 C#5:.25 D5:.25 C#5:.25 C5:.25 B4:.25 C5:.25 B4:.25 Bb4:.25 A4:.25 G#4:.25 G4:.25 F#4:.25 F4:.25 E4:.25 D#4:.25 E4:.25 F4:.25 E4:.25 D#4:.25 E4:.25 F4:.25 E4"],
+ ["Elgar · Pomp and Circumstance", 84, "C5:2 B4:.5 C5:.5 D5 A4:2 G4:2 F4:2 E4:.5 F4:.5 G4 D4:4"],
+ ["Holst · Jupiter", 92, "E4:.5 G4:.5 A4:1.5 C5:.5 B4:.75 G4:.25 C5:.5 D5:.5 C5 B4 A4:.5 B4:.5 A4 G4 E4:2"],
+ ["Satie · Gymnopédie No. 1", 84, "F#5 A5 G5 F#5 C#5 B4 C#5 D5 A4:3 F#4:3"],
+ ["Joplin · The Entertainer", 96, "D5:.25 D#5:.25 E5:.25 C6:.5 E5:.25 C6:.5 E5:.25 C6:1.5 C6:.25 D6:.25 D#6:.25 E6:.25 C6:.25 D6:.25 E6:.5 B5:.25 D6:.5 C6"],
+ ["Verdi · La donna è mobile", 138, "G4 G4 G4 B4:1.5 A4:.5 F4 R F4 F4 F4 A4:1.5 G4:.5 E4 R"],
+ ["Paganini · Caprice No. 24", 112, "A4:.5 R:.25 A4:.25 A4:.25 C5:.25 B4:.25 A4:.25 E5:.5 R:.25 E4:.25 E4:.25 G#4:.25 F#4:.25 E4:.25 A4:.5 R:.25 A4:.25 A4:.25 C5:.25 B4:.25 A4:.25 E5:.5 E4"],
+ ["Haydn · Surprise Symphony", 116, "C4:.5 C4:.5 E4:.5 E4:.5 G4:.5 G4:.5 E4 F4:.5 F4:.5 D4:.5 D4:.5 B3:.5 B3:.5 G3 C4:.5 C4:.5 E4:.5 E4:.5 G4:.5 G4:.5 E4 C5:.5 C5:.5 F#4:.5 F#4:.5 G4:2"],
+ ["Haydn · Emperor Hymn", 92, "G4:1.5 A4:.5 B4 A4 C5 B4 A4:.5 F#4:.5 G4 E5 D5 C5 B4 A4 B4:.5 G4:.5 D5:2"],
+ ["La Marseillaise", 120, "D4:.25 D4:.5 D4:.25 G4 G4 A4 A4 D5:1.5 B4:.5 G4:.75 G4:.25 B4:.75 G4:.25 E4 C5:2 A4:.75 F#4:.25 G4:2"],
+ ["God Save the King", 96, "G4 G4 A4 F#4:1.5 G4:.5 A4 B4 B4 C5 B4:1.5 A4:.5 G4 A4 G4 F#4 G4:3"],
+ ["The Star-Spangled Banner", 104, "G4:.75 E4:.25 C4 E4 G4 C5:2 E5:.75 D5:.25 C5 E4 F#4 G4:2 G4:.5 G4:.5 E5:1.5 D5:.5 C5 B4:2 A4:.5 B4:.5 C5 C5 G4 E4 C4"],
+ ["O Canada", 100, "E4:2 G4:1.5 G4:.5 C4:3 D4 E4 F4 G4 A4 D4:3"],
+ ["Yankee Doodle", 132, "C4:.5 C4:.5 D4:.5 E4:.5 C4:.5 E4:.5 D4 C4:.5 C4:.5 D4:.5 E4:.5 C4 B3 C4:.5 C4:.5 D4:.5 E4:.5 F4:.5 E4:.5 D4:.5 C4:.5 B3:.5 G3:.5 A3:.5 B3:.5 C4 C4"],
+ ["Oh! Susanna", 132, "C4:.5 D4:.5 E4 G4 G4:1.5 A4:.5 G4 E4 C4:1.5 D4:.5 E4 E4 D4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:1.5 A4:.5 G4 E4 C4:1.5 D4:.5 E4 E4 D4 D4 C4:3"],
+ ["Camptown Races", 132, "G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 E4:.5 D4:1.5 E4:.5 D4:1.5 G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 D4:.75 E4:.25 D4 C4:2"],
+ ["When the Saints Go Marching In", 144, "C4 E4 F4 G4:4 R C4 E4 F4 G4:4 R C4 E4 F4 G4:2 E4:2 C4:2 E4:2 D4:4"],
+ ["Amazing Grace", 92, "D4 G4:2 B4:.5 G4:.5 B4:2 A4 G4:2 E4 D4:2 D4 G4:2 B4:.5 G4:.5 B4:2 A4 D5:4"],
+ ["Battle Hymn of the Republic", 112, "G4:1.5 F4:.5 E4:.75 G4:.25 C5:.75 D5:.25 E5:2 C5:2 A4:1.5 B4:.5 C5:.75 B4:.25 C5:.75 A4:.25 G4:2 E4:2"],
+ ["When Johnny Comes Marching Home", 132, "E4:.5 A4 A4:.5 A4 B4:.5 C5 B4:.5 C5 A4:.5 G4:1.5 E4:1.5 E4:.5 A4 A4:.5 A4 B4:.5 C5 B4:.5 C5 D5:.5 E5:1.5 C5:1.5"],
+ ["Oh My Darling, Clementine", 116, "F4:.75 F4:.25 F4 C4 A4:.75 A4:.25 A4 F4 F4:.75 A4:.25 C5:1.5 C5:.5 Bb4:.5 A4:.5 G4:2"],
+ ["She'll Be Coming Round the Mountain", 132, "D4:.5 E4:.5 G4:.5 G4:.5 G4:.5 G4:.5 E4:.5 D4:.5 B3:.5 D4:.5 G4:2 G4:.5 A4:.5 B4:.5 B4:.5 B4:.5 B4:.5 D5:.5 B4:.5 A4:.5 G4:.5 A4:2"],
+ ["Row, Row, Row Your Boat", 150, "C4:1.5 C4:1.5 C4 D4:.5 E4:1.5 E4 D4:.5 E4 F4:.5 G4:3 C5:.5 C5:.5 C5:.5 G4:.5 G4:.5 G4:.5 E4:.5 E4:.5 E4:.5 C4:.5 C4:.5 C4:.5 G4 F4:.5 E4 D4:.5 C4:3"],
+ ["London Bridge Is Falling Down", 120, "G4:.75 A4:.25 G4:.5 F4:.5 E4:.5 F4:.5 G4 D4:.5 E4:.5 F4 E4:.5 F4:.5 G4 G4:.75 A4:.25 G4:.5 F4:.5 E4:.5 F4:.5 G4 D4 G4 E4:.5 C4:1.5"],
+ ["Mary Had a Little Lamb", 126, "E4 D4 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4 D4 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4"],
+ ["Frère Jacques", 120, "C4 D4 E4 C4 C4 D4 E4 C4 E4 F4 G4:2 E4 F4 G4:2 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 C4 G3 C4:2 C4 G3 C4:2"],
+ ["Alouette", 132, "C4:1.5 D4:.5 E4 E4 D4:.5 C4:.5 D4:.5 E4:.5 C4 G3 C4:1.5 D4:.5 E4 E4 D4:.5 C4:.5 D4:.5 E4:.5 C4:2"],
+ ["Au clair de la lune", 110, "C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4"],
+ ["Jingle Bells", 152, "E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4:1.5 F4:.5 F4 E4 E4 E4:.5 E4:.5 E4 D4 D4 E4 D4:2 G4:2"],
+ ["Silent Night", 92, "G4:1.5 A4:.5 G4 E4:3 G4:1.5 A4:.5 G4 E4:3 D5:2 D5 B4:3 C5:2 C5 G4:3"],
+ ["Deck the Halls", 144, "G4:1.5 F4:.5 E4 D4 C4 D4 E4 C4 D4:.5 E4:.5 F4:.5 D4:.5 E4:1.5 D4:.5 C4 B3 C4:2"],
+ ["We Wish You a Merry Christmas", 150, "D4 G4 G4:.5 A4:.5 G4:.5 F#4:.5 E4 E4 E4 A4 A4:.5 B4:.5 A4:.5 G4:.5 F#4 D4 D4 B4 B4:.5 C5:.5 B4:.5 A4:.5 G4 E4 D4:.5 D4:.5 E4 A4 F#4 G4:2"],
+ ["O Christmas Tree", 104, "D4 G4:.75 G4:.25 G4:1.5 A4:.5 B4:.75 B4:.25 B4:1.5 B4:.5 A4:.5 B4:.5 C5 F#4 A4 G4:2"],
+ ["Joy to the World", 104, "C5 B4:.75 A4:.25 G4:1.5 F4:.5 E4 D4 C4:1.5 G4:.5 A4:1.5 A4:.5 B4:1.5 B4:.5 C5:3"],
+ ["God Rest Ye Merry, Gentlemen", 132, "E4 E4 B4 B4 A4 G4 F#4 E4 D4 E4 F#4 G4 A4 B4:3"],
+ ["Carol of the Bells", 180, "Bb4 A4:.5 Bb4:.5 G4 Bb4 A4:.5 Bb4:.5 G4 Bb4 A4:.5 Bb4:.5 G4 Bb4 A4:.5 Bb4:.5 G4 D5 C5:.5 D5:.5 Bb4 D5 C5:.5 D5:.5 Bb4 G5 G5:.5 G5:.5 F5:.5 Eb5:.5 D5 D5:.5 D5:.5 C5:.5 Bb4:.5 C5 C5:.5 C5:.5 D5:.5 C5:.5 G4 A4:.5 Bb4:.5 G4"],
+ ["O Come, All Ye Faithful", 104, "G4 G4:2 D4 G4 A4:2 D4:2 B4 A4 B4 C5 B4:2 A4:2"],
+ ["Good King Wenceslas", 124, "G4 G4 G4 A4 G4 G4 D4:2 E4 D4 E4 F#4 G4:2 G4:2"],
+ ["Auld Lang Syne", 100, "C4 F4:1.5 F4:.5 F4 A4 G4:1.5 F4:.5 G4 A4 F4:1.5 F4:.5 A4 C5 D5:3 D5 C5:1.5 A4:.5 A4 F4 G4:1.5 F4:.5 G4 A4 F4:1.5 D4:.5 D4 C4 F4:3"],
+ ["Happy Birthday to You", 120, "C4:.75 C4:.25 D4 C4 F4 E4:2 C4:.75 C4:.25 D4 C4 G4 F4:2 C4:.75 C4:.25 C5 A4 F4 E4 D4 Bb4:.75 Bb4:.25 A4 F4 G4 F4:2"],
+ ["Take Me Out to the Ball Game", 176, "C4:2 C5 A4 G4 E4 G4:3 D4:3 C4:2 C5 A4 G4 E4 G4:6"],
+ ["Greensleeves", 126, "A4 C5:2 D5 E5:1.5 F5:.5 E5 D5:2 B4 G4:1.5 A4:.5 B4 C5:2 A4 A4:1.5 G#4:.5 A4 B4:2 G#4 E4:2"],
+ ["Scarborough Fair", 116, "D4:2 D4 A4:2 A4 E4:1.5 F4:.5 E4 D4:3 R A4 C5 D5:2 C5 A4 B4 G4 A4:3"],
+ ["Drunken Sailor", 124, "A4 A4:.5 A4:.5 A4 A4:.5 A4:.5 A4 D4 F4 A4 G4 G4:.5 G4:.5 G4 G4:.5 G4:.5 G4 C4 E4 G4 A4 A4:.5 A4:.5 A4 A4:.5 A4:.5 A4 B4 C5 D5 C5 A4 G4 E4 D4:2 D4:2"],
+ ["Danny Boy", 84, "B3:.5 C4:.5 D4:.5 E4:1.5 D4:.5 E4:.5 A4:.5 G4:.5 E4:.5 D4:.5 C4:.5 A3:1.5 C4:.5 E4:.5 F4:.5 G4:1.5 A4:.5 G4:.5 E4:.5 C4:.5 E4:.5 D4:3"],
+ ["Sakura, Sakura", 84, "A4 A4 B4:2 A4 A4 B4:2 A4 B4 C5 B4 A4 B4:.5 A4:.5 F4:2 E4 C4 E4 F4 E4 E4:.5 C4:.5 B3:2"],
+ ["Hava Nagila", 132, "E4 E4:.5 G#4:.5 F4:.5 E4:1.5 G#4 G#4:.5 B4:.5 A4:.5 G#4:1.5 A4 A4:.5 C5:.5 B4:.5 A4:1.5 G#4:.5 F4:.5 E4:.5 F4:.5 E4:2"],
+ ["Bella Ciao", 132, "E4:.5 A4:.5 B4:.5 C5:.5 A4:2 E4:.5 A4:.5 B4:.5 C5:.5 A4:2 E4:.5 A4:.5 B4:.5 C5 B4:.5 A4:.5 C5 B4:.5 A4:.5 E5 E5 E5"],
+ ["La Cucaracha", 132, "C4:.5 C4:.5 C4:.5 F4 A4:1.5 C4:.5 C4:.5 C4:.5 F4 A4:2 R F4 F4:.5 E4:.5 E4:.5 D4:.5 D4:.5 C4:2"],
+ ["Smetana · The Moldau", 112, "B3:.5 E4 F#4:.5 G4 A4:.5 B4 B4:.5 B4:1.5 C5:1.5 C5:1.5 B4:3"],
+ ["Pop Goes the Weasel", 152, "C4 C4:.5 D4 D4:.5 E4:.5 G4:.5 E4:.5 C4:1.5 C4 C4:.5 D4 D4:.5 E4:1.5 C4:1.5 C4 C4:.5 D4 D4:.5 E4:.5 G4:.5 E4:.5 C4:1.5 A4:1.5 D4 F4:.5 E4:1.5 C4:1.5"],
+ ["Old MacDonald Had a Farm", 132, "G4 G4 G4 D4 E4 E4 D4:2 B4 B4 A4 A4 G4:3"],
+ ["Shave and a Haircut", 132, "C5 G4:.5 G4:.5 A4 G4 R B4 C5"],
+ ["Taps", 66, "G3:.75 G3:.25 C4:3 G3:.75 C4:.25 E4:3 G3:.5 C4:.5 E4 G3:.5 C4:.5 E4 G3:.5 C4:.5 E4:3"],
+ ["Dies Irae", 84, "F4 E4 F4 D4 E4 C4 D4 D4:2 F4 F4:.5 G4:.5 F4 E4 D4 C4 E4 F4 E4 D4:2"],
+ ["Daisy Bell", 156, "D5:3 B4:3 G4:3 D4:3 E4 F#4 G4 E4:2 G4 D4:6"],
+ ["The Irish Washerwoman", 200, "B4:.5 G4:.5 G4:.5 D4:.5 G4:.5 G4:.5 B4:.5 G4:.5 B4:.5 D5:.5 C5:.5 B4:.5 C5:.5 A4:.5 A4:.5 E4:.5 A4:.5 A4:.5 C5:.5 A4:.5 C5:.5 E5:.5 D5:.5 C5:.5"],
+ ["Dvořák · New World Symphony", 72, "E4:1.5 G4:.5 G4:2 E4:1.5 D4:.5 C4:2 D4:1.5 E4:.5 G4:1.5 E4:.5 D4:4"],
+ ["Mozart · Piano Sonata No. 16", 132, "C5:2 E5 G5 B4:1.5 C5:.25 D5:.25 C5:2 A5:2 G5 C6 G5 F5 E5:2"],
+ ["Strauss · Also sprach Zarathustra", 66, "C4:2 G4:2 C5:3 E5:.25 Eb5:3.5"],
+ ["Alford · Colonel Bogey March", 120, "G4:.5 E4:1.5 E4:.5 F4:.5 G4:.5 E5 E5 C5:2"],
+ ["Ievan Polkka", 132, "B4:.5 E5:.5 E5:.75 F#5:.25 G5:.5 E5:.5 E5:.5 G5:.5 F#5:.5 D5:.5 D5:.5 F#5:.5 G5:.5 E5:.5 E5"],
+ ["My Bonnie Lies over the Ocean", 138, "G4 E5:2 D5 C5 D5 C5 A4 G4 E4:3 G4 E5:2 D5 C5 C5 B4 C5 D5:5"],
+ ["Spanish Romance", 190, "B4 B4 B4 B4 A4 G4 G4 F#4 E4 E4 G4 B4 E5 E5 E5 E5 D5 C5 C5 B4 A4 A4 B4 C5 B4 C5 B4 D#5 C5 B4 B4 A4 G4 G4 F#4 E4 F#4 F#4 F#4 F#4 G4 F#4 E4:3"],
+ ["Ding Dong Merrily on High", 132, "D5:1.5 C5:.5 B4:.5 C5:.5 D5:.5 B4:.5 C5:1.5 B4:.5 A4:.5 B4:.5 C5:.5 A4:.5 B4:1.5 A4:.5 G4:.5 A4:.5 B4:.5 G4:.5 A4:1.5 G4:.5 F#4 D4 G4:2"],
+ ["The First Noel", 112, "E4:.5 D4:.5 C4:1.5 D4:.5 E4:.5 F4:.5 G4:2 A4:.5 B4:.5 C5 B4 A4 G4:2"],
+ ["O Come, O Come, Emmanuel", 92, "E4 G4 B4 B4 B4 A4 C5 B4 A4 G4:2"],
+ ["Aura Lee", 92, "C4 F4 E4 F4 G4 D4 G4:2 F4 E4 D4 E4 F4:4"]
+];
+const SONGS=RAW_SONGS.map(([n,bpm,q])=>({n,bpm,seq:q.split(' ').map(tok=>{const m=/^(?:R|([A-G])([#b]?)(\d))(?::([\d.]+))?$/.exec(tok);if(!m){console.warn('bad note',tok,n);return null;}
+  return [m[1]?12*(+m[3]+1)+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]=='#'?1:m[2]=='b'?-1:0):null,m[4]?+m[4]:1];}).filter(Boolean)}));
+const FUND=.55, FUND_MAX=1.3;   // seconds of music one riff pays for, and how far ahead riffs can pay
+let curSong=0,stepI=0,beatPos=0,seqT=0,fundUntil=0,critNext=false;
 const hz=m=>440*2**((m-69)/12), floorAt=(m,min)=>{while(m<min)m+=12;return m;};
-const showSong=()=>{$('song').textContent='♪ '+SONGS[songI].n;};
+const unlocked=()=>SONGS.map((_,i)=>i).filter(i=>S.songs[i]);
+const showSong=()=>{$('song').textContent=SONGS[curSong].n;$('songN').textContent=`${unlocked().length}/${SONGS.length} songs`;};
+function pickSong(){const u=unlocked();curSong=S.songSel>=0&&S.songs[S.songSel]?S.songSel:u[Math.floor(Math.random()*u.length)];stepI=0;beatPos=0;showSong();}
+function nextSong(){const u=unlocked();curSong=S.songSel>=0&&S.songs[S.songSel]?S.songSel:u[(u.indexOf(curSong)+1)%u.length];stepI=0;beatPos=0;showSong();}
+function unlockSong(){const l=SONGS.map((_,i)=>i).filter(i=>!S.songs[i]);if(!l.length)return null;const i=l[Math.floor(Math.random()*l.length)];S.songs[i]=1;showSong();return SONGS[i];}
 function tone(type,f,t,d,vol,dest,vib){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
   if(vib){const l=AC.createOscillator(),lg=AC.createGain();l.frequency.value=5.5;lg.gain.value=f*.012;l.connect(lg).connect(o.frequency);l.start(t);l.stop(t+d);}
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(dest);o.start(t);o.stop(t+d);return o;}
 function hiss(t,d,vol,type,freq){const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();n.buffer=noiseBuf;f.type=type;f.frequency.value=freq;
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(f).connect(g).connect(clean);n.start(t);n.stop(t+d);}
-function playStep(crit){ if(!audioOn())return; try{
-  const song=SONGS[songI],m=song.m[stepI],t=AC.currentTime,has=i=>S.gens[i]>0,lo=m-12,beat=stepI%2==0;
-  tone('sawtooth',hz(lo),t,.3,.8,dist);                                                             // you, on the pick: the melody
-  if(has(0)){const r=floorAt(lo-12,40);tone('sawtooth',hz(r),t,.32,.7,dist);tone('sawtooth',hz(r+7),t,.32,.5,dist);}   // rhythm guitar: power chord underneath
-  if(has(1)){hiss(t,.04,.3,'highpass',7000);                                                        // drummer: hi-hat on every hit, kick and snare alternating
-    if(beat){const k=tone('sine',150,t,.17,1.4,clean);k.frequency.exponentialRampToValueAtTime(45,t+.12);}
-    else{hiss(t,.14,.8,'highpass',1500);tone('triangle',190,t,.08,.6,clean);}}
-  if(has(2))tone('triangle',hz(floorAt(m-24,28)),t,.36,1.1,clean);                                  // bassist: two octaves below the melody
-  if(has(3))tone('square',hz(m),t,.3,.16,clean,true);                                               // lead guitarist: an octave above, with vibrato
-  if(has(4)){tone('sine',hz(m),t,.42,.3,clean);tone('sine',hz(m+7),t,.42,.16,clean);tone('sine',hz(m+12),t,.42,.2,clean);}   // keyboardist: organ stack
-  if(has(5)){const o=AC.createOscillator(),l=AC.createOscillator(),lg=AC.createGain(),f=AC.createBiquadFilter(),g=AC.createGain();   // singer: a filtered "aah"
+/* one note of the song (m = midi note or null for a rest) lasting `dur` seconds = `beats` beats of `bd` seconds */
+function playNote(m,t,dur,bd,beats){const has=i=>S.gens[i]>0,len=Math.max(.14,Math.min(dur,1.6));
+  if(has(1)||has(6))for(let g=Math.ceil(beatPos*2-1e-6)/2;g<beatPos+beats-1e-6;g+=.5){const tt=t+(g-beatPos)*bd,whole=Math.abs(g-Math.round(g))<1e-6;
+    if(has(1)){hiss(tt,.04,.3,'highpass',7000);                                                     // drummer: hi-hat on every half beat, kick and snare on alternate beats
+      if(whole){if(Math.round(g)%2==0){const k=tone('sine',150,tt,.17,1.4,clean);k.frequency.exponentialRampToValueAtTime(45,tt+.12);}
+        else{hiss(tt,.14,.8,'highpass',1500);tone('triangle',190,tt,.08,.6,clean);}}}
+    if(has(6)&&whole){const f=AC.createBiquadFilter(),c=AC.createGain();f.type='bandpass';f.frequency.value=800;f.Q.value=3;          // cowbell player: every beat, naturally
+      c.gain.setValueAtTime(.7,tt);c.gain.exponentialRampToValueAtTime(.001,tt+.16);f.connect(c).connect(clean);
+      [540,800].forEach(q=>{const o=AC.createOscillator();o.type='square';o.frequency.value=q;o.connect(f);o.start(tt);o.stop(tt+.16);});}}
+  if(m==null)return;
+  const lo=m-12;
+  tone('sawtooth',hz(lo),t,len,.8,dist);                                                            // you, on the pick: the melody
+  if(has(0)){const r=floorAt(lo-12,40);tone('sawtooth',hz(r),t,len,.7,dist);tone('sawtooth',hz(r+7),t,len,.5,dist);}   // rhythm guitarist: power chord underneath
+  if(has(2))tone('triangle',hz(floorAt(m-24,28)),t,len,1.1,clean);                                  // bassist: two octaves below
+  if(has(3))tone('square',hz(m),t,len,.16,clean,true);                                              // lead guitarist: an octave above, with vibrato
+  if(has(4)){tone('sine',hz(m),t,len*1.2,.3,clean);tone('sine',hz(m+7),t,len*1.2,.16,clean);tone('sine',hz(m+12),t,len*1.2,.2,clean);}   // keyboardist: organ stack
+  if(has(5)&&beats>=.5){const o=AC.createOscillator(),l=AC.createOscillator(),lg=AC.createGain(),f=AC.createBiquadFilter(),g=AC.createGain(),e=Math.max(.3,len);   // singer: a filtered "aah" on the longer notes
     o.type='sawtooth';o.frequency.value=hz(lo);l.frequency.value=5.5;lg.gain.value=hz(lo)*.015;l.connect(lg).connect(o.frequency);
-    f.type='bandpass';f.frequency.value=1000;f.Q.value=3;g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.9,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.42);
-    o.connect(f).connect(g).connect(clean);o.start(t);l.start(t);o.stop(t+.42);l.stop(t+.42);}
-  if(has(6)&&beat){const f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.value=800;f.Q.value=3;                // cowbell player: on every beat, naturally
-    g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);f.connect(g).connect(clean);
-    [540,800].forEach(q=>{const o=AC.createOscillator();o.type='square';o.frequency.value=q;o.connect(f);o.start(t);o.stop(t+.16);});}
-  if(crit){hiss(t,.5,.6,'highpass',5000);tone('sawtooth',hz(m+12),t,.4,.35,dist);}                 // critical riff: crash cymbal and a screaming octave
-  if(++stepI>=song.m.length){stepI=0;if(++loopI>=2){loopI=0;songI=(songI+1)%SONGS.length;showSong();}}
- }catch(e){} }
+    f.type='bandpass';f.frequency.value=1000;f.Q.value=3;g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.9,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+e);
+    o.connect(f).connect(g).connect(clean);o.start(t);l.start(t);o.stop(t+e);l.stop(t+e);}
+  if(critNext){critNext=false;hiss(t,.5,.6,'highpass',5000);tone('sawtooth',hz(m+12),t,.4,.35,dist);}}   // critical riff: crash cymbal and a screaming octave
+/* a riff pays for more music; `secs` overrides the amount (used for the preview in the setlist) */
+function fundMusic(crit,secs){ if(!audioOn())return;const now=AC.currentTime;if(crit)critNext=true;
+  fundUntil=secs?now+secs:Math.min(Math.max(fundUntil,now)+FUND,now+FUND_MAX);pump();}
+function pump(){ if(!AC||S.mute||AC.state!=='running')return;const now=AC.currentTime;if(seqT<now-.05)seqT=now+.03;let guard=0;
+  while(seqT<now+.12&&seqT<fundUntil&&guard++<64){const song=SONGS[curSong],[m,d]=song.seq[stepI],bd=60/song.bpm;
+    try{playNote(m,seqT,d*bd,bd,d);}catch(e){}
+    seqT+=d*bd;beatPos+=d;if(++stepI>=song.seq.length){nextSong();seqT+=bd;}}}   // one beat of silence, then the next song
+setInterval(pump,30);
+function openSongs(){const u=unlocked();
+  let h=`<button class="pk${S.songSel<0?' on':''}" data-i="-1"><span class="pe">🔀</span><span><b>Play all my songs in turn</b></span></button>`;
+  u.forEach(i=>h+=`<button class="pk${S.songSel==i?' on':''}" data-i="${i}"><span class="pe">${i==curSong?'🔊':'🎵'}</span><span><b>${SONGS[i].n}</b></span></button>`);
+  h+=`<div class="pf" style="color:#a08c84;margin-top:8px">${SONGS.length-u.length} more songs to find. Every boss you beat teaches the band one, and a caught stage diver has a 0.5% chance.</div>`;
+  modal(`Setlist · ${u.length}/${SONGS.length}`,h,[['Close']]);
+  $('mP').querySelectorAll('.pk').forEach(b=>b.onclick=()=>{S.songSel=+b.dataset.i;$('modal').classList.remove('show');
+    if(S.songSel>=0){curSong=S.songSel;stepI=0;beatPos=0;showSong();fundMusic(false,5);}save();});}
+$('songBtn').onclick=openSongs;
 
 /* ---------- embers ---------- */
 const cv=$('embers'),cx=cv.getContext('2d');let P=[];
@@ -938,14 +1066,14 @@ function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();}
   render();}
-showSong();let lastAch=0;calcFx();buildAch();buildTech();buildBoss();drawSlots();
+pickSong();let lastAch=0;calcFx();buildAch();buildTech();buildBoss();drawSlots();
 setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});
 buildPerks();tick();
 /* ---------- onboarding guide: [panel to highlight, mobile tab, title, text] ---------- */
 const TOUR=[
- ['pStage','gear','Shred','Tap the pick to play a riff and win <b>fans</b>. Fast riffs fill the <b>crowd hype</b> bar, which boosts everything while you keep playing, and now and then a riff is a critical hit.'],
+ ['pStage','gear','Shred','Tap the pick to play a riff and win <b>fans</b>. Fast riffs fill the <b>crowd hype</b> bar, which boosts everything while you keep playing, and now and then a riff is a critical hit. While you shred, the band plays a song: tap <b>Now playing</b> to pick one from your setlist.'],
  ['pStage','gear','Boosts','<b>Overdrive</b> and <b>Encore</b> are short boosts that cost solo skill 🎼. Sometimes a glowing 🤘 stage diver appears: catch it for a surprise bonus.'],
  ['pGens','gear','The Band','Spend fans to hire band members and level them up. They earn fans every second, even while the game is closed. Levels 10, 25, 50, 100 and beyond give big bonuses.'],
  ['pGens','gear','Instruments and equipment','Every member has two slots. Bosses drop gear in four rarities, from common to legendary. Tap a slot to choose what to equip, and use the <b>Gear Forge</b> to merge five items into one of the next rarity.'],

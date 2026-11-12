@@ -168,12 +168,31 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 .abil button small{display:block}
 .abil button.rdy small.c{color:var(--sk)}
 
-/* epic gear */
-.gen.epic{border-color:#a8842c;background:linear-gradient(90deg,#2c1e08,#1c1024 75%)}
-.gen.epic .nm{color:var(--gold)}
-.gen.epic .nm:after{content:"EPIC";font-size:10px;letter-spacing:1.5px;margin-left:8px;padding:1px 6px;border-radius:4px;background:linear-gradient(var(--gold),#c98a1a);color:#1a0f02;vertical-align:middle;font-weight:700}
-.gen.epic.ok{box-shadow:0 0 16px rgba(255,215,106,.22)}
-.gen.epic .ico{filter:drop-shadow(0 0 8px rgba(255,215,106,.8))}
+/* band members with gear slots */
+.gen.mem{display:block;padding:0;cursor:default}
+.gen.mem.locked{display:none}
+.gen.mem:not(.ok){opacity:1}
+.gen.mem .buy{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:9px 12px 7px;cursor:pointer}
+.gen.mem:not(.ok) .buy{opacity:.55;cursor:not-allowed}
+.slots{display:flex;gap:8px;padding:0 12px 11px}
+.slot{flex:1;min-width:0;display:flex;align-items:center;gap:7px;font:inherit;font-size:12.5px;color:var(--dim);background:#120a0c;border:1px dashed var(--line);border-radius:8px;padding:5px 8px;cursor:pointer;text-align:left;transition:.12s}
+.slot:hover{border-color:var(--fire2);color:var(--text)}
+.slot .se{font-size:19px;line-height:1;flex:none}
+.slot .sn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.slot .sc{flex:none;font-size:11px;background:var(--fire2);color:#160a04;border-radius:10px;padding:0 6px;font-weight:700}
+.slot.r0,.pk.r0{border:1px solid #6f9a5c}.slot.r1,.pk.r1{border:1px solid #4f8fe0}.slot.r2,.pk.r2{border:1px solid var(--gold)}
+.slot.r0 .sn{color:#b6e0a0}.slot.r1 .sn{color:#9cc8ff}.slot.r2 .sn{color:var(--gold)}
+.slot.r2{box-shadow:0 0 10px rgba(255,215,106,.25)}
+.slot.new{border-color:var(--fire2);animation:pulse 1.4s infinite}
+.rar{letter-spacing:3px}.rar.r0{color:#b6e0a0}.rar.r1{color:#9cc8ff}.rar.r2{color:var(--gold)}
+#modal .box{max-height:88vh;overflow:auto}
+#modal .pk{display:flex;gap:12px;align-items:center;width:100%;text-align:left;text-transform:none;letter-spacing:0;font-size:14px;line-height:1.35;padding:9px 11px;margin-bottom:7px;background:#160e10;border-radius:9px}
+#modal .pk.on{background:linear-gradient(160deg,#2a1c0c,#160e10);box-shadow:0 0 12px rgba(255,179,0,.3)}
+#modal .pk .pe{font-size:30px;flex:none}
+#modal .pk small{color:var(--dim)}
+#modal .pk.r0 b{color:#b6e0a0}#modal .pk.r1 b{color:#9cc8ff}#modal .pk.r2 b{color:var(--gold)}
+.pf{color:#ffb8a8;font-size:13px}
+#modal .pk i{color:var(--dim);font-size:12.5px}
 
 /* boss fights */
 .boss{border-color:#6a2230;background:linear-gradient(170deg,rgba(64,14,24,.88),rgba(22,15,17,.88))}
@@ -235,6 +254,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .eq{height:24px;margin-top:4px}
   h2{font-size:20px}
   .gen{padding:11px 12px;gap:10px;grid-template-columns:40px 1fr auto}
+  .gen.mem{padding:0}
+  .gen.mem .buy{grid-template-columns:40px 1fr auto;gap:10px;padding:11px 12px 8px}
   .gen .ds{display:none}
   .gen.ok:hover{transform:none}
   #ups{grid-template-columns:1fr 1fr}
@@ -277,7 +298,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   <div class="hbtns"><button id="mute"></button><button id="wipe">🗑<span class="lbl"> Wipe save</span></button></div>
 </header>
 <nav id="tabs">
-  <button data-tab="gear" class="on"><span>🎸</span>Gear</button>
+  <button data-tab="gear" class="on"><span>🎸</span>Band</button>
   <button data-tab="ups"><span>⚡</span>Upgrades</button>
   <button data-tab="skill"><span>🎼</span>Skill</button>
   <button data-tab="boss"><span>☠️</span>Boss</button>
@@ -343,7 +364,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     <section class="panel boss" id="pBoss">
       <h2>Underworld Tour <span class="skamt" id="bsRec"></span></h2>
       <div id="bossLocked">
-        <p class="bossp">Below the stage wait things that hate your music. Spend platinum records to open the gate, beat bosses with your riffs and loot epic gear.</p>
+        <p class="bossp">Below the stage wait things that hate your music. Spend platinum records to open the gate, beat bosses with your riffs and loot instruments and equipment for your band.</p>
         <button id="bossUnlock" class="bbtn"></button>
       </div>
       <div id="bossOpen" hidden>
@@ -360,7 +381,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   </div>
 
   <section class="panel" id="pGens">
-    <h2>Gear &amp; Crew <span class="qty" id="qty"><button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="100">×100</button><button data-q="-1">Max</button></span></h2>
+    <h2>The Band <span class="qty" id="qty"><button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="100">×100</button><button data-q="-1">Max</button></span></h2>
     <div id="gens"></div>
   </section>
 </main>
@@ -380,40 +401,85 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <script>
 const $=id=>document.getElementById(id);
 const GENS=[
- ['🎸','Busker Guitar','A battered six-string on a street corner',15,.2],
- ['🔊','Garage Amp','Loud enough to anger three neighbours',100,1],
- ['🥁','Double-Kick Drummer','200 BPM and no days off',1100,8],
- ['🚐','Tour Van','Smells awful. Gets you to the gig',12e3,47],
- ['🔥','Pyro Rig','Eyebrows are optional',13e4,260],
- ['💿','Record Deal','Sign here, here, and in blood here',14e5,1400],
- ['🏟️','Stadium Show','Eighty thousand horns in the air',2e7,7800],
- ['✈️','World Tour','A private jet named after your ego',33e7,44e3],
- ['🎪','Festival Headliner','Your name in the biggest font',51e8,26e4],
- ['🌋','Volcano Amphitheatre','Naturally heated mosh pit',75e9,16e5],
- ['👹','Underworld Residency','The crowd is literally undying',1e12,1e7],
- ['🌌','Cosmic Feedback Loop','A riff that echoes across galaxies',14e12,65e6],
- /* epic gear: only appears after dropping from a boss */
- ['🦷','Fang of the First Riff',"A pick carved from a demon's tooth",1e3,100],
- ['🪓','Thunderforged Axe','Six strings, one lightning bolt',1e5,6e3],
- ['🎙️','Banshee Microphone','Every scream reaches the cheap seats',1e7,4e5],
- ['🛢️','Hellhound Kick Drum','It bites back on the downbeat',1e9,25e6],
- ['👑','Crown of Feedback','Never in tune, always in charge',1e11,15e8],
- ['🗿','Monolith Amp Stack','Carved before music had a name',1e13,1e11]
+ /* band members: [emoji, name, description, cost of the first level, fans/sec per level] */
+ ['🎸','Rhythm Guitarist','Knows three chords. Uses two.',15,.2],
+ ['🥁','Drummer','Speeds up when excited. Is always excited.',300,3],
+ ['🪕','Bassist','Nobody is sure when he joined.',6e3,40],
+ ['🤘','Lead Guitarist','Will not stop soloing. Please send help.',12e4,550],
+ ['🎹','Keyboardist','Hidden behind the fog since the first gig.',3e6,8e3],
+ ['🎤','Singer','Arrives last, leaves first, thanks the wrong city.',9e7,14e4],
+ ['🔔','Cowbell Player','The song needed more of it. So did the band.',4e9,35e5]
 ];
-const NG=12; // number of regular gear types; the rest are epics
+const NG=GENS.length;
+const BASE_INST=['Borrowed Guitar','Practice Pad Kit','Two-String Bass','Mail-Order Guitar','Toy Keyboard','Bare Lungs','Small Cowbell'];
+/* band gear dropped by bosses: [member, slot (i=instrument, e=equipment), rarity 0-2, emoji, name, effects, flavour]
+   effects: self = this member ×N · buff = {member: ×N} for another member · all = all fans ×N · click = riff power ×N
+            crit = crit chance + · boss = boss damage ×N · off = offline earnings + · hype = max hype bonus + */
+const ITEMS=[
+ [0,'i',0,'🎸','Pawn Shop Special',{self:2},'Stays in tune for almost a whole song.'],
+ [0,'i',1,'🪚','Chainsaw Guitar',{self:4,click:1.25},'Technically also a gardening tool.'],
+ [0,'i',2,'🪓','Thunderforged Axe',{self:10,all:1.25},'Six strings, one lightning bolt.'],
+ [0,'e',0,'🔊','Slightly Too Loud Amp',{self:2},'The neighbours have formed a committee.'],
+ [0,'e',1,'📣','Backing Scream Mic',{self:1.5,buff:{5:2}},'He only knows one word and it is "YEAH".'],
+ [0,'e',2,'🧱','Wall of Amps',{self:5,buff:{3:2}},'Most of them are empty boxes. Do not tell anyone.'],
+ [1,'i',0,'🥁','Kit With All Its Cymbals',{self:2},'A luxury.'],
+ [1,'i',1,'🛢️','Oil Drum Kit',{self:4,buff:{2:2}},'Tight low end, faint smell of diesel.'],
+ [1,'i',2,'🐕','Hellhound Kick Drum',{self:10,buff:{2:3}},'It bites back on the downbeat.'],
+ [1,'e',0,'🥢','Spare Sticks',{self:1.5},'He drops one per song. Now it does not matter.'],
+ [1,'e',1,'🦿','Double-Kick Machine',{self:3},'Both feet. No excuses.'],
+ [1,'e',2,'🎠','Spinning Drum Riser',{self:4,all:1.2},'Nobody asked. Everybody cheered.'],
+ [2,'i',0,'🪕','Bass With All Four Strings',{self:2},'He still only uses one.'],
+ [2,'i',1,'📻','Subwoofer Bass',{self:4,buff:{1:2}},'Locks in with the drums. Unlocks nearby cars.'],
+ [2,'i',2,'🐋','Bass of the Deep',{self:10,buff:{1:3}},'Felt, not heard. Mostly by whales.'],
+ [2,'e',0,'🎚️','Volume Knob',{self:2},'Somebody finally turned the bass player up.'],
+ [2,'e',1,'🧊','Fridge-Sized Cabinet',{self:3,buff:{4:1.5}},'Also keeps the drinks cold.'],
+ [2,'e',2,'🌋','Earthquake Pedal',{self:5,boss:2},'Registered on three seismographs.'],
+ [3,'i',0,'📐','Pointy Guitar',{self:2},'Extra points for the points.'],
+ [3,'i',1,'🦞','Double-Neck Guitar',{self:4,click:1.5},'Twice the necks, same number of ideas.'],
+ [3,'i',2,'🦷','Fang of the First Riff',{self:10,click:2},"A guitar inlaid with a demon's tooth."],
+ [3,'e',0,'🦆','Wah Pedal',{self:1.5},'Makes the guitar sound like a duck with opinions.'],
+ [3,'e',1,'🌬️','Wind Machine',{self:3,buff:{5:1.5}},'For the hair. It is always for the hair.'],
+ [3,'e',2,'🔦','Solo Spotlight',{self:5,crit:.03},'Follows him everywhere. Even backstage.'],
+ [4,'i',0,'🎹','Keyboard With Working Keys',{self:2},'All of them. Even the black ones.'],
+ [4,'i',1,'🎛️','Keytar',{self:4,buff:{3:1.5}},'Finally allowed at the front of the stage.'],
+ [4,'i',2,'⛪','Cathedral Organ on Wheels',{self:10,all:1.3},'Needs its own truck and a bishop.'],
+ [4,'e',0,'🔌','Second Keyboard (Unplugged)',{self:1.5},'Looks great. Does nothing.'],
+ [4,'e',1,'🌫️','Fog Machine',{self:2,hype:.25},'Nobody has seen the keyboardist in years.'],
+ [4,'e',2,'🦸','The Cape',{self:4,all:1.15},'Adds nothing to the sound. Adds everything.'],
+ [5,'i',0,'🎤','Mic Without Tape On It',{self:2},'Smells only slightly of the last singer.'],
+ [5,'i',1,'🎙️','Banshee Microphone',{self:4,hype:.25},'Every scream reaches the cheap seats.'],
+ [5,'i',2,'🍬','Golden Throat Lozenge',{self:10,all:1.25},'One per career.'],
+ [5,'e',0,'🍯','Honey and Tea',{self:1.5},'In a flask labelled "definitely tea".'],
+ [5,'e',1,'👖','Leather Trousers',{self:3},'Two sizes too small. The high notes got higher.'],
+ [5,'e',2,'📜','Stage-Dive Insurance',{self:4,off:.25},'Covers the band while you are away.'],
+ [6,'i',0,'🔔','Bigger Cowbell',{self:2},'Progress.'],
+ [6,'i',1,'🏅','Gold-Plated Cowbell',{self:4,all:1.1},'Sounds the same. Costs more.'],
+ [6,'i',2,'✨','Cowbell of Prophecy',{self:10,all:1.5},'It was foretold: there would be more.'],
+ [6,'e',0,'🥢','Second Drumstick',{self:1.5},'Revolutionary.'],
+ [6,'e',1,'📋','Cowbell Solo Permit',{self:3,click:1.25},'Signed by the whole band, under protest.'],
+ [6,'e',2,'🐄','An Actual Cow',{self:5,buff:{1:2}},'Moos on the downbeat. Mostly.']
+];
+const RN=['Common','Rare','Epic'], RARE_CHANCE=.28;
+const ITEM={};ITEMS.forEach(a=>{const id=a[0]+a[1]+a[2];ITEM[id]={id,m:a[0],k:a[1],r:a[2],e:a[3],n:a[4],fx:a[5],t:a[6]};});
 const G=1.15, TIERS=[10,25,50,100,200], TMULT=[10,60,500,8e3,4e5], TN=['Tuned','Overdriven','Blackened','Legendary','Godforged'];
 const CLK=[100,1e3,2e4,5e5,2e7,1e9,1e11,1e13,1e15];
 const CN=['Heavier Strings','Drop-D Tuning','Palm Muting','Sweep Picking','Tapping Solo','Seven Strings','Eight Strings','Shred Mastery','Fingers of Fury'];
 const PERKS=[
  {id:'crew',n:'Roadie Army',d:'+25% all fans per level',c:l=>2*2**l,max:50},
  {id:'pick',n:'Golden Pick',d:'Riff power ×1.5 per level',c:l=>3**l,max:20},
- {id:'cheap',n:'Endorsement Deal',d:'Gear 5% cheaper per level',c:l=>3*2**l,max:10},
+ {id:'cheap',n:'Endorsement Deal',d:'Band members 5% cheaper per level',c:l=>3*2**l,max:10},
  {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
-const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},epic:{}});
-let S=fresh(), qty=1, hype=0, achCount=0;
-try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d); while(S.gens.length<GENS.length)S.gens.push(0);}}catch(e){}
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},v:2});
+let S=fresh(), qty=1, hype=0, achCount=0, migrated=0;
+try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);
+  if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
+    const old=Object.keys(d.epic||{}).length;S.gens=GENS.map(()=>0);for(const k in S.ups)if(k[0]=='g')delete S.ups[k];
+    S.fans=Math.max(S.fans,S.run);delete S.epic;S.items={};S.eq={};
+    const ep=Object.values(ITEM).filter(x=>x.r==2).sort(()=>Math.random()-.5);for(let i=0;i<old&&i<ep.length;i++){S.items[ep[i].id]=1;S.eq[ep[i].m+ep[i].k]=ep[i].id;}
+    S.v=2;migrated=1+old;}
+  while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 const save=()=>{S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
 
 const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
@@ -422,7 +488,16 @@ function fmt(n){ if(n<1000) return n<10&&n%1?n.toFixed(1):Math.floor(n).toString
   const v=n/10**(e*3); return (v<10?v.toFixed(2):v<100?v.toFixed(1):v.toFixed(0))+SUF[e]; }
 const pl=id=>S.perks[id]||0;
 const tl=id=>S.tech[id]||0;
-const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'))*(1+.03*achCount)*(1+.25*Object.keys(S.epic).length);
+/* combined effects of all equipped band gear; a member's gear only counts once that member is hired */
+let FX={m:GENS.map(()=>1),all:1,click:1,crit:0,boss:1,off:0,hype:0};
+function calcFx(){const f={m:GENS.map(()=>1),all:1,click:1,crit:0,boss:1,off:0,hype:0};
+  GENS.forEach((_,i)=>{if(!S.gens[i])return;for(const k of 'ie'){const it=ITEM[S.eq[i+k]];if(!it)continue;const x=it.fx;
+    if(x.self)f.m[i]*=x.self;if(x.buff)for(const j in x.buff)f.m[j]*=x.buff[j];if(x.all)f.all*=x.all;if(x.click)f.click*=x.click;
+    if(x.crit)f.crit+=x.crit;if(x.boss)f.boss*=x.boss;if(x.off)f.off+=x.off;if(x.hype)f.hype+=x.hype;}});FX=f;}
+const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.self}`);if(x.buff)for(const j in x.buff)p.push(`${GENS[j][1]} ×${x.buff[j]}`);
+  if(x.all)p.push(`All fans ×${x.all}`);if(x.click)p.push(`Riff power ×${x.click}`);if(x.crit)p.push(`Crit chance +${Math.round(x.crit*100)}%`);
+  if(x.boss)p.push(`Boss damage ×${x.boss}`);if(x.off)p.push(`Offline earnings +${Math.round(x.off*100)}%`);if(x.hype)p.push(`Max hype bonus +${Math.round(x.hype*100)}%`);return p.join(' · ');};
+const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'))*(1+.03*achCount)*FX.all;
 const tierCount=i=>TIERS.reduce((a,_,t)=>a+(S.ups['g'+i+'t'+t]?1:0),0);
 /* milestones (free): ×2 at 10 and 25 owned, ×5 at 50/150/250…, ×10 at every 100 */
 const msMult=n=>2**((n>=10)+(n>=25))*5**(Math.floor(n/50)-Math.floor(n/100))*10**Math.floor(n/100);
@@ -430,18 +505,18 @@ const msPrev=n=>n>=50?Math.floor(n/50)*50:n>=25?25:n>=10?10:0;
 const msNext=n=>n<10?10:n<25?25:(Math.floor(n/50)+1)*50;
 const msBonus=n=>n%100==0?10:n%50==0?5:2;
 const gm=i=>2**tierCount(i)*msMult(S.gens[i]);
-const genFps=i=>GENS[i][4]*S.gens[i]*gm(i)*gmult();
+const genFps=i=>GENS[i][4]*S.gens[i]*gm(i)*FX.m[i]*gmult();
 const baseFps=()=>GENS.reduce((a,_,i)=>a+genFps(i),0);
 /* temporary boosts: crowd hype (up to ×2) and timed buffs */
 const buff=id=>(S.buffs[id]||0)>Date.now();
-const hypeMult=()=>1+hype*(1+.25*tl('crowd'));
+const hypeMult=()=>1+hype*(1+.25*tl('crowd')+FX.hype);
 const fps=()=>baseFps()*hypeMult()*(buff('frenzy')?7:1);
 /* riff power = (base riff + 0.25% of fans/sec) × every riff upgrade (×1.5 each) × Golden Pick (×1.5 each).
    The multipliers apply to the whole value, so an upgrade does exactly what its label says.
    Balance target: with all 9 riff upgrades one riff is worth ~0.1s of production, so with hype and crits hand
    clicking at 6/s is about ×3 idle income and maxed autoclickers (21/s) about ×8. */
 const RIFF_UP=1.5, PICK_UP=1.5, RIFF_SHARE=.0025;
-const clickMult=()=>RIFF_UP**CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0)*PICK_UP**pl('pick');
+const clickMult=()=>RIFF_UP**CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0)*PICK_UP**pl('pick')*FX.click;
 const clickPow=()=>((1+.1*S.earned)*hypeMult()+RIFF_SHARE*fps())*clickMult()*(buff('solo')?10:1);
 /* autoclickers: each Auto-Shredder clicks 2×/s, +1/s per Speed Picking level */
 const autoRate=()=>tl('auto')*(2+tl('speed'));
@@ -462,13 +537,27 @@ function gain(n){S.fans+=n;S.run+=n;S.total+=n;}
 
 /* ---------- build DOM ---------- */
 const gensEl=$('gens'), genRows=[];
-GENS.forEach((g,i)=>{const b=document.createElement('button');b.className='gen'+(i>=NG?' epic':'');
-  b.innerHTML=`<div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div><i class="mbar"></i>`;
-  b.onclick=()=>{const {k,cost}=bulk(i); if(S.fans>=cost){const m0=msMult(S.gens[i]);S.fans-=cost;S.gens[i]+=k;const up=msMult(S.gens[i])/m0;
-    if(up>1){chord(2.5);b.classList.remove('boom');void b.offsetWidth;b.classList.add('boom');
-      const r=b.getBoundingClientRect(),s=document.createElement('div');s.className='float';s.textContent=`${g[1]} ×${fmt(up)}!`;s.style.left=r.left+60+'px';s.style.top=r.top+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(r.left+r.width/2,r.top+r.height/2);}
+/* one card per band member: a button that hires / levels the member, plus an instrument slot and an equipment slot */
+GENS.forEach((g,i)=>{const d=document.createElement('div');d.className='gen mem';
+  d.innerHTML=`<button class="buy"><div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div></button><div class="slots"><button class="slot" data-k="i"></button><button class="slot" data-k="e"></button></div><i class="mbar"></i>`;
+  const b=d.querySelector('.buy');
+  b.onclick=()=>{const {k,cost}=bulk(i); if(S.fans>=cost){const m0=msMult(S.gens[i]),hired=!S.gens[i];S.fans-=cost;S.gens[i]+=k;const up=msMult(S.gens[i])/m0;
+    if(up>1||hired){chord(2.5);d.classList.remove('boom');void d.offsetWidth;d.classList.add('boom');
+      const r=d.getBoundingClientRect(),s=document.createElement('div');s.className='float';s.textContent=hired&&up<=1?`${g[1]} joined the band!`:`${g[1]} ×${fmt(up)}!`;s.style.left=r.left+60+'px';s.style.top=r.top+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(r.left+r.width/2,r.top+r.height/2);}
     else chord(.5);upsDirty=true;render();}};
-  gensEl.appendChild(b);genRows.push({b,cost:b.querySelector('.cost'),own:b.querySelector('.own'),ms:b.querySelector('.ms'),bar:b.querySelector('.mbar')});});
+  const sl=[...d.querySelectorAll('.slot')];sl.forEach(s=>s.onclick=()=>openSlot(i,s.dataset.k));
+  gensEl.appendChild(d);genRows.push({b:d,cost:d.querySelector('.cost'),own:d.querySelector('.own'),ms:d.querySelector('.ms'),bar:d.querySelector('.mbar'),si:sl[0],se:sl[1]});});
+function drawSlots(){genRows.forEach((row,i)=>{for(const k of 'ie'){const el=k=='i'?row.si:row.se,it=ITEM[S.eq[i+k]],
+    spare=Object.values(ITEM).filter(x=>x.m==i&&x.k==k&&S.items[x.id]&&x.id!=S.eq[i+k]).length;
+  el.className='slot'+(it?' r'+it.r:'')+(spare&&!it?' new':'');
+  el.innerHTML=`<span class="se">${it?it.e:k=='i'?'🎵':'＋'}</span><span class="sn">${it?it.n:k=='i'?BASE_INST[i]:'Equipment slot'}</span>${spare?`<b class="sc">${spare}</b>`:''}`;}});}
+function openSlot(i,k){const own=Object.values(ITEM).filter(x=>x.m==i&&x.k==k&&S.items[x.id]).sort((a,b)=>b.r-a.r),cur=S.eq[i+k]||'';
+  const row=(id,e,n,r,fx,t)=>`<button class="pk${id==cur?' on':''}${r>=0?' r'+r:''}" data-id="${id}"><span class="pe">${e}</span><span><b>${n}</b>${r>=0?` <small>${RN[r]}</small>`:''}<br><span class="pf">${fx}</span>${t?`<br><i>${t}</i>`:''}</span></button>`;
+  let h='';own.forEach(x=>h+=row(x.id,x.e,x.n,x.r,fxText(x),x.t));
+  h+=row('',k=='i'?'🎵':'🚫',k=='i'?BASE_INST[i]:'Nothing',-1,k=='i'?'Base instrument · no bonus':'Leave the slot empty','');
+  if(!own.length)h+=`<div class="pf" style="margin-top:10px">Nothing found for this slot yet. Bosses in the Underworld Tour drop band gear.</div>`;
+  modal(`${GENS[i][1]} · ${k=='i'?'Instrument':'Equipment'}`,h,[['Close']]);
+  $('mP').querySelectorAll('.pk').forEach(b=>b.onclick=()=>{const id=b.dataset.id;if(id)S.eq[i+k]=id;else delete S.eq[i+k];chord(1.5);$('modal').classList.remove('show');drawSlots();render();save();});}
 $('qty').onclick=e=>{const q=e.target.dataset.q;if(!q)return;qty=+q;[...$('qty').children].forEach(x=>x.classList.toggle('on',x===e.target));render();};
 for(let i=0;i<22;i++){const b=document.createElement('i');b.style.animationDuration=(.35+Math.random()*.7)+'s';b.style.animationDelay=(-Math.random())+'s';$('eq').appendChild(b);}
 
@@ -477,7 +566,7 @@ function upList(){const L=[];
   CLK.forEach((c,t)=>{if(!S.ups['c'+t]&&S.run>=c/5&&(t==0||S.ups['c'+(t-1)]))L.push({id:'c'+t,t:CN[t],d:'Riff power ×1.5',c});});
   GENS.forEach((g,i)=>TIERS.forEach((n,t)=>{if(!S.ups['g'+i+'t'+t]&&S.gens[i]>=n)L.push({id:'g'+i+'t'+t,t:`${g[0]} ${TN[t]}`,d:`${g[1]} ×2`,c:g[3]*TMULT[t]});}));
   return L.sort((a,b)=>a.c-b.c);}
-function buildUps(){const L=upList();$('ups').innerHTML=L.length?'':'<div class="empty">Buy gear and gather fans to unlock upgrades…</div>';upBtns=[];
+function buildUps(){const L=upList();$('ups').innerHTML=L.length?'':'<div class="empty">Hire band members and gather fans to unlock upgrades…</div>';upBtns=[];
   L.forEach(u=>{const b=document.createElement('button');b.className='up';b.innerHTML=`<div class="t">${u.t}</div><div class="d">${u.d}</div><div class="c">${fmt(u.c)} fans</div>`;
     b.onclick=()=>{if(S.fans>=u.c){S.fans-=u.c;S.ups[u.id]=1;chord(1.5);upsDirty=true;render();}};$('ups').appendChild(b);upBtns.push({b,c:u.c});});
   upsDirty=false;}
@@ -489,14 +578,15 @@ function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earn
 
 let lastUpCount=-1;
 function render(){
+  calcFx();
   const f=fps();
   $('fans').textContent=fmt(S.fans);$('fps').textContent=fmt(f);$('cp').textContent=fmt(clickPow());
   $('sRun').textContent=fmt(S.run);$('sTot').textContent=fmt(S.total);$('sClk').textContent=fmt(S.clicks);$('sAsc').textContent=S.asc;
   let r=RANKS[0][1];for(const [n,t] of RANKS)if(S.run>=n)r=t;$('rank').textContent=(S.asc?`Tour ${S.asc+1} · `:'')+r;
   genRows.forEach((row,i)=>{const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans>=cost);
-    row.b.classList.toggle('locked',i>=NG?!S.epic[i]:i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
-    row.cost.textContent=`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(GENS[i][4]*gm(i)*gmult())}/s each`;row.own.textContent=S.gens[i];
-    const n=S.gens[i],a=msPrev(n),z=msNext(n);row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${msBonus(z)} bonus at ${z} owned`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
+    row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
+    row.cost.textContent=(S.gens[i]?'':'Hire: ')+`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(GENS[i][4]*gm(i)*FX.m[i]*gmult())}/s per level`;row.own.textContent=S.gens[i];
+    const n=S.gens[i],a=msPrev(n),z=msNext(n);row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${msBonus(z)} bonus at level ${z}`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
   upBtns.forEach(u=>u.b.classList.toggle('ok',S.fans>=u.c));
   perkBtns.forEach(p=>p.b.classList.toggle('ok',!p.mx&&S.records>=p.c));
@@ -530,7 +620,7 @@ document.body.dataset.tab='gear';
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.body.dataset.tab=b.dataset.tab;tabBtns.forEach(x=>x.classList.toggle('on',x===b));scrollTo({top:0,behavior:'smooth'});};
 
 /* ---------- click ---------- */
-function riff(e,auto){let v=clickPow();const crit=Math.random()<.04+.01*tl('prec');if(crit){v*=15+5*tl('brut');S.crits++;}
+function riff(e,auto){let v=clickPow();const crit=Math.random()<.04+.01*tl('prec')+FX.crit;if(crit){v*=15+5*tl('brut');S.crits++;}
   gain(v);S.clicks++;
   hype=Math.min(1,hype+.02);if(hype>=.95)S.hyped=1;
   // an autoclicker riff is a real click; only its sound is rate-limited and its visuals skipped while the tab is hidden
@@ -547,9 +637,9 @@ function modal(t,p,btns){$('mT').textContent=t;$('mP').innerHTML=p;$('mB').inner
   $('modal').classList.add('show');}
 $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
   modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever and can be spent on legend perks.`,
-  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map((_,i)=>S.epic[i]?1:0);S.ups={};
+  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map(()=>0);S.ups={};
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
-$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();render();save();},1]]);
+$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();drawSlots();render();save();},1]]);
 
 /* ---------- toast ---------- */
 let toastT;function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
@@ -604,14 +694,15 @@ const ACH=[
  ['Household Name','1T all-time fans',()=>S.total>=1e12],['Immortal','1Qa all-time fans',()=>S.total>=1e15],
  ['Warm-Up','Shred 100 riffs',()=>S.clicks>=100],['Calloused Fingers','Shred 1,000 riffs',()=>S.clicks>=1e3],['Human Metronome','Shred 10,000 riffs',()=>S.clicks>=1e4],
  ['Critical Mass','Land 25 critical riffs',()=>S.crits>=25],['Wall of Death','Max out crowd hype',()=>S.hyped],
- ['Gear Head','Own 50 of one gear',()=>maxGen()>=50],['Hoarder','Own 100 of one gear',()=>maxGen()>=100],['Wall of Amps','Own 200 of one gear',()=>maxGen()>=200],
- ['Full Production','Own every gear type',()=>S.gens.slice(0,NG).every(n=>n>0)],
+ ['Tight Unit','Get a band member to level 50',()=>maxGen()>=50],['Session Pro','Get a band member to level 100',()=>maxGen()>=100],['Living Legend','Get a band member to level 200',()=>maxGen()>=200],
+ ['Full Line-Up','Hire every band member',()=>S.gens.every(n=>n>0)],
  ['Crowd Surfer','Catch a stage diver',()=>S.divers>=1],['Pit Boss','Catch 25 stage divers',()=>S.divers>=25],
  ['Loud','1K fans per second',()=>baseFps()>=1e3],['Deafening','1M fans per second',()=>baseFps()>=1e6],
  ['Platinum','Ascend once',()=>S.asc>=1],['Hall of Famer','Ascend 5 times',()=>S.asc>=5],
  ['Soloist','Play your first solo',()=>S.solos>=1],['Virtuoso','Reach solo level 20',()=>soloLvl()>=20],
- ['Boss Slayer','Defeat a boss',()=>S.boss.wins>=1],['Epic Loot','Find an epic gear',()=>Object.keys(S.epic).length>=1],
- ['Relic Hunter','Find every epic gear',()=>Object.keys(S.epic).length>=GENS.length-NG]];
+ ['Boss Slayer','Defeat a boss',()=>S.boss.wins>=1],['Epic Loot','Find an epic item',()=>epicOwned()>=1],
+ ['Relic Hunter','Find all 14 epic items',()=>epicOwned()>=14],
+ ['More Cowbell','Hire the cowbell player',()=>S.gens[6]>0]];
 function buildAch(){achCount=ACH.reduce((a,_,i)=>a+(S.ach[i]?1:0),0);$('achN').textContent=`${achCount}/${ACH.length} · +${achCount*3}% fans`;
   $('ach').innerHTML=ACH.map((a,i)=>`<div class="ac${S.ach[i]?' got':''}"><b>${S.ach[i]?'🏆 ':''}${a[0]}</b>${a[1]}</div>`).join('');}
 function checkAch(){let n=0,last;ACH.forEach((a,i)=>{if(!S.ach[i]&&a[2]()){S.ach[i]=1;n++;last=a[0];}});
@@ -625,17 +716,21 @@ const BOSSES=[['🧛','Count Feedback'],['🐺','The Howling Roadie'],['💀','S
 const BSK=[
  {id:'dmg',n:'Riff Damage',d:'Damage against bosses ×2',c:l=>Math.round(5*1.6**l),max:40},
  {id:'time',n:'Extended Set',d:'Fight timer +5s',c:l=>Math.round(6*1.6**l),max:10},
- {id:'loot',n:'Loot Sense',d:'Epic drop chance +6%',c:l=>Math.round(8*1.7**l),max:10},
+ {id:'loot',n:'Loot Sense',d:'Epic drop chance +3%',c:l=>Math.round(8*1.7**l),max:10},
  {id:'weak',n:'Weak Spot',d:'Boss crit chance +5% (crits ×4)',c:l=>Math.round(10*1.8**l),max:8},
  {id:'combo',n:'Shred Combo',d:'Fast hits stack up to +50% more damage',c:l=>Math.round(10*1.9**l),max:6},
  {id:'band',n:'Backing Band',d:'+1 automatic hit per second',c:l=>Math.round(12*1.8**l),max:8},
  {id:'final',n:'Final Chorus',d:'+100% damage below 30% boss HP',c:l=>30*3**l,max:3},
- {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −40s',c:l=>Math.round(15*2**l),max:6}];
+ {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −5 min',c:l=>Math.round(15*2**l),max:6}];
 const bl=id=>S.bs[id]||0;
-const bossHP=k=>400*2.5**k, bossDmg=()=>10*2**bl('dmg'), bossTime=()=>30+5*bl('time'), bossDrop=()=>.2+.06*bl('loot'),
-      bossCd=()=>300-40*bl('quick'), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
+const bossHP=k=>400*2.5**k, bossDmg=()=>10*2**bl('dmg')*FX.boss, bossTime=()=>30+5*bl('time'), bossDrop=()=>.02+.03*bl('loot'),
+      bossCd=()=>3600-300*bl('quick'), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
 const bossOf=k=>{const b=BOSSES[k%BOSSES.length],t=Math.floor(k/BOSSES.length);return {e:b[0],n:b[1]+(t?' '+'★'.repeat(Math.min(t,5)):'')};};
-const epicCount=()=>Object.keys(S.epic).length;
+const itemCount=()=>Object.keys(S.items).filter(id=>ITEM[id]).length, epicOwned=()=>Object.keys(S.items).filter(id=>ITEM[id]&&ITEM[id].r==2).length;
+/* every boss win drops one piece of band gear you do not own yet: epic with the epic chance, else rare 28%, else common */
+function rollLoot(){const r=Math.random(),e=bossDrop(),want=r<e?2:r<e+RARE_CHANCE?1:0,pool=q=>Object.values(ITEM).filter(x=>x.r==q&&!S.items[x.id]);
+  for(const q of (want==2?[2,1,0]:want==1?[1,0]:[0,1])){const p=pool(q);if(p.length)return p[Math.floor(Math.random()*p.length)];}
+  return null;}
 let F=null,bskBtns=[],autoAcc=0,bandAcc=0;
 function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.boss.on;$('bossUnlock').textContent=`Open the gate · 💿 ${BOSS_COST}`;
   const el=$('bskills');el.innerHTML='';bskBtns=[];
@@ -644,7 +739,7 @@ function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.bo
     b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};el.appendChild(b);bskBtns.push({b,c,mx});});
   const k=S.boss.lvl,b=bossOf(k);$('bEmo').textContent=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}`;
   $('bStats').innerHTML=`HP <b>${fmt(bossHP(k))}</b> · your hit <b>${fmt(bossDmg())}</b> · <b>${bossTime()}s</b> timer<br>epic drop <b>${Math.round(bossDrop()*100)}%</b> · auto hits <b>${bossAuto()}/s</b> · cooldown <b>${fmtT(bossCd())}</b>`;
-  $('epicN').innerHTML=`Epic gear found: <b>${epicCount()}/${GENS.length-NG}</b> · each one gives +25% all fans`;}
+  $('epicN').innerHTML=`Band gear found: <b>${itemCount()}/${ITEMS.length}</b> (<b>${epicOwned()}</b> epic) · every win drops one item`;}
 $('bossUnlock').onclick=()=>{if(S.boss.on||S.records<BOSS_COST)return;S.records-=BOSS_COST;S.boss.on=true;chord(4);toast('☠️ <b>The Underworld Tour is open</b>');buildBoss();render();save();};
 function bossFloat(txt,crit){const r=$('fBoss').getBoundingClientRect(),s=document.createElement('div');s.className='float bf'+(crit?' crit':'');s.textContent=txt;
   s.style.left=r.left+r.width*(.2+Math.random()*.6)-20+'px';s.style.top=r.top+r.height*(.1+Math.random()*.4)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);}
@@ -668,11 +763,10 @@ function hitBoss(auto,quiet){if(!F)return;const now=Date.now();let d=bossDmg();
 function endFight(win,fled){const k=F.k,left=Math.max(0,F.hp)/F.max,b=bossOf(k);F=null;$('fight').classList.remove('show');S.cd.boss=Date.now()+bossCd()*1e3;
   if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>Spend platinum records on Riff Damage or Extended Set and come back.`,[['Retreat',null,1]]);render();save();return;}
   S.boss.lvl++;S.boss.wins++;const g=Math.max(baseFps()*900,clickPow()*100),sk=5+2*k;gain(g);S.skill+=sk;
-  let loot='<br><br><span style="color:#a08c84">No epic drop this time.</span>';
-  if(Math.random()<bossDrop()){const pool=[];for(let i=NG;i<GENS.length;i++)if(!S.epic[i])pool.push(i);
-    if(pool.length){const i=pool[0];S.epic[i]=1;S.gens[i]+=1;loot=`<br><br><b style="color:#ffd76a;letter-spacing:3px">★ EPIC DROP ★</b><br><span style="font-size:46px">${GENS[i][0]}</span><br><b style="color:#ffd76a;font-size:19px">${GENS[i][1]}</b><br>Now in Gear &amp; Crew, and +25% all fans.`;}
-    else{const i=NG+Math.floor(Math.random()*(GENS.length-NG));S.gens[i]+=10;loot=`<br><br><b style="color:#ffd76a">Duplicate epic:</b> +10 ${GENS[i][1]}`;}
-    upsDirty=true;}
+  const it=rollLoot();let loot;
+  if(it){S.items[it.id]=1;const slot=it.m+it.k,cur=ITEM[S.eq[slot]];let eqd='';if(!cur||cur.r<it.r){S.eq[slot]=it.id;eqd='<br>Equipped automatically.';}
+    loot=`<br><br><b class="rar r${it.r}">★ ${RN[it.r].toUpperCase()} DROP ★</b><br><span style="font-size:46px">${it.e}</span><br><b style="font-size:19px">${it.n}</b><br><span style="color:#ffb8a8">${GENS[it.m][1]} ${it.k=='i'?'instrument':'equipment'} · ${fxText(it)}</span><br><i>${it.t}</i>${eqd}`;drawSlots();}
+  else{S.skill+=10;loot='<br><br>You already own everything this boss could drop: +10 🎼 instead.';}
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
   modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} 🎼${loot}`,[['Rock on',null,1]]);buildBoss();render();save();}
 $('fightBtn').onclick=startFight;$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
@@ -710,7 +804,7 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);if(P.length<70&&Math.random
    is paid out at 50% of the current rate, capped at 8 hours. Wall-clock based, so it also
    covers a page that was frozen in the background and never reloaded. */
 const AWAY=90, CAP=8*3600;
-function away(sec){hype=0;const dt=Math.min(sec,CAP),g=baseFps()*dt*.5; if(g<=0)return; gain(g);
+function away(sec){hype=0;const dt=Math.min(sec,CAP),g=baseFps()*dt*Math.min(1,.5+FX.off); if(g<=0)return; gain(g);
   modal('Welcome back!',`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>CAP?' (the 8 hour limit)':''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`,[['Rock on',null,1]]);}
 let prev=S.last||Date.now();
 function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
@@ -719,11 +813,12 @@ function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();}
   render();}
-let lastAch=0;buildAch();buildTech();buildBoss();
+let lastAch=0;calcFx();buildAch();buildTech();buildBoss();drawSlots();
 setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});
 buildPerks();tick();
+if(migrated)modal('The Band Has Re-Formed',`Gear &amp; Crew is now <b>The Band</b>: hire members, level them up, and fit each with an instrument and equipment dropped by bosses.<br><br>Your old gear is gone, so every fan you earned this tour is back in your pocket to spend on the new line-up.${migrated>1?`<br><br>Your ${migrated-1} old epic gear became ${migrated-1} epic band item${migrated>2?'s':''}, already equipped.`:''}`,[['Rock on',null,1]]);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>

@@ -168,6 +168,52 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 .abil button small{display:block}
 .abil button.rdy small.c{color:var(--sk)}
 
+/* epic gear */
+.gen.epic{border-color:#a8842c;background:linear-gradient(90deg,#2c1e08,#1c1024 75%)}
+.gen.epic .nm{color:var(--gold)}
+.gen.epic .nm:after{content:"EPIC";font-size:10px;letter-spacing:1.5px;margin-left:8px;padding:1px 6px;border-radius:4px;background:linear-gradient(var(--gold),#c98a1a);color:#1a0f02;vertical-align:middle;font-weight:700}
+.gen.epic.ok{box-shadow:0 0 16px rgba(255,215,106,.22)}
+.gen.epic .ico{filter:drop-shadow(0 0 8px rgba(255,215,106,.8))}
+
+/* boss fights */
+.boss{border-color:#6a2230;background:linear-gradient(170deg,rgba(64,14,24,.88),rgba(22,15,17,.88))}
+.boss h2{color:#ff9090}
+.bossp{font-size:14px;color:#e0c4c4;line-height:1.45;margin-bottom:10px}
+.bbtn{width:100%;font-family:"Metal Mania",serif;font-size:19px;letter-spacing:1.5px;padding:10px;border-radius:9px;border:1px solid #ff7a7a;color:#1a0406;background:linear-gradient(#ffb8a8,#e0283c);cursor:pointer;transition:.15s}
+.bbtn b{font-weight:400}
+.bbtn small{display:block;font-family:Oswald,sans-serif;font-size:12px;letter-spacing:0;font-variant-numeric:tabular-nums}
+.bbtn:not(:disabled):hover{box-shadow:0 0 24px rgba(255,80,90,.6)}
+.bbtn:disabled{opacity:.4;cursor:not-allowed}
+.bcard{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.bemo{font-size:54px;line-height:1;filter:drop-shadow(0 0 14px #e0283c)}
+.bname{font-family:"Metal Mania",serif;font-size:20px;letter-spacing:1px;color:#fff}
+#bStats{font-size:13px;line-height:1.5}
+#bStats b,#epicN b{color:#ffb8a8;font-weight:500}
+#epicN{font-size:13px;margin:10px 0}
+#bskills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bsk{font:inherit;color:inherit;text-align:left;background:#1c0e12;border:1px solid #55222c;border-radius:9px;padding:9px;cursor:pointer;transition:.12s}
+.bsk .t{font-size:14px;font-weight:500;color:#ff9c9c}
+.bsk .t small{color:#b08a8a}
+.bsk .d{font-size:12px;color:#c0a0a0;margin:2px 0 4px}
+.bsk .c{font-size:13px;color:#fff}
+.bsk.ok{border-color:#b04050}
+.bsk.ok:hover{border-color:#ff9090;box-shadow:0 0 14px rgba(255,90,100,.4)}
+.bsk:not(.ok){opacity:.5;cursor:not-allowed}
+#fight{position:fixed;inset:0;z-index:18;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(130,12,28,.93),rgba(5,2,3,.98) 72%);padding:16px}
+#fight.show{display:flex}
+.fbox{width:min(440px,100%);text-align:center}
+.fname{font-family:"Metal Mania",serif;font-size:28px;letter-spacing:1px;color:#fff;text-shadow:0 0 18px #e0283c;margin-bottom:12px}
+.fbar{position:relative;height:24px;border-radius:7px;background:#12080a;border:1px solid #5a1a24;overflow:hidden;margin-bottom:8px}
+.fbar i{position:absolute;left:0;top:0;bottom:0;width:100%;transition:width .1s linear}
+.fbar.hp i{background:linear-gradient(#ff6a6a,#a01020)}
+.fbar.tm i{background:linear-gradient(#ffd76a,#c98a1a)}
+.fbar span{position:relative;font-size:13px;line-height:22px;font-weight:500;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
+#fBoss{display:block;margin:14px auto;font-size:min(150px,38vw);line-height:1.2;background:none;border:0;cursor:pointer;filter:drop-shadow(0 0 30px #e0283c);animation:bob 1.4s ease-in-out infinite alternate}
+#fBoss:active{filter:brightness(1.7) drop-shadow(0 0 40px #ff5060)}
+#fInfo b{color:#ffb8a8}
+#fFlee{margin-top:16px;font:inherit;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:7px 18px;border-radius:7px;border:1px solid #5a1a24;background:#1c0e12;color:#c0a0a0;cursor:pointer}
+.float.bf{z-index:19;color:#ffb8a8;text-shadow:0 0 10px #e0283c}
+
 /* touch + mobile */
 html{-webkit-text-size-adjust:100%}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
@@ -194,11 +240,13 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   #ups{grid-template-columns:1fr 1fr}
   .up,.perk{padding:11px 10px}
   #pAch{order:6}
-  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill),
-  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill),
-  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch),
-  body[data-tab=legend] :is(#pUps,#pGens,#pSkill){display:none}
-  #tabs{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill,#pBoss),
+  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill,#pBoss),
+  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pBoss),
+  body[data-tab=boss] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill),
+  body[data-tab=legend] :is(#pUps,#pGens,#pSkill,#pBoss){display:none}
+  #tabs button{font-size:10.5px!important;letter-spacing:.8px!important}
+  #tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   #tabs button{position:relative;font:inherit;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);background:none;border:0;padding:9px 4px 10px;cursor:pointer}
   #tabs button span{display:block;font-size:22px;line-height:1.2;filter:grayscale(.8) opacity(.7)}
   #tabs button.on{color:var(--gold)}
@@ -232,6 +280,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   <button data-tab="gear" class="on"><span>🎸</span>Gear</button>
   <button data-tab="ups"><span>⚡</span>Upgrades</button>
   <button data-tab="skill"><span>🎼</span>Skill</button>
+  <button data-tab="boss"><span>☠️</span>Boss</button>
   <button data-tab="legend"><span>💿</span>Legend</button>
 </nav>
 <main>
@@ -251,7 +300,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
           <path d="M112 30 68 104h28l-12 62 50-82h-30l8-54Z" fill="#160a08" stroke="#ffe9a8" stroke-width="3" stroke-linejoin="round"/>
         </svg>
       </button>
-      <div class="sub">Shred for <b id="cp">1</b> fans per riff</div>
+      <div class="sub">Shred for <b id="cp">1</b> fans per riff<span id="autoTxt"></span></div>
       <div class="eq" id="eq"></div>
       <div class="hype"><div class="hbar"><i id="hypeBar"></i></div><span id="hypeTxt"></span></div>
       <div class="abil"><button id="aSolo"></button><button id="aEnc"></button></div>
@@ -291,6 +340,19 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       <button id="ascBtn" disabled>Ascend to Legend</button>
       <div id="perks"></div>
     </section>
+    <section class="panel boss" id="pBoss">
+      <h2>Underworld Tour <span class="skamt" id="bsRec"></span></h2>
+      <div id="bossLocked">
+        <p class="bossp">Below the stage wait things that hate your music. Spend platinum records to open the gate, beat bosses with your riffs and loot epic gear.</p>
+        <button id="bossUnlock" class="bbtn"></button>
+      </div>
+      <div id="bossOpen" hidden>
+        <div class="bcard"><div class="bemo" id="bEmo"></div><div><div class="bname" id="bName"></div><div class="sub" id="bStats"></div></div></div>
+        <button id="fightBtn" class="bbtn"><b>Fight</b><small id="fightCd"></small></button>
+        <div class="sub" id="epicN"></div>
+        <div id="bskills"></div>
+      </div>
+    </section>
     <section class="panel" id="pUps">
       <h2>Upgrades</h2>
       <div id="ups"></div>
@@ -305,6 +367,15 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <div id="modal"><div class="panel box"><h2 id="mT"></h2><p id="mP"></p><div class="btns" id="mB"></div></div></div>
 <div id="flash"></div>
 <div id="toast"></div>
+<div id="fight"><div class="fbox">
+  <div class="fname" id="fName"></div>
+  <div class="fbar hp"><i id="fHp"></i><span id="fHpT"></span></div>
+  <div class="fbar tm"><i id="fTm"></i><span id="fTmT"></span></div>
+  <button id="fBoss" aria-label="Hit the boss"></button>
+  <div class="sub" id="fInfo"></div>
+  <div class="sub" style="margin-top:4px">Tap the boss to hit it</div>
+  <button id="fFlee">Flee</button>
+</div></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -320,19 +391,27 @@ const GENS=[
  ['🎪','Festival Headliner','Your name in the biggest font',51e8,26e4],
  ['🌋','Volcano Amphitheatre','Naturally heated mosh pit',75e9,16e5],
  ['👹','Underworld Residency','The crowd is literally undying',1e12,1e7],
- ['🌌','Cosmic Feedback Loop','A riff that echoes across galaxies',14e12,65e6]
+ ['🌌','Cosmic Feedback Loop','A riff that echoes across galaxies',14e12,65e6],
+ /* epic gear: only appears after dropping from a boss */
+ ['🦷','Fang of the First Riff',"A pick carved from a demon's tooth",1e3,100],
+ ['🪓','Thunderforged Axe','Six strings, one lightning bolt',1e5,6e3],
+ ['🎙️','Banshee Microphone','Every scream reaches the cheap seats',1e7,4e5],
+ ['🛢️','Hellhound Kick Drum','It bites back on the downbeat',1e9,25e6],
+ ['👑','Crown of Feedback','Never in tune, always in charge',1e11,15e8],
+ ['🗿','Monolith Amp Stack','Carved before music had a name',1e13,1e11]
 ];
+const NG=12; // number of regular gear types; the rest are epics
 const G=1.15, TIERS=[10,25,50,100,200], TMULT=[10,60,500,8e3,4e5], TN=['Tuned','Overdriven','Blackened','Legendary','Godforged'];
 const CLK=[100,1e3,2e4,5e5,2e7,1e9,1e11,1e13,1e15];
 const CN=['Heavier Strings','Drop-D Tuning','Palm Muting','Sweep Picking','Tapping Solo','Seven Strings','Eight Strings','Shred Mastery','Fingers of Fury'];
 const PERKS=[
  {id:'crew',n:'Roadie Army',d:'+25% all fans per level',c:l=>2*2**l,max:50},
- {id:'pick',n:'Golden Pick',d:'Riffs ×3 per level',c:l=>3**l,max:20},
+ {id:'pick',n:'Golden Pick',d:'Riff power ×1.5 per level',c:l=>3**l,max:20},
  {id:'cheap',n:'Endorsement Deal',d:'Gear 5% cheaper per level',c:l=>3*2**l,max:10},
  {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
-const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0});
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},epic:{}});
 let S=fresh(), qty=1, hype=0, achCount=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d); while(S.gens.length<GENS.length)S.gens.push(0);}}catch(e){}
 const save=()=>{S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
@@ -343,7 +422,7 @@ function fmt(n){ if(n<1000) return n<10&&n%1?n.toFixed(1):Math.floor(n).toString
   const v=n/10**(e*3); return (v<10?v.toFixed(2):v<100?v.toFixed(1):v.toFixed(0))+SUF[e]; }
 const pl=id=>S.perks[id]||0;
 const tl=id=>S.tech[id]||0;
-const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'))*(1+.03*achCount);
+const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'))*(1+.03*achCount)*(1+.25*Object.keys(S.epic).length);
 const tierCount=i=>TIERS.reduce((a,_,t)=>a+(S.ups['g'+i+'t'+t]?1:0),0);
 /* milestones (free): ×2 at 10 and 25 owned, ×5 at 50/150/250…, ×10 at every 100 */
 const msMult=n=>2**((n>=10)+(n>=25))*5**(Math.floor(n/50)-Math.floor(n/100))*10**Math.floor(n/100);
@@ -357,11 +436,19 @@ const baseFps=()=>GENS.reduce((a,_,i)=>a+genFps(i),0);
 const buff=id=>(S.buffs[id]||0)>Date.now();
 const hypeMult=()=>1+hype*(1+.25*tl('crowd'));
 const fps=()=>baseFps()*hypeMult()*(buff('frenzy')?7:1);
-const clickCore=()=>2**CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0)*3**pl('pick')*(1+.1*S.earned);
-const clickPow=()=>(clickCore()*hypeMult()+.02*fps())*(buff('solo')?10:1);
+/* riff power = (base riff + 0.25% of fans/sec) × every riff upgrade (×1.5 each) × Golden Pick (×1.5 each).
+   The multipliers apply to the whole value, so an upgrade does exactly what its label says.
+   Balance target: with all 9 riff upgrades one riff is worth ~0.1s of production, so with hype and crits hand
+   clicking at 6/s is about ×3 idle income and maxed autoclickers (21/s) about ×8. */
+const RIFF_UP=1.5, PICK_UP=1.5, RIFF_SHARE=.0025;
+const clickMult=()=>RIFF_UP**CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0)*PICK_UP**pl('pick');
+const clickPow=()=>((1+.1*S.earned)*hypeMult()+RIFF_SHARE*fps())*clickMult()*(buff('solo')?10:1);
+/* autoclickers: each Auto-Shredder clicks 2×/s, +1/s per Speed Picking level */
+const autoRate=()=>tl('auto')*(2+tl('speed'));
+let lastSnd=0;const sndOk=()=>{const n=performance.now();if(n-lastSnd<110)return false;lastSnd=n;return true;};
 /* Solo Skill: second currency. Solo level follows riff power (without temporary boosts);
    one solo per hour pays a random amount between 4× and 8× the level. */
-const riffBase=()=>clickCore()+.02*baseFps();
+const riffBase=()=>((1+.1*S.earned)+RIFF_SHARE*baseFps())*clickMult();
 const soloLvl=()=>1+Math.floor(3*Math.log10(Math.max(1,riffBase())));
 const soloRange=()=>{const l=soloLvl();return [4*l,8*l];};
 const fmtT=s=>s>=60?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:Math.ceil(s)+'s';
@@ -375,7 +462,7 @@ function gain(n){S.fans+=n;S.run+=n;S.total+=n;}
 
 /* ---------- build DOM ---------- */
 const gensEl=$('gens'), genRows=[];
-GENS.forEach((g,i)=>{const b=document.createElement('button');b.className='gen';
+GENS.forEach((g,i)=>{const b=document.createElement('button');b.className='gen'+(i>=NG?' epic':'');
   b.innerHTML=`<div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div><i class="mbar"></i>`;
   b.onclick=()=>{const {k,cost}=bulk(i); if(S.fans>=cost){const m0=msMult(S.gens[i]);S.fans-=cost;S.gens[i]+=k;const up=msMult(S.gens[i])/m0;
     if(up>1){chord(2.5);b.classList.remove('boom');void b.offsetWidth;b.classList.add('boom');
@@ -387,7 +474,7 @@ for(let i=0;i<22;i++){const b=document.createElement('i');b.style.animationDurat
 
 let upsDirty=true, upBtns=[];
 function upList(){const L=[];
-  CLK.forEach((c,t)=>{if(!S.ups['c'+t]&&S.run>=c/5&&(t==0||S.ups['c'+(t-1)]))L.push({id:'c'+t,t:CN[t],d:'Riff power ×2',c});});
+  CLK.forEach((c,t)=>{if(!S.ups['c'+t]&&S.run>=c/5&&(t==0||S.ups['c'+(t-1)]))L.push({id:'c'+t,t:CN[t],d:'Riff power ×1.5',c});});
   GENS.forEach((g,i)=>TIERS.forEach((n,t)=>{if(!S.ups['g'+i+'t'+t]&&S.gens[i]>=n)L.push({id:'g'+i+'t'+t,t:`${g[0]} ${TN[t]}`,d:`${g[1]} ×2`,c:g[3]*TMULT[t]});}));
   return L.sort((a,b)=>a.c-b.c);}
 function buildUps(){const L=upList();$('ups').innerHTML=L.length?'':'<div class="empty">Buy gear and gather fans to unlock upgrades…</div>';upBtns=[];
@@ -407,7 +494,7 @@ function render(){
   $('sRun').textContent=fmt(S.run);$('sTot').textContent=fmt(S.total);$('sClk').textContent=fmt(S.clicks);$('sAsc').textContent=S.asc;
   let r=RANKS[0][1];for(const [n,t] of RANKS)if(S.run>=n)r=t;$('rank').textContent=(S.asc?`Tour ${S.asc+1} · `:'')+r;
   genRows.forEach((row,i)=>{const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans>=cost);
-    row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
+    row.b.classList.toggle('locked',i>=NG?!S.epic[i]:i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
     row.cost.textContent=`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(GENS[i][4]*gm(i)*gmult())}/s each`;row.own.textContent=S.gens[i];
     const n=S.gens[i],a=msPrev(n),z=msNext(n);row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${msBonus(z)} bonus at ${z} owned`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
@@ -430,18 +517,29 @@ function render(){
   $('buffs').innerHTML=[['frenzy','Mosh Pit · fans ×7'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
   $('hfans').innerHTML=`${fmt(S.fans)} <small>+${fmt(f)}/s</small>`;
   tabBtns[1].classList.toggle('hot',upBtns.some(u=>S.fans>=u.c));
-  tabBtns[3].classList.toggle('hot',p>=1||perkBtns.some(x=>!x.mx&&S.records>=x.c));
+  const ar=autoRate();$('autoTxt').textContent=ar?` · 🤖 ${ar} clicks/s`:'';
+  $('bsRec').textContent='💿 '+fmt(S.records);$('bossUnlock').disabled=S.records<BOSS_COST;
+  const bcd=((S.cd.boss||0)-now)/1e3;$('fightBtn').disabled=bcd>0||!!F;$('fightCd').textContent=bcd>0?'ready in '+fmtT(bcd):'READY';
+  bskBtns.forEach(t=>t.b.classList.toggle('ok',!t.mx&&S.records>=t.c));
+  tabBtns[3].classList.toggle('hot',S.boss.on?bcd<=0:S.records>=BOSS_COST);
+  if(F)drawFight();
+  tabBtns[4].classList.toggle('hot',p>=1||perkBtns.some(x=>!x.mx&&S.records>=x.c));
 }
 const tabBtns=[...$('tabs').children];
 document.body.dataset.tab='gear';
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.body.dataset.tab=b.dataset.tab;tabBtns.forEach(x=>x.classList.toggle('on',x===b));scrollTo({top:0,behavior:'smooth'});};
 
 /* ---------- click ---------- */
-$('pick').onclick=e=>{let v=clickPow();const crit=Math.random()<.04+.01*tl('prec');if(crit){v*=15+5*tl('brut');S.crits++;}
-  gain(v);S.clicks++;hype=Math.min(1,hype+.04);if(hype>=1)S.hyped=1;chord(crit?2.2:1);
+function riff(e,auto){let v=clickPow();const crit=Math.random()<.04+.01*tl('prec');if(crit){v*=15+5*tl('brut');S.crits++;}
+  gain(v);S.clicks++;
+  hype=Math.min(1,hype+.02);if(hype>=.95)S.hyped=1;
+  // an autoclicker riff is a real click; only its sound is rate-limited and its visuals skipped while the tab is hidden
+  if(!auto||sndOk())chord(crit?2.2:1);
+  if(auto&&document.hidden)return;
   const s=document.createElement('div');s.className='float'+(crit?' crit':'');s.textContent=(crit?'CRIT! +':'+')+fmt(v);
   const r=$('pick').getBoundingClientRect();s.style.left=(e.clientX||r.left+r.width/2)-20+(Math.random()*40-20)+'px';s.style.top=(e.clientY||r.top+40)-20+'px';
-  document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(e.clientX||r.left+r.width/2,e.clientY||r.top+r.height/2);render();};
+  document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(e.clientX||r.left+r.width/2,e.clientY||r.top+r.height/2);if(!auto)render();}
+$('pick').onclick=e=>riff(e);
 
 /* ---------- ascend ---------- */
 function modal(t,p,btns){$('mT').textContent=t;$('mP').innerHTML=p;$('mB').innerHTML='';
@@ -449,9 +547,9 @@ function modal(t,p,btns){$('mT').textContent=t;$('mP').innerHTML=p;$('mB').inner
   $('modal').classList.add('show');}
 $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
   modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever and can be spent on legend perks.`,
-  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map(()=>0);S.ups={};
+  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map((_,i)=>S.epic[i]?1:0);S.ups={};
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
-$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;upsDirty=true;buildPerks();buildAch();buildTech();render();save();},1]]);
+$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();render();save();},1]]);
 
 /* ---------- toast ---------- */
 let toastT;function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
@@ -466,6 +564,8 @@ ABIL.forEach(a=>{const b=$(a.el);b.innerHTML=`<b>${a.n}</b><small></small><small
 
 /* ---------- solo skill: hourly solo + technique upgrades bought with skill ---------- */
 const TECH=[
+ {id:'auto',n:'🤖 Auto-Shredder',d:'+1 autoclicker that clicks for you',c:l=>40*3**l,max:3},
+ {id:'speed',n:'⚡ Speed Picking',d:'Each autoclicker +1 click per second',c:l=>250*4**l,max:5},
  {id:'crowd',n:'Crowd Work',d:'Max hype bonus +25%',c:l=>Math.round(10*1.8**l),max:8},
  {id:'prec',n:'Precision',d:'Crit chance +1%',c:l=>Math.round(8*1.7**l),max:11},
  {id:'brut',n:'Brutality',d:'Crits hit +5× harder',c:l=>Math.round(12*1.7**l),max:10},
@@ -505,11 +605,13 @@ const ACH=[
  ['Warm-Up','Shred 100 riffs',()=>S.clicks>=100],['Calloused Fingers','Shred 1,000 riffs',()=>S.clicks>=1e3],['Human Metronome','Shred 10,000 riffs',()=>S.clicks>=1e4],
  ['Critical Mass','Land 25 critical riffs',()=>S.crits>=25],['Wall of Death','Max out crowd hype',()=>S.hyped],
  ['Gear Head','Own 50 of one gear',()=>maxGen()>=50],['Hoarder','Own 100 of one gear',()=>maxGen()>=100],['Wall of Amps','Own 200 of one gear',()=>maxGen()>=200],
- ['Full Production','Own every gear type',()=>S.gens.every(n=>n>0)],
+ ['Full Production','Own every gear type',()=>S.gens.slice(0,NG).every(n=>n>0)],
  ['Crowd Surfer','Catch a stage diver',()=>S.divers>=1],['Pit Boss','Catch 25 stage divers',()=>S.divers>=25],
  ['Loud','1K fans per second',()=>baseFps()>=1e3],['Deafening','1M fans per second',()=>baseFps()>=1e6],
  ['Platinum','Ascend once',()=>S.asc>=1],['Hall of Famer','Ascend 5 times',()=>S.asc>=5],
- ['Soloist','Play your first solo',()=>S.solos>=1],['Virtuoso','Reach solo level 20',()=>soloLvl()>=20]];
+ ['Soloist','Play your first solo',()=>S.solos>=1],['Virtuoso','Reach solo level 20',()=>soloLvl()>=20],
+ ['Boss Slayer','Defeat a boss',()=>S.boss.wins>=1],['Epic Loot','Find an epic gear',()=>Object.keys(S.epic).length>=1],
+ ['Relic Hunter','Find every epic gear',()=>Object.keys(S.epic).length>=GENS.length-NG]];
 function buildAch(){achCount=ACH.reduce((a,_,i)=>a+(S.ach[i]?1:0),0);$('achN').textContent=`${achCount}/${ACH.length} · +${achCount*3}% fans`;
   $('ach').innerHTML=ACH.map((a,i)=>`<div class="ac${S.ach[i]?' got':''}"><b>${S.ach[i]?'🏆 ':''}${a[0]}</b>${a[1]}</div>`).join('');}
 function checkAch(){let n=0,last;ACH.forEach((a,i)=>{if(!S.ach[i]&&a[2]()){S.ach[i]=1;n++;last=a[0];}});
@@ -517,13 +619,77 @@ function checkAch(){let n=0,last;ACH.forEach((a,i)=>{if(!S.ach[i]&&a[2]()){S.ach
 const muteLbl=()=>{$('mute').innerHTML=S.mute?'🔇<span class="lbl"> Muted</span>':'🔊<span class="lbl"> Sound</span>';};
 $('mute').onclick=()=>{S.mute=!S.mute;muteLbl();};muteLbl();
 
+/* ---------- underworld tour: boss fights, every stat skilled with platinum records ---------- */
+const BOSS_COST=50;
+const BOSSES=[['🧛','Count Feedback'],['🐺','The Howling Roadie'],['💀','Skullcrusher Sid'],['🐙','Kraken of the Pit'],['🧟','The Undead Manager'],['🐉','Dragon of Distortion'],['👹','Lord Tritone'],['😈','The Crossroads Devil']];
+const BSK=[
+ {id:'dmg',n:'Riff Damage',d:'Damage against bosses ×2',c:l=>Math.round(5*1.6**l),max:40},
+ {id:'time',n:'Extended Set',d:'Fight timer +5s',c:l=>Math.round(6*1.6**l),max:10},
+ {id:'loot',n:'Loot Sense',d:'Epic drop chance +6%',c:l=>Math.round(8*1.7**l),max:10},
+ {id:'weak',n:'Weak Spot',d:'Boss crit chance +5% (crits ×4)',c:l=>Math.round(10*1.8**l),max:8},
+ {id:'combo',n:'Shred Combo',d:'Fast hits stack up to +50% more damage',c:l=>Math.round(10*1.9**l),max:6},
+ {id:'band',n:'Backing Band',d:'+1 automatic hit per second',c:l=>Math.round(12*1.8**l),max:8},
+ {id:'final',n:'Final Chorus',d:'+100% damage below 30% boss HP',c:l=>30*3**l,max:3},
+ {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −40s',c:l=>Math.round(15*2**l),max:6}];
+const bl=id=>S.bs[id]||0;
+const bossHP=k=>400*2.5**k, bossDmg=()=>10*2**bl('dmg'), bossTime=()=>30+5*bl('time'), bossDrop=()=>.2+.06*bl('loot'),
+      bossCd=()=>300-40*bl('quick'), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
+const bossOf=k=>{const b=BOSSES[k%BOSSES.length],t=Math.floor(k/BOSSES.length);return {e:b[0],n:b[1]+(t?' '+'★'.repeat(Math.min(t,5)):'')};};
+const epicCount=()=>Object.keys(S.epic).length;
+let F=null,bskBtns=[],autoAcc=0,bandAcc=0;
+function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.boss.on;$('bossUnlock').textContent=`Open the gate · 💿 ${BOSS_COST}`;
+  const el=$('bskills');el.innerHTML='';bskBtns=[];
+  BSK.forEach(t=>{const l=bl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='bsk';
+    b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':'💿 '+fmt(c)}</div>`;
+    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};el.appendChild(b);bskBtns.push({b,c,mx});});
+  const k=S.boss.lvl,b=bossOf(k);$('bEmo').textContent=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}`;
+  $('bStats').innerHTML=`HP <b>${fmt(bossHP(k))}</b> · your hit <b>${fmt(bossDmg())}</b> · <b>${bossTime()}s</b> timer<br>epic drop <b>${Math.round(bossDrop()*100)}%</b> · auto hits <b>${bossAuto()}/s</b> · cooldown <b>${fmtT(bossCd())}</b>`;
+  $('epicN').innerHTML=`Epic gear found: <b>${epicCount()}/${GENS.length-NG}</b> · each one gives +25% all fans`;}
+$('bossUnlock').onclick=()=>{if(S.boss.on||S.records<BOSS_COST)return;S.records-=BOSS_COST;S.boss.on=true;chord(4);toast('☠️ <b>The Underworld Tour is open</b>');buildBoss();render();save();};
+function bossFloat(txt,crit){const r=$('fBoss').getBoundingClientRect(),s=document.createElement('div');s.className='float bf'+(crit?' crit':'');s.textContent=txt;
+  s.style.left=r.left+r.width*(.2+Math.random()*.6)-20+'px';s.style.top=r.top+r.height*(.1+Math.random()*.4)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);}
+function drawFight(){const now=Date.now(),tl_=Math.max(0,F.end-now)/1e3;if(now-F.last>1500)F.combo=0;
+  $('fHp').style.width=Math.max(0,F.hp/F.max*100)+'%';$('fHpT').textContent=`${fmt(Math.max(0,F.hp))} / ${fmt(F.max)} HP`;
+  $('fTm').style.width=tl_/bossTime()*100+'%';$('fTmT').textContent=tl_.toFixed(1)+'s';
+  const cm=1+Math.min(F.combo*.02,.5*bl('combo'));
+  $('fInfo').innerHTML=`Hit <b>${fmt(bossDmg())}</b>${bl('combo')?` · combo <b>×${cm.toFixed(2)}</b>`:''}${bossAuto()?` · <b>${bossAuto()}</b> auto hits/s`:''}${F.hp/F.max<.3&&bl('final')?' · <b>FINAL CHORUS</b>':''}`;}
+function startFight(){if(F||!S.boss.on||(S.cd.boss||0)>Date.now())return;const k=S.boss.lvl,b=bossOf(k),now=Date.now();
+  F={k,max:bossHP(k),hp:bossHP(k),end:now+bossTime()*1e3,combo:0,last:0};bandAcc=0;
+  $('fBoss').textContent=b.e;$('fName').textContent=`${b.n} · Stage ${k+1}`;$('fight').classList.add('show');chord(4);drawFight();}
+function hitBoss(auto,quiet){if(!F)return;const now=Date.now();let d=bossDmg();
+  if(!auto){F.combo=now-F.last<1500?F.combo+1:1;F.last=now;}
+  d*=1+Math.min(F.combo*.02,.5*bl('combo'));
+  const crit=Math.random()<bossCrit();if(crit)d*=4;
+  if(F.hp/F.max<.3)d*=1+bl('final');
+  F.hp-=d;
+  if(!auto||Math.random()<.4)bossFloat((crit?'CRIT! ':'')+'-'+fmt(d),crit);
+  if(!auto&&(!quiet||sndOk()))chord(crit?2:.6);
+  if(F.hp<=0)endFight(true);else if(!auto)drawFight();}
+function endFight(win,fled){const k=F.k,left=Math.max(0,F.hp)/F.max,b=bossOf(k);F=null;$('fight').classList.remove('show');S.cd.boss=Date.now()+bossCd()*1e3;
+  if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>Spend platinum records on Riff Damage or Extended Set and come back.`,[['Retreat',null,1]]);render();save();return;}
+  S.boss.lvl++;S.boss.wins++;const g=Math.max(baseFps()*900,clickPow()*100),sk=5+2*k;gain(g);S.skill+=sk;
+  let loot='<br><br><span style="color:#a08c84">No epic drop this time.</span>';
+  if(Math.random()<bossDrop()){const pool=[];for(let i=NG;i<GENS.length;i++)if(!S.epic[i])pool.push(i);
+    if(pool.length){const i=pool[0];S.epic[i]=1;S.gens[i]+=1;loot=`<br><br><b style="color:#ffd76a;letter-spacing:3px">★ EPIC DROP ★</b><br><span style="font-size:46px">${GENS[i][0]}</span><br><b style="color:#ffd76a;font-size:19px">${GENS[i][1]}</b><br>Now in Gear &amp; Crew, and +25% all fans.`;}
+    else{const i=NG+Math.floor(Math.random()*(GENS.length-NG));S.gens[i]+=10;loot=`<br><br><b style="color:#ffd76a">Duplicate epic:</b> +10 ${GENS[i][1]}`;}
+    upsDirty=true;}
+  $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
+  modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} 🎼${loot}`,[['Rock on',null,1]]);buildBoss();render();save();}
+$('fightBtn').onclick=startFight;$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
+/* automatic riffs (Auto-Shredder) and automatic boss hits (Auto-Shredder + Backing Band) */
+/* Autoclickers click whatever a mouse would: the pick normally, the boss during a fight (full hits that build combo).
+   Backing Band adds its own plain automatic boss hits on top. */
+function autoTick(dt){autoAcc+=dt*autoRate();let n=Math.floor(autoAcc);autoAcc-=n;n=Math.min(n,400);
+  for(let i=0;i<n;i++){if(F)hitBoss(false,true);else riff({},true);}
+  if(F){bandAcc+=dt*bl('band');let m=Math.floor(bandAcc);bandAcc-=m;for(let i=0;i<m&&F;i++)hitBoss(true);}}
+
 /* ---------- audio: distorted power chords ---------- */
-let AC,dist,riff=0;const NOTES=[82.4,82.4,98,82.4,110,82.4,116.5,110,82.4,82.4,123.5,98];
+let AC,dist,noteI=0;const NOTES=[82.4,82.4,98,82.4,110,82.4,116.5,110,82.4,82.4,123.5,98];
 function chord(len,freq){ if(S.mute)return; try{
   if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();dist=AC.createWaveShaper();const c=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;c[i]=Math.tanh(x*6);}dist.curve=c;
     const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;const out=AC.createGain();out.gain.value=.12;dist.connect(lp).connect(out).connect(AC.destination);}
   if(AC.state==='suspended')AC.resume();
-  const t=AC.currentTime,f=freq||NOTES[riff++%NOTES.length],d=.16*len+.1,g=AC.createGain();
+  const t=AC.currentTime,f=freq||NOTES[noteI++%NOTES.length],d=.16*len+.1,g=AC.createGain();
   g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+d);g.connect(dist);
   [1,1.498,2].forEach(m=>{const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=f*m;o.connect(g);o.start(t);o.stop(t+d);});
  }catch(e){} }
@@ -548,11 +714,12 @@ function away(sec){hype=0;const dt=Math.min(sec,CAP),g=baseFps()*dt*.5; if(g<=0)
   modal('Welcome back!',`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>CAP?' (the 8 hour limit)':''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`,[['Rock on',null,1]]);}
 let prev=S.last||Date.now();
 function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
-  if(dt>AWAY)away(dt);else if(dt>0){gain(fps()*dt);hype=Math.max(0,hype-dt*.04);}
+  if(dt>AWAY)away(dt);else if(dt>0){gain(fps()*dt);hype=Math.max(0,hype-dt*(.03+.12*hype));autoTick(dt);}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
+  if(F&&now>F.end)endFight(false);
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();}
   render();}
-let lastAch=0;buildAch();buildTech();
+let lastAch=0;buildAch();buildTech();buildBoss();
 setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});

@@ -412,6 +412,12 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
           <path d="M100 194C60 152 14 92 20 50 25 14 60 6 100 6s75 8 80 44c6 42-40 102-80 144Z" fill="url(#pg)" stroke="#2a0a0a" stroke-width="5"/>
           <path d="M100 194C60 152 14 92 20 50 25 14 60 6 100 6s75 8 80 44c6 42-40 102-80 144Z" fill="url(#sh)"/>
           <path id="bolt" d="M112 30 68 104h28l-12 62 50-82h-30l8-54Z" fill="#160a08" stroke="#ffe9a8" stroke-width="3" stroke-linejoin="round"/>
+          <g id="pigFace" style="display:none" stroke="#7a2148" stroke-width="3" stroke-linejoin="round">
+            <path d="M40 34 34 8 66 20Z" fill="#ff8fc0"/><path d="M160 34 166 8 134 20Z" fill="#ff8fc0"/>
+            <circle cx="72" cy="66" r="8" fill="#2a0a18" stroke="none"/><circle cx="128" cy="66" r="8" fill="#2a0a18" stroke="none"/><circle cx="75" cy="63" r="2.6" fill="#fff" stroke="none"/><circle cx="131" cy="63" r="2.6" fill="#fff" stroke="none"/>
+            <ellipse cx="100" cy="108" rx="38" ry="27" fill="#ff9fcb"/><ellipse cx="87" cy="108" rx="7" ry="10" fill="#7a2148" stroke="none"/><ellipse cx="113" cy="108" rx="7" ry="10" fill="#7a2148" stroke="none"/>
+            <path d="M84 148q16 12 32 0" fill="none" stroke-linecap="round"/>
+          </g>
         </svg>
       </button>
       <div class="sub">Shred for <b id="cp">1</b> fans per riff<span id="autoTxt"></span></div>
@@ -726,11 +732,12 @@ const SKINS=[
  ['Blood Moon','#ff7a7a','#c4122f','#3a0410','#120004','#ffb0b0',{boss:2},'Boss damage ×2','Only comes out for a fight.'],
  ['The Void','#c896ff','#5a1fb0','#12042a','#05010c','#e6ccff',{solo:1.25},'Solos pay 25% more skill','It stares back. It also claps.'],
  ['Bubblegum','#ffe0f4','#ff6ac8','#a01c78','#3a0628','#ffffff',{diver:.7},'Stage divers 30% more often','Pink. Sparkly. Deeply metal.'],
- ['Chrome','#ffffff','#9aa6b4','#2a323c','#0a0e12','#e8f0ff',{auto:1},'Each autoclicker +1 click per second','Polished daily by a roadie who hates you.']
-].map(a=>({n:a[0],c:[a[1],a[2],a[3]],bolt:a[4],edge:a[5],fx:a[6],d:a[7],t:a[8]}));
+ ['Chrome','#ffffff','#9aa6b4','#2a323c','#0a0e12','#e8f0ff',{auto:1},'Each autoclicker +1 click per second','Polished daily by a roadie who hates you.'],
+ ['Hog Wild','#ffd3e6','#ff8fc0','#c2417f','#7a2148','#ffffff',{off:.25},'Piggy bank: offline earnings +25%','Oink. Squeals louder than the lead guitar.','pig']
+].map(a=>({n:a[0],c:[a[1],a[2],a[3]],bolt:a[4],edge:a[5],fx:a[6],d:a[7],t:a[8],face:a[9]}));   // face 'pig' swaps the lightning bolt for a pig face
 const FX0=()=>({m:GENS.map(()=>1),all:1,click:1,crit:0,boss:1,off:0,hype:0,hypeKeep:1,diver:1,solo:1,auto:0});
 let FX=FX0();
-function calcFx(){const f=FX0(),sk=(SKINS[S.skin]||SKINS[0]).fx;for(const k in sk){if(k=='crit'||k=='auto')f[k]+=sk[k];else f[k]*=sk[k];}
+function calcFx(){const f=FX0(),sk=(SKINS[S.skin]||SKINS[0]).fx;for(const k in sk){if(k=='crit'||k=='auto'||k=='off'||k=='hype')f[k]+=sk[k];else f[k]*=sk[k];}
   GENS.forEach((_,i)=>{if(!S.gens[i])return;for(const k of 'ie'){const it=ITEM[S.eq[i+k]];if(!it)continue;const x=it.fx;
     if(x.self)f.m[i]*=x.self;if(x.buff)for(const j in x.buff)f.m[j]*=x.buff[j];if(x.all)f.all*=x.all;if(x.click)f.click*=x.click;
     if(x.crit)f.crit+=x.crit;if(x.boss)f.boss*=x.boss;if(x.off)f.off+=x.off;if(x.hype)f.hype+=x.hype;}});FX=f;}
@@ -837,10 +844,10 @@ $('forgeBtn').onclick=openForge;
 /* ---------- pick skins ---------- */
 const skinCount=()=>SKINS.filter((_,i)=>S.skins[i]).length;
 function applySkin(){const k=SKINS[S.skin]||SKINS[0],st=document.querySelectorAll('#pg stop');k.c.forEach((c,i)=>st[i].setAttribute('stop-color',c));
-  $('bolt').setAttribute('fill',k.bolt);$('bolt').setAttribute('stroke',k.edge);$('pick').style.filter=`drop-shadow(0 0 28px ${k.c[1]}99)`;}
+  $('bolt').setAttribute('fill',k.bolt);$('bolt').setAttribute('stroke',k.edge);$('bolt').style.display=k.face?'none':'';$('pigFace').style.display=k.face=='pig'?'':'none';$('pick').style.filter=`drop-shadow(0 0 28px ${k.c[1]}99)`;}
 function dropSkin(){const l=SKINS.map((_,i)=>i).filter(i=>!S.skins[i]);if(!l.length)return null;const i=l[Math.floor(Math.random()*l.length)];S.skins[i]=1;return SKINS[i];}
 function openSkins(){let h='';SKINS.forEach((k,i)=>{if(!S.skins[i])return;
-    h+=`<button class="pk${S.skin==i?' on':''}" data-i="${i}"><span class="sw" style="background:linear-gradient(${k.c.join(',')})"></span><span><b>${k.n}</b><br><span class="pf">${k.d}</span><br><i>${k.t}</i></span></button>`;});
+    h+=`<button class="pk${S.skin==i?' on':''}" data-i="${i}"><span class="sw" style="background:linear-gradient(${k.c.join(',')});display:grid;place-items:center;font-size:20px">${k.face=='pig'?'🐷':''}</span><span><b>${k.n}</b><br><span class="pf">${k.d}</span><br><i>${k.t}</i></span></button>`;});
   h+=`<div class="pf" style="color:#a08c84;margin-top:8px">${SKINS.length-skinCount()} more skins to find. A beaten boss drops one 25% of the time, a caught stage diver 2%.</div>`;
   modal(`Pick Skins · ${skinCount()}/${SKINS.length}`,h,[['Close']]);
   $('mP').querySelectorAll('.pk').forEach(b=>b.onclick=()=>{S.skin=+b.dataset.i;applySkin();chord(1.5);$('modal').classList.remove('show');render();save();});}

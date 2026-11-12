@@ -130,6 +130,7 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 #buffs span{font-size:12px;padding:2px 10px;border-radius:20px;background:linear-gradient(var(--fire2),var(--fire));color:#160a04;font-weight:700;font-variant-numeric:tabular-nums}
 .float.crit{font-size:32px;color:#fff;text-shadow:0 0 14px var(--blood),0 0 4px var(--blood)}
 .diver{position:fixed;z-index:15;width:68px;height:68px;border-radius:50%;border:2px solid var(--gold);background:radial-gradient(circle at 35% 30%,#fff3c4,var(--fire2) 35%,var(--fire) 65%,var(--blood));font-size:34px;line-height:1;cursor:pointer;box-shadow:0 0 30px var(--fire),0 0 60px rgba(255,179,0,.5);animation:bob 1.2s ease-in-out infinite alternate,fadein .4s}
+.diver.rare{width:84px;height:84px;font-size:42px;border-color:#e9d5ff;background:radial-gradient(circle at 35% 30%,#fff,#d5b0ff 30%,#7a2cff 62%,#1c0638);box-shadow:0 0 34px #a855f7,0 0 80px rgba(168,85,247,.65);animation:bob .7s ease-in-out infinite alternate,fadein .4s}
 @keyframes bob{to{transform:translateY(-14px) rotate(8deg) scale(1.08)}}
 @keyframes fadein{from{opacity:0}}
 #toast{position:fixed;top:calc(70px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-20px);z-index:25;background:#1c1214;border:1px solid var(--gold);color:var(--text);padding:9px 16px;border-radius:10px;box-shadow:0 0 24px rgba(255,179,0,.4);opacity:0;pointer-events:none;transition:.3s;text-align:center;width:max-content;max-width:90vw;font-size:15px}
@@ -427,7 +428,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     <section class="panel asc" id="pAsc">
       <h2>Go Platinum</h2>
       <div class="ascrow"><div class="disc"></div>
-        <p>You hold <b id="recs">0</b> platinum records (<b id="earned">0</b> earned, each <b>+10%</b> fans forever).<br>Ascend now for <b id="gain">+0</b>.</p></div>
+        <p>You hold <b id="recs">0</b> platinum records (<b id="earned">0</b> earned, all fans <b id="recBon">×1</b>).<br><span style="font-size:.85em;opacity:.75">Each record: +10% fans forever. From the 101st on, each one also multiplies all fans by ×1.02.</span><br>Ascend now for <b id="gain">+0</b>.</p></div>
       <div class="bar"><i id="ascBar"></i></div>
       <div class="sub" id="ascNext" style="font-size:13px;margin-bottom:10px"></div>
       <button id="ascBtn" disabled>Ascend to Legend</button>
@@ -582,7 +583,7 @@ const PERKS=[
  {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
-const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},v:3});
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,v:3});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -627,7 +628,11 @@ function calcFx(){const f=FX0(),sk=(SKINS[S.skin]||SKINS[0]).fx;for(const k in s
 const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.self}`);if(x.buff)for(const j in x.buff)p.push(`${GENS[j][1]} ×${x.buff[j]}`);
   if(x.all)p.push(`All fans ×${x.all}`);if(x.click)p.push(`Riff power ×${x.click}`);if(x.crit)p.push(`Crit chance +${Math.round(x.crit*100)}%`);
   if(x.boss)p.push(`Boss damage ×${x.boss}`);if(x.off)p.push(`Offline earnings +${Math.round(x.off*100)}%`);if(x.hype)p.push(`Max hype bonus +${Math.round(x.hype*100)}%`);return p.join(' · ');};
-const gmult=()=>(1+.1*S.earned)*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all;
+/* platinum records: +10% fans each, and from the 101st on every record also multiplies all fans by ×1.02 (compounding).
+   Past 100B fans records only grow with the logarithm of all-time fans, so without this the late game stalls. */
+const DIA_FROM=100, DIA_UP=1.02;
+const recBonus=()=>(1+.1*S.earned)*DIA_UP**Math.max(0,S.earned-DIA_FROM);
+const gmult=()=>recBonus()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all;
 const tierCount=i=>TIERS.reduce((a,_,t)=>a+(S.ups['g'+i+'t'+t]?1:0),0);
 /* milestones (free): ×2 at levels 10 and 25, then every 50 levels a bonus that grows with the level:
    ×5 at 50, ×10 at 100, ×10 at 150, ×20 at 200, ×15 at 250, ×30 at 300 … (5 or 10, times the hundred you are in).
@@ -641,22 +646,23 @@ const gm=i=>2**tierCount(i)*msMult(S.gens[i]);
 const genFps=i=>GENS[i][4]*S.gens[i]*gm(i)*FX.m[i]*gmult();
 const baseFps=()=>GENS.reduce((a,_,i)=>a+genFps(i),0);
 /* temporary boosts: crowd hype (up to ×2) and timed buffs */
+const PIT_X=25;   // Circle Pit, a rare crowd event
 const buff=id=>(S.buffs[id]||0)>Date.now();
 const hypeMult=()=>1+hype*(1+.25*tl('crowd')+FX.hype);
-const fps=()=>baseFps()*hypeMult()*(buff('frenzy')?7:1)*(buff('pyro')?5:1);
+const fps=()=>baseFps()*hypeMult()*(buff('frenzy')?7:1)*(buff('pyro')?5:1)*(buff('pit')?PIT_X:1);
 /* riff power = (base riff + 0.25% of fans/sec) × every riff upgrade (×1.5 each) × Golden Pick (×1.5 each).
    The multipliers apply to the whole value, so an upgrade does exactly what its label says.
    Balance target: with all 9 riff upgrades one riff is worth ~0.1s of production, so with hype and crits hand
    clicking at 6/s is about ×3 idle income and maxed autoclickers (21/s) about ×8. */
 const RIFF_UP=1.5, PICK_UP=1.5, RIFF_SHARE=.0025;
 const clickMult=()=>RIFF_UP**CLK.reduce((a,_,t)=>a+(S.ups['c'+t]?1:0),0)*PICK_UP**pl('pick')*FX.click*(1+.15*S.boss.wins);   // every boss you beat adds +15% riff power for good
-const clickPow=()=>((1+.1*S.earned)*hypeMult()+RIFF_SHARE*fps())*clickMult()*(buff('solo')?10:1);
+const clickPow=()=>(recBonus()*hypeMult()+RIFF_SHARE*fps())*clickMult()*(buff('solo')?10:1);
 /* autoclickers: each Auto-Shredder clicks 2×/s, +1/s per Speed Picking level */
 const autoRate=()=>tl('auto')*(2+tl('speed')+FX.auto);
 let lastSnd=0;const sndOk=()=>{const n=performance.now();if(n-lastSnd<110)return false;lastSnd=n;return true;};
 /* Solo Skill: second currency. Solo level follows riff power (without temporary boosts);
    one solo per hour pays a random amount between 4× and 8× the level. */
-const riffBase=()=>((1+.1*S.earned)+RIFF_SHARE*baseFps())*clickMult();
+const riffBase=()=>(recBonus()+RIFF_SHARE*baseFps())*clickMult();
 const soloLvl=()=>1+Math.floor(3*Math.log10(Math.max(1,riffBase())));
 const soloRange=()=>{const l=soloLvl();return [4*l,8*l];};
 const fmtT=s=>s>=60?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:Math.ceil(s)+'s';
@@ -671,7 +677,7 @@ function bulk(i){ const b=GENS[i][3]*cdisc()*G**S.gens[i]; let k=qty;
 const REC_K1=1e9, REC_N1=Math.sqrt(REC_K1/1e6), REC_K2=1e11, REC_N2=REC_N1*(REC_K2/REC_K1)**.25, REC_PER_DECADE=25;
 const recOf=t=>t<=REC_K1?Math.sqrt(t/1e6):t<=REC_K2?REC_N1*(t/REC_K1)**.25:REC_N2+REC_PER_DECADE*Math.log10(t/REC_K2);
 const fansFor=n=>n<=REC_N1?n*n*1e6:n<=REC_N2?REC_K1*(n/REC_N1)**4:REC_K2*10**((n-REC_N2)/REC_PER_DECADE);
-const pending=()=>Math.max(0,Math.floor(recOf(S.total)*recMult()+1e-9)-S.earned);   // Record Deal multiplies every step
+const pending=()=>Math.max(0,Math.floor(recOf(S.total)*recMult()+1e-9)-(S.earned-(S.gift||0)));   // Record Deal multiplies every step; records gifted by label scouts come on top
 
 function gain(n){S.fans+=n;S.run+=n;S.total+=n;}
 
@@ -764,8 +770,8 @@ function render(){
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
   upBtns.forEach(u=>u.b.classList.toggle('ok',S.fans>=u.c));
   perkBtns.forEach(p=>p.b.classList.toggle('ok',!p.mx&&S.records>=p.c));
-  const p=pending(),have=S.earned+p,lo=fansFor(have/recMult()),hi=fansFor((have+1)/recMult());
-  $('recs').textContent=fmt(S.records);$('earned').textContent=fmt(S.earned);$('gain').textContent='+'+fmt(p)+' 💿';
+  const p=pending(),have=S.earned-(S.gift||0)+p,lo=fansFor(have/recMult()),hi=fansFor((have+1)/recMult());
+  $('recs').textContent=fmt(S.records);$('earned').textContent=fmt(S.earned);$('recBon').textContent='×'+fmt(recBonus());$('gain').textContent='+'+fmt(p)+' 💿';
   $('ascBar').style.width=Math.min(100,Math.max(0,(S.total-lo)/(hi-lo)*100))+'%';
   $('ascNext').textContent=`Next record at ${fmt(hi)} all-time fans`;
   $('ascBtn').disabled=p<1;
@@ -778,7 +784,7 @@ function render(){
   $('playSolo').disabled=pcd>0;$('skCd').textContent=pcd>0?'ready in '+fmtT(pcd):'READY';
   techBtns.forEach(t=>t.b.classList.toggle('ok',!t.mx&&S.skill>=t.c));
   tabBtns[2].classList.toggle('hot',pcd<=0||techBtns.some(t=>!t.mx&&S.skill>=t.c));
-  $('buffs').innerHTML=[['frenzy','Mosh Pit · fans ×7'],['pyro','Pyro Blast · fans ×5'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
+  $('buffs').innerHTML=[['pit','Circle Pit · fans ×'+PIT_X],['frenzy','Mosh Pit · fans ×7'],['pyro','Pyro Blast · fans ×5'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
   $('hfans').innerHTML=`${fmt(S.fans)} <small>+${fmt(f)}/s</small>`;
   tabBtns[1].classList.toggle('hot',upBtns.some(u=>S.fans>=u.c));
   const ar=autoRate();$('autoTxt').textContent=ar?(S.autoOff?' · 🤖 paused':` · 🤖 ${ar} clicks/s`):'';const abt=$('autoBtn'),abl=S.autoOff?'▶ Resume':'⏸ Pause';if(abt.hidden!==!ar)abt.hidden=!ar;if(abt.textContent!==abl)abt.textContent=abl;   // only touch the button when it changes, so a tap is never interrupted
@@ -815,7 +821,7 @@ function modal(t,p,btns){$('mT').textContent=t;$('mP').innerHTML=p;$('mB').inner
   btns.forEach(([l,fn,go])=>{const b=document.createElement('button');b.textContent=l;if(go)b.className='go';b.onclick=()=>{$('modal').classList.remove('show');fn&&fn();};$('mB').appendChild(b);});
   $('modal').classList.add('show');}
 $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
-  modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever and can be spent on legend perks.`,
+  modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever (from the 101st on also ×1.02 on top) and can be spent on legend perks.`,
   [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=pl('start')?100*10**pl('start'):0;S.run=0;S.gens=GENS.map(()=>0);S.ups={};
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
 $('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;pickSong();upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();drawSlots();applySkin();render();save();tourShow(0);},1]]);
@@ -864,11 +870,23 @@ $('playSolo').onclick=()=>{if((S.cd.play||0)>Date.now())return;
 
 /* ---------- stage divers: random tap-to-catch events ---------- */
 let nextDiver=Date.now()+4e4+Math.random()*5e4,diverEl=null;
-function spawnDiver(){const el=diverEl=document.createElement('button');el.className='diver';el.textContent='🤘';el.setAttribute('aria-label','Catch the stage diver');
+/* rare crowd events: about one stage diver in eight is something bigger, with its own icon.
+   Circle Pit (fans ×25), Wall of Death (one hour of fans), Backstage Pass (all action cooldowns reset), Label Scout (platinum records). */
+const RARE_EV=.12, EVENTS=[
+ ['pit','🌀','Circle Pit',.35],['wall','💀','Wall of Death',.35],['pass','🎫','Backstage Pass',.15],['scout','💿','Label Scout',.15]];
+const scoutRecs=()=>1+Math.floor(S.earned/100);
+function rollEvent(){if(Math.random()>=RARE_EV)return null;let r=Math.random();for(const e of EVENTS){if((r-=e[3])<0)return e[0]=='scout'&&!S.earned?EVENTS[1]:e;}return EVENTS[0];}
+function crowdEvent(ev,now){S.events=(S.events||0)+1;chord(4);$('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');
+  if(ev[0]=='pit'){S.buffs.pit=now+frenzyDur()*1e3;toast(`🌀 <b>CIRCLE PIT!</b> All fans ×${PIT_X} for ${frenzyDur()} seconds`);}
+  else if(ev[0]=='wall'){const g=Math.max(baseFps()*3600,clickPow()*500);gain(g);toast(`💀 <b>WALL OF DEATH!</b> The crowd collides: +${fmt(g)} fans (one hour's worth)`);}
+  else if(ev[0]=='pass'){for(const k in S.cd)if(k!='boss')S.cd[k]=0;toast('🎫 <b>BACKSTAGE PASS!</b> Solo and all actions are ready again');}
+  else{const n=scoutRecs();S.records+=n;S.earned+=n;S.gift=(S.gift||0)+n;buildPerks();toast(`💿 <b>LABEL SCOUT!</b> Signed on the spot: +${n} platinum record${n>1?'s':''}`);}}
+function spawnDiver(){const ev=rollEvent(),el=diverEl=document.createElement('button');el.className='diver'+(ev?' rare':'');el.textContent=ev?ev[1]:'🤘';el.setAttribute('aria-label',ev?'Join the '+ev[2]:'Catch the stage diver');
   el.style.left=(8+Math.random()*68)+'vw';el.style.top=(24+Math.random()*44)+'vh';nextDiver=Date.now()+(6e4+Math.random()*9e4)*(1-.1*tl('pres'))*FX.diver;
   el.onclick=()=>{const rc=el.getBoundingClientRect(),now=Date.now(),r=Math.random();el.remove();diverEl=null;S.divers++;chord(3);
     burst(rc.left+34,rc.top+34);burst(rc.left+34,rc.top+34);
-    if(r<.45){S.buffs.frenzy=now+frenzyDur()*1e3;toast(`🤘 <b>Mosh Pit Frenzy!</b> All fans ×7 for ${frenzyDur()} seconds`);}
+    if(ev){burst(rc.left+34,rc.top+34);crowdEvent(ev,now);}
+    else if(r<.45){S.buffs.frenzy=now+frenzyDur()*1e3;toast(`🤘 <b>Mosh Pit Frenzy!</b> All fans ×7 for ${frenzyDur()} seconds`);}
     else if(r<.8){const g=Math.max(baseFps()*300,clickPow()*40);gain(g);toast(`🤘 <b>Merch Rush!</b> +${fmt(g)} fans`);}
     else{S.buffs.solo=Math.max(S.buffs.solo||0,now)+soloDur()*1e3;toast(`🤘 <b>Shred Storm!</b> Riffs ×10 for ${soloDur()} seconds`);}
     if(Math.random()<.02){const sk=dropSkin();if(sk)toast(`🎨 The stage diver dropped a pick skin: <b>${sk.n}</b>`);}   // rare skin drop
@@ -1194,7 +1212,7 @@ buildPerks();tick();
 /* ---------- onboarding guide: [panel to highlight, mobile tab, title, text] ---------- */
 const TOUR=[
  ['pStage','gear','Shred','Tap the pick to play a riff and win <b>fans</b>. Fast riffs fill the <b>crowd hype</b> bar, which boosts everything while you keep playing, and now and then a riff is a critical hit. While you shred, the band plays a song: tap <b>Now playing</b> to pick one from your setlist.'],
- ['pStage','gear','Boosts','<b>Overdrive</b> and <b>Encore</b> are short boosts that cost solo skill 🎼. Sometimes a glowing 🤘 stage diver appears: catch it for a surprise bonus.'],
+ ['pStage','gear','Boosts','<b>Overdrive</b> and <b>Encore</b> are short boosts that cost solo skill 🎼. Sometimes a glowing 🤘 stage diver appears: catch it for a surprise bonus. Rarely a purple one shows up instead: a 🌀 Circle Pit, 💀 Wall of Death, 🎫 Backstage Pass or 💿 Label Scout, each far stronger.'],
  ['pGens','gear','The Band','Spend fans to hire band members and level them up. They earn fans every second, even while the game is closed. Levels 10, 25, 50, 100 and beyond give big bonuses.'],
  ['pGens','gear','Instruments and equipment','Every member has two slots. Bosses drop gear in four rarities, from common to legendary. Tap a slot to choose what to equip, and use the <b>Gear Forge</b> to merge five items into one of the next rarity.'],
  ['pUps','ups','Upgrades','One-off purchases that multiply a band member or your riff power. New ones appear as you progress.'],

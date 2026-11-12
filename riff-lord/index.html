@@ -534,7 +534,7 @@ const GENS=[
  ['🎹','Keyboardist','Hidden behind the fog since the first gig.',3e6,8e3],
  ['🎤','Singer','Arrives last, leaves first, thanks the wrong city.',9e7,14e4],
  ['🔔','Cowbell Player','The song needed more of it. So did the band.',4e9,35e5],
- /* guest stars: signed with platinum records first, then hired and levelled with fans. No gear slots, but each brings an action. */
+ /* guest stars: hired and levelled with fans like everyone else. No gear slots, but each brings an action. */
  ['🎺','Horn Section','Three people, nine opinions, one very loud note.',2e11,12e7],
  ['🧨','Pyro Technician','Has most of his eyebrows. Used to have all of them.',15e12,8e9],
  ['🎻','Symphony Orchestra','Eighty musicians asking where the sheet music is.',1e15,5e11],
@@ -552,9 +552,9 @@ const GENS=[
  ["🔮","Theremin Mystic","Never touches his instrument. Claims that is the whole point.",1e64,6.1e38],
  ["🐐","Band Goat","A goat. Chews through cables. Still out-earns the bassist.",1e69,2.5e41]
 ];
-const NG=7;                      // core members 0–6, then three guest stars (signed with records, no gear slots), then the touring members
+const NG=7;                      // core members 0–6, then three guest stars (no gear slots, one action each), then the touring members
 const isGuest=i=>i>=NG&&i<NG+3;
-const GUEST_COST=[30,100,300];   // platinum records to sign each guest star
+const GUEST_COST=[30,100,300];   // what signing a guest star used to cost in platinum records; refunded to old saves
 const BASE_INST=['Borrowed Guitar','Practice Pad Kit','Two-String Bass','Mail-Order Guitar','Toy Keyboard','Bare Lungs','Small Cowbell','','','',"Wheezing Squeezebox","Dented School Saxophone","Upturned Buckets","Squeaky Crank Box","Plastic Recorder","Sore Throat","Broken Record Player","Bent Coat Hanger","Detuned Radio","A Perfectly Normal Goat"];
 /* band gear dropped by bosses. Every slot has three variants with different effects, and every variant exists in
    four rarities, so 34 slots × 3 × 4 = 408 items. [member, slot (i=instrument, e=equipment), emoji, name, second effect, flavour]
@@ -690,7 +690,7 @@ const PERKS=[
  {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:12}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
-const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,v:4});
+const fresh=()=>({fans:0,run:0,total:0,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,v:5});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -702,7 +702,8 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
     const conv=id=>ITEM[id+'-'+id[2]]?id+'-'+id[2]:null,it={};for(const id in S.items){const n=conv(id);if(n)it[n]=1;}S.items=it;
     for(const sl in S.eq){const n=conv(S.eq[sl]);if(n)S.eq[sl]=n;else delete S.eq[sl];}}
   if((S.v||0)<4){for(let i=NG+3;i<GENS.length;i++){S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);}}   // v4 repriced the touring members completely, so their old levels are returned to zero
-  S.v=4;
+  if((S.v||0)<5){let back=0;GUEST_COST.forEach((c,j)=>{if(S.guest[NG+j])back+=c;});S.guest={};if(back){S.records+=back;S.refund=back;}}   // v5: guest stars no longer cost records, so what was paid comes back
+  S.v=5;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 const save=()=>{S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
 
@@ -796,7 +797,7 @@ const gensEl=$('gens'), genRows=[];
 GENS.forEach((g,i)=>{const d=document.createElement('div');d.className='gen mem';
   d.innerHTML=`<button class="buy"><div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div></button>${!isGuest(i)?'<div class="slots"><button class="slot" data-k="i"></button><button class="slot" data-k="e"></button></div>':'<div class="guest">★ Guest star · brings their own gear and a special action</div>'}<i class="mbar"></i>`;
   const b=d.querySelector('.buy');
-  b.onclick=()=>{if(isGuest(i)&&!S.guest[i]){const gc=GUEST_COST[i-NG];if(S.records>=gc){S.records-=gc;S.guest[i]=1;chord(4);toast(`★ <b>${g[1]}</b> signed as a guest star`);render();save();}return;}
+  b.onclick=()=>{
     const {k,cost}=bulk(i); if(S.fans>=cost){const m0=msMult(S.gens[i]),hired=!S.gens[i];S.fans-=cost;S.gens[i]+=k;S.met[i]=1;const up=msMult(S.gens[i])/m0;
     if(up>1||hired){chord(2.5);d.classList.remove('boom');void d.offsetWidth;d.classList.add('boom');
       const r=d.getBoundingClientRect(),s=document.createElement('div');s.className='float';s.textContent=hired&&up<=1?`${g[1]} joined the band!`:`${g[1]} ×${fmt(up)}!`;s.style.left=r.left+60+'px';s.style.top=r.top+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(r.left+r.width/2,r.top+r.height/2);}
@@ -872,10 +873,8 @@ function render(){
   let r=RANKS[0][1];for(const [n,t] of RANKS)if(S.run>=n)r=t;$('rank').textContent=(S.asc?`Tour ${S.asc+1} · `:'')+r;
   const totF=baseFps();
   genRows.forEach((row,i)=>{
-    if(isGuest(i)&&!S.guest[i]){const gc=GUEST_COST[i-NG];row.b.classList.toggle('ok',S.records>=gc);row.b.classList.toggle('locked',!(S.asc>0||S.gens[NG-1]>0));   // unsigned guest star
-      row.cost.textContent=`🔒 Sign this guest star: 💿 ${gc}`;row.own.textContent='';row.ms.textContent='Then hire and level with fans like the rest of the band';row.bar.style.width='0%';return;}
     const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans>=cost);
-    row.b.classList.toggle('locked',i>0&&!isGuest(i)&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
+    row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run<GENS[i][3]/4);
     row.cost.textContent=(S.gens[i]?'':'Hire: ')+`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(GENS[i][4]*gm(i)*FX.m[i]*gmult())}/s per level`;row.own.textContent=S.gens[i];
     const n=S.gens[i],a=msPrev(n),z=msNext(n);const sh=totF>0?genFps(i)/totF*100:0;row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${msBonus(z)} at level ${z} · <span class="shr">${sh>=10?sh.toFixed(0):sh>=.1?sh.toFixed(1):sh>0?'<0.1':'0'}%</span> of fans/s`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
@@ -1417,6 +1416,7 @@ setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});
 buildPerks();tick();
+if(S.refund){toast(`💿 Guest stars are free now: <b>${S.refund} platinum records</b> refunded`);delete S.refund;save();}
 /* ---------- onboarding guide: [panel to highlight, mobile tab, title, text] ---------- */
 const TOUR=[
  ['pStage','gear','Shred','Tap the pick to play a riff and win <b>fans</b>. Fast riffs fill the <b>crowd hype</b> bar, which boosts everything while you keep playing, and now and then a riff is a critical hit. While you shred, the band plays a song: tap <b>Now playing</b> to pick one from your setlist.'],

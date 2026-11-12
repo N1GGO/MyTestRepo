@@ -141,6 +141,9 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 .ac.got{opacity:1;border-color:#8a6a1c;background:linear-gradient(160deg,#2a1c0c,#140c0e)}
 .ac.got b{color:var(--gold)}
 
+/* now playing */
+.song{font-size:12.5px;margin-top:6px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* solo skill */
 :root{--sk:#c896ff}
 .skill{border-color:#4a2f6a;background:linear-gradient(170deg,rgba(44,24,66,.85),rgba(22,15,17,.85))}
@@ -352,6 +355,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       </button>
       <div class="sub">Shred for <b id="cp">1</b> fans per riff<span id="autoTxt"></span></div>
       <div class="eq" id="eq"></div>
+      <div class="sub song" id="song"></div>
       <div class="hype"><div class="hbar"><i id="hypeBar"></i></div><span id="hypeTxt"></span></div>
       <div class="abil"><button id="aSolo"></button><button id="aEnc"></button></div>
       <div class="sub skmini">🎼 <b id="skMini">0</b> solo skill to spend</div>
@@ -696,7 +700,7 @@ function riff(e,auto){let v=clickPow();const crit=Math.random()<.04+.01*tl('prec
   gain(v);S.clicks++;
   hype=Math.min(1,hype+.02);if(hype>=.95)S.hyped=1;
   // an autoclicker riff is a real click; only its sound is rate-limited and its visuals skipped while the tab is hidden
-  if(!auto||sndOk())chord(crit?2.2:1);
+  if(!auto||sndOk())playStep(crit);
   if(auto&&document.hidden)return;
   const s=document.createElement('div');s.className='float'+(crit?' crit':'');s.textContent=(crit?'CRIT! +':'+')+fmt(v);
   const r=$('pick').getBoundingClientRect();s.style.left=(e.clientX||r.left+r.width/2)-20+(Math.random()*40-20)+'px';s.style.top=(e.clientY||r.top+40)-20+'px';
@@ -847,15 +851,66 @@ function autoTick(dt){autoAcc+=dt*autoRate();let n=Math.floor(autoAcc);autoAcc-=
   for(let i=0;i<n;i++){if(F)hitBoss(false,true);else riff({},true);}
   if(F){bandAcc+=dt*bl('band');let m=Math.floor(bandAcc);bandAcc-=m;for(let i=0;i<m&&F;i++)hitBoss(true);}}
 
-/* ---------- audio: distorted power chords ---------- */
-let AC,dist,noteI=0;const NOTES=[82.4,82.4,98,82.4,110,82.4,116.5,110,82.4,82.4,123.5,98];
-function chord(len,freq){ if(S.mute)return; try{
-  if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();dist=AC.createWaveShaper();const c=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;c[i]=Math.tanh(x*6);}dist.curve=c;
-    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;const out=AC.createGain();out.gain.value=.12;dist.connect(lp).connect(out).connect(AC.destination);}
-  if(AC.state==='suspended')AC.resume();
+/* ---------- audio ---------- */
+let AC,dist,clean,noiseBuf,noteI=0;const NOTES=[82.4,82.4,98,82.4,110,82.4,116.5,110,82.4,82.4,123.5,98];
+function audioOn(){ if(S.mute)return false; try{
+  if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();
+    dist=AC.createWaveShaper();const c=new Float32Array(256);for(let i=0;i<256;i++){const x=i/128-1;c[i]=Math.tanh(x*6);}dist.curve=c;   // distorted bus: guitars
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;const out=AC.createGain();out.gain.value=.12;dist.connect(lp).connect(out).connect(AC.destination);
+    clean=AC.createGain();clean.gain.value=.2;clean.connect(AC.destination);                                                              // clean bus: drums, bass, keys, voice, cowbell
+    noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;}
+  if(AC.state==='suspended')AC.resume();return true;}catch(e){return false;} }
+/* interface sound: a short power chord (purchases, boss hits, events) */
+function chord(len,freq){ if(!audioOn())return; try{
   const t=AC.currentTime,f=freq||NOTES[noteI++%NOTES.length],d=.16*len+.1,g=AC.createGain();
   g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+d);g.connect(dist);
   [1,1.498,2].forEach(m=>{const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=f*m;o.connect(g);o.start(t);o.stop(t+d);});
+ }catch(e){} }
+
+/* ---------- the band plays ----------
+   Every riff click plays the next note of a famous theme, and every hired band member joins in with their own part.
+   The themes are all public-domain classics that metal bands love to cover; click speed sets the tempo. */
+const N2M=n=>{const m=/^([A-G])(#?)(\d)$/.exec(n);return 12*(+m[3]+1)+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]?1:0);};
+const SONGS=[
+ ['Beethoven · Symphony No. 5','G4 G4 G4 D#4 F4 F4 F4 D4 G4 G4 G4 D#4 G#4 G#4 G#4 G4 D#5 D#5 D#5 C5'],
+ ['Grieg · In the Hall of the Mountain King','A3 B3 C4 D4 E4 C4 E4 D#4 B3 D#4 D4 A#3 D4 A3 B3 C4 D4 E4 C4 E4 A4 G4 E4 C4 E4 G4'],
+ ['Beethoven · Ode to Joy','E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4 D4 D4 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4 C4 C4'],
+ ['Bach · Toccata and Fugue in D minor','A4 G4 A4 G4 F4 E4 D4 C#4 D4 A3 G3 A3 E3 F3 C#3 D3'],
+ ['Korobeiniki · Russian folk song','E5 B4 C5 D5 C5 B4 A4 A4 C5 E5 D5 C5 B4 C5 D5 E5 C5 A4 A4'],
+ ['Beethoven · Für Elise','E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 G#4 B4 C5 E4 E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 C5 B4 A4'],
+ ['Offenbach · Can-Can','D4 D4 E4 G4 F#4 E4 A4 A4 A4 B4 F#4 G4 E4 E4 E4 G4 F#4 E4 D4 D5 C#5 B4 A4 G4 F#4 E4'],
+ ['Mozart · Rondo alla Turca','B4 A4 G#4 A4 C5 D5 C5 B4 C5 E5 F5 E5 D#5 E5 B5 A5 G#5 A5 B5 A5 G#5 A5 C6'],
+ ['Bizet · Habanera from Carmen','D5 C#5 C5 C5 C5 B4 A#4 A4 A4 A4 G#4 G4 F4 E4 F4 G4 F4 E4'],
+ ['Greensleeves · English folk song','A4 C5 D5 E5 F5 E5 D5 B4 G4 A4 B4 C5 A4 A4 G#4 A4 B4 G#4 E4'],
+ ['Dies Irae · medieval chant','F4 E4 F4 D4 E4 C4 D4 D4 F4 F4 G4 F4 E4 D4 C4 E4 F4 E4 D4 D4']
+].map(([n,q])=>({n,m:q.split(' ').map(N2M)}));
+let songI=Math.floor(Math.random()*SONGS.length),stepI=0,loopI=0;
+const hz=m=>440*2**((m-69)/12), floorAt=(m,min)=>{while(m<min)m+=12;return m;};
+const showSong=()=>{$('song').textContent='♪ '+SONGS[songI].n;};
+function tone(type,f,t,d,vol,dest,vib){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+  if(vib){const l=AC.createOscillator(),lg=AC.createGain();l.frequency.value=5.5;lg.gain.value=f*.012;l.connect(lg).connect(o.frequency);l.start(t);l.stop(t+d);}
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(dest);o.start(t);o.stop(t+d);return o;}
+function hiss(t,d,vol,type,freq){const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();n.buffer=noiseBuf;f.type=type;f.frequency.value=freq;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(f).connect(g).connect(clean);n.start(t);n.stop(t+d);}
+function playStep(crit){ if(!audioOn())return; try{
+  const song=SONGS[songI],m=song.m[stepI],t=AC.currentTime,has=i=>S.gens[i]>0,lo=m-12,beat=stepI%2==0;
+  tone('sawtooth',hz(lo),t,.3,.8,dist);                                                             // you, on the pick: the melody
+  if(has(0)){const r=floorAt(lo-12,40);tone('sawtooth',hz(r),t,.32,.7,dist);tone('sawtooth',hz(r+7),t,.32,.5,dist);}   // rhythm guitar: power chord underneath
+  if(has(1)){hiss(t,.04,.3,'highpass',7000);                                                        // drummer: hi-hat on every hit, kick and snare alternating
+    if(beat){const k=tone('sine',150,t,.17,1.4,clean);k.frequency.exponentialRampToValueAtTime(45,t+.12);}
+    else{hiss(t,.14,.8,'highpass',1500);tone('triangle',190,t,.08,.6,clean);}}
+  if(has(2))tone('triangle',hz(floorAt(m-24,28)),t,.36,1.1,clean);                                  // bassist: two octaves below the melody
+  if(has(3))tone('square',hz(m),t,.3,.16,clean,true);                                               // lead guitarist: an octave above, with vibrato
+  if(has(4)){tone('sine',hz(m),t,.42,.3,clean);tone('sine',hz(m+7),t,.42,.16,clean);tone('sine',hz(m+12),t,.42,.2,clean);}   // keyboardist: organ stack
+  if(has(5)){const o=AC.createOscillator(),l=AC.createOscillator(),lg=AC.createGain(),f=AC.createBiquadFilter(),g=AC.createGain();   // singer: a filtered "aah"
+    o.type='sawtooth';o.frequency.value=hz(lo);l.frequency.value=5.5;lg.gain.value=hz(lo)*.015;l.connect(lg).connect(o.frequency);
+    f.type='bandpass';f.frequency.value=1000;f.Q.value=3;g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.9,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.42);
+    o.connect(f).connect(g).connect(clean);o.start(t);l.start(t);o.stop(t+.42);l.stop(t+.42);}
+  if(has(6)&&beat){const f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.value=800;f.Q.value=3;                // cowbell player: on every beat, naturally
+    g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);f.connect(g).connect(clean);
+    [540,800].forEach(q=>{const o=AC.createOscillator();o.type='square';o.frequency.value=q;o.connect(f);o.start(t);o.stop(t+.16);});}
+  if(crit){hiss(t,.5,.6,'highpass',5000);tone('sawtooth',hz(m+12),t,.4,.35,dist);}                 // critical riff: crash cymbal and a screaming octave
+  if(++stepI>=song.m.length){stepI=0;if(++loopI>=2){loopI=0;songI=(songI+1)%SONGS.length;showSong();}}
  }catch(e){} }
 
 /* ---------- embers ---------- */
@@ -883,7 +938,7 @@ function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();}
   render();}
-let lastAch=0;calcFx();buildAch();buildTech();buildBoss();drawSlots();
+showSong();let lastAch=0;calcFx();buildAch();buildTech();buildBoss();drawSlots();
 setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});

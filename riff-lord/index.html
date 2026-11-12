@@ -452,48 +452,49 @@ const BASE_INST=['Borrowed Guitar','Practice Pad Kit','Two-String Bass','Mail-Or
    A variant with no second effect is a pure booster of its own member; the others give up some of that for a second effect:
    buff = another member · all = all fans · click = riff power · crit = crit chance · boss = boss damage · off = offline earnings · hype = max hype */
 const VARS=[
- [0,'i','🎸','Pawn Shop Special',null,'Stays in tune for almost a whole song.'],
- [0,'i','🪚','Chainsaw Guitar',['click'],'Technically also a gardening tool.'],
- [0,'i','🪓','Thunderforged Axe',['all'],'Six strings, one lightning bolt.'],
- [0,'e','🔊','Slightly Too Loud Amp',null,'The neighbours have formed a committee.'],
- [0,'e','📣','Backing Scream Mic',['buff',5],'He only knows one word and it is "YEAH".'],
- [0,'e','🧱','Wall of Amps',['buff',3],'Most of them are empty boxes. Do not tell anyone.'],
- [1,'i','🥁','Kit With All Its Cymbals',null,'A luxury.'],
- [1,'i','🛢️','Oil Drum Kit',['buff',2],'Tight low end, faint smell of diesel.'],
- [1,'i','🐕','Hellhound Kick Drum',['boss'],'It bites back on the downbeat.'],
- [1,'e','🦿','Double-Kick Machine',null,'Both feet. No excuses.'],
- [1,'e','🥢','Spare Sticks',['click'],'He drops one per song. Now it does not matter.'],
- [1,'e','🎠','Spinning Drum Riser',['all'],'Nobody asked. Everybody cheered.'],
- [2,'i','🪕','Bass With All Four Strings',null,'He still only uses one.'],
- [2,'i','📻','Subwoofer Bass',['buff',1],'Locks in with the drums. Unlocks nearby cars.'],
- [2,'i','🐋','Bass of the Deep',['all'],'Felt, not heard. Mostly by whales.'],
- [2,'e','🎚️','Volume Knob',null,'Somebody finally turned the bass player up.'],
- [2,'e','🧊','Fridge-Sized Cabinet',['buff',4],'Also keeps the drinks cold.'],
- [2,'e','🌋','Earthquake Pedal',['boss'],'Registered on three seismographs.'],
- [3,'i','📐','Pointy Guitar',null,'Extra points for the points.'],
- [3,'i','🦞','Double-Neck Guitar',['click'],'Twice the necks, same number of ideas.'],
- [3,'i','🦷','Fang of the First Riff',['crit'],"A guitar inlaid with a demon's tooth."],
- [3,'e','🦆','Wah Pedal',null,'Makes the guitar sound like a duck with opinions.'],
- [3,'e','🌬️','Wind Machine',['buff',5],'For the hair. It is always for the hair.'],
- [3,'e','🔦','Solo Spotlight',['crit'],'Follows him everywhere. Even backstage.'],
- [4,'i','🎹','Keyboard With Working Keys',null,'All of them. Even the black ones.'],
- [4,'i','🎛️','Keytar',['buff',3],'Finally allowed at the front of the stage.'],
- [4,'i','⛪','Cathedral Organ on Wheels',['all'],'Needs its own truck and a bishop.'],
- [4,'e','🔌','Second Keyboard (Unplugged)',null,'Looks great. Does nothing. Somehow helps.'],
- [4,'e','🌫️','Fog Machine',['hype'],'Nobody has seen the keyboardist in years.'],
- [4,'e','🦸','The Cape',['all'],'Adds nothing to the sound. Adds everything.'],
- [5,'i','🎤','Mic Without Tape On It',null,'Smells only slightly of the last singer.'],
- [5,'i','🎙️','Banshee Microphone',['hype'],'Every scream reaches the cheap seats.'],
- [5,'i','🍬','Golden Throat Lozenge',['all'],'One per career.'],
- [5,'e','🍯','Honey and Tea',null,'In a flask labelled "definitely tea".'],
- [5,'e','👖','Leather Trousers',['hype'],'Two sizes too small. The high notes got higher.'],
- [5,'e','📜','Stage-Dive Insurance',['off'],'Covers the band while you are away.'],
- [6,'i','🔔','Bigger Cowbell',null,'Progress.'],
- [6,'i','🏅','Gold-Plated Cowbell',['all'],'Sounds the same. Costs more.'],
- [6,'i','✨','Cowbell of Prophecy',['crit'],'It was foretold: there would be more.'],
- [6,'e','🥢','Second Drumstick',null,'Revolutionary.'],
- [6,'e','📋','Cowbell Solo Permit',['click'],'Signed by the whole band, under protest.'],
- [6,'e','🐄','An Actual Cow',['buff',1],'Moos on the downbeat. Mostly.']
+ /* names are affectionate nods to rock and pop culture; the order inside each slot (pure, 2nd effect, 2nd effect) must stay fixed because saves store it */
+ [0,'i','🫳','Air Guitar',null,'Most excellent. Weighs nothing, never needs tuning.'],
+ [0,'i','🔥','Flame-Throwing Guitar',['click'],'Comes bolted to a truck in the desert. Witness it.'],
+ [0,'i','⚡','Schoolboy Lightning Guitar',['all'],'Comes with a school uniform. The shorts are not optional.'],
+ [0,'e','🔊','Amp That Goes to Eleven',null,'One louder than ten. That is the whole point.'],
+ [0,'e','🎭','Bohemian Backing Choir',['buff',5],'Four voices, one hundred and eighty overdubs.'],
+ [0,'e','🧱','Wall of Sound',['buff',3],'Fills the stadium. And the car park. And the next town.'],
+ [1,'i','🧸','Puppet Drummer\'s Kit',null,'Previous owner was red, fuzzy and ate a cymbal.'],
+ [1,'i','💥','Spontaneously Combusting Kit',['buff',2],'The band has had a few drummers. Warranty does not cover them.'],
+ [1,'i','🌩️','Gated Reverb Toms',['boss'],'You can feel them coming. Wait for it. Wait for it…'],
+ [1,'e','🎡','Upside-Down Drum Cage',null,'Spins the whole kit over the crowd. Lunch not recommended.'],
+ [1,'e','⏱️','Not-Quite-My-Tempo Metronome',['click'],'It throws a chair if you rush. Or drag.'],
+ [1,'e','🔆','Giant Gong',['all'],'Hit once per concert, talked about for decades.'],
+ [2,'i','7️⃣','Seven Nation Bass',null,'Technically a guitar with a pedal. Nobody tell the stadium.'],
+ [2,'i','📺','Sitcom Slap Bass',['buff',1],'Plays itself between scenes about nothing.'],
+ [2,'i','🦷','Another One Bites the Bass',['all'],'The one riff every single person can hum.'],
+ [2,'e','🧊','Borrowed Bassline',null,'Totally different song. It has one extra note.'],
+ [2,'e','🗿','Tiny Stonehenge',['buff',4],'Ordered in feet, delivered in inches. In danger of being trodden on.'],
+ [2,'e','💩','Brown Note Generator',['boss'],'A myth, they said. Bring spare trousers anyway.'],
+ [3,'i','🚫','Forbidden Stairway Double-Neck',null,'Banned from being played in every guitar shop on Earth.'],
+ [3,'i','☔','Purple Symbol Guitar',['click'],'Shaped like a name nobody can pronounce.'],
+ [3,'i','🛣️','Crossroads Guitar',['crit'],'Tuned by a stranger at midnight. Terms and conditions apply.'],
+ [3,'e','😈','Pick of Density',null,'Carved from a demon\'s tooth. Surprisingly heavy.'],
+ [3,'e','⛪','Desert Chapel Wind Machine',['buff',5],'For solos played outside very small churches.'],
+ [3,'e','🗣️','Talk Box',['crit'],'Makes the guitar talk. Mostly it says "wow".'],
+ [4,'i','🚀','Final Countdown Synth',null,'Plays exactly one fanfare. It is enough.'],
+ [4,'i','🕺','Eighties Keytar',['buff',3],'Shoulder strap, big hair, zero regrets.'],
+ [4,'i','👻','Phantom\'s Pipe Organ',['all'],'Includes a half mask and a lake in the basement.'],
+ [4,'e','🕴️','Rickroll Sequencer',null,'You knew what it was. You pressed play anyway.'],
+ [4,'e','🌫️','Smoke-on-the-Water Machine',['hype'],'Covers the stage and one nearby lake.'],
+ [4,'e','🧙','Prog Wizard Cape',['all'],'For twenty-minute solos about King Arthur. On ice.'],
+ [5,'i','🎤','Bottomless Mic Stand',null,'Lost its lower half years ago. Works better this way.'],
+ [5,'i','🧣','Scarf-Covered Mic Stand',['hype'],'More scarf than stand at this point.'],
+ [5,'i','🤖','Autotune Box',['all'],'Makes any singer sound like a very confident robot.'],
+ [5,'e','🍫','No-Brown-Candy Contract',null,'If you find a brown one, go and check the stage rigging.'],
+ [5,'e','🦇','Rubber Bat (Probably)',['hype'],'It looked like a rubber one. It was not a rubber one.'],
+ [5,'e','📺','Hotel TV Insurance',['off'],'Covers one television per window per night.'],
+ [6,'i','🔔','More Cowbell',null,'You have a fever. This is the only cure.'],
+ [6,'i','💀','Cowbell of the Reaper',['all'],'Do not fear it. Really explore the studio space.'],
+ [6,'i','💍','One Bell to Rule Them All',['crit'],'Forged in a volcano, lost in a river, found in a pawn shop.'],
+ [6,'e','🎻','World\'s Smallest Violin',null,'Plays whenever the cowbell player complains.'],
+ [6,'e','📯','Vuvuzela',['click'],'One note. Ninety minutes. No mercy.'],
+ [6,'e','🐄','Album Cover Cow',['buff',1],'Stood in a field for one photo. Has been a diva ever since.']
 ];
 const RN=['Common','Rare','Epic','Legendary'], RARE_CHANCE=.28;
 /* effect strength per rarity (common, rare, epic, legendary) */
@@ -577,11 +578,13 @@ const cdisc=()=>1-.05*pl('cheap');
 function bulk(i){ const b=GENS[i][3]*cdisc()*G**S.gens[i]; let k=qty;
   if(qty<0){k=Math.max(1,Math.floor(Math.log(S.fans*(G-1)/b+1)/Math.log(G)));}
   return {k,cost:b*(G**k-1)/(G-1)}; }
-/* platinum records from all-time fans: square root up to 1B fans (about 31 records), then a fourth root,
-   so every further record needs a much bigger step (50 records at 6.25B, 100 at 100B, 1000 at 1Qa). */
-const REC_KNEE=1e9, REC_AT_KNEE=Math.sqrt(REC_KNEE/1e6);
-const recOf=t=>t<=REC_KNEE?Math.sqrt(t/1e6):REC_AT_KNEE*(t/REC_KNEE)**.25;
-const fansFor=n=>n<=REC_AT_KNEE?n*n*1e6:REC_KNEE*(n/REC_AT_KNEE)**4;
+/* platinum records from all-time fans, in three segments that each make the next record cost more:
+   up to 1B fans     square root          (1B   = about 31 records)
+   1B to 100B        fourth root          (100B = 100 records)
+   past 100B         25 records per ×10   (1T = 125, 1Qa = 200): every record costs about 10% more fans than the last */
+const REC_K1=1e9, REC_N1=Math.sqrt(REC_K1/1e6), REC_K2=1e11, REC_N2=REC_N1*(REC_K2/REC_K1)**.25, REC_PER_DECADE=25;
+const recOf=t=>t<=REC_K1?Math.sqrt(t/1e6):t<=REC_K2?REC_N1*(t/REC_K1)**.25:REC_N2+REC_PER_DECADE*Math.log10(t/REC_K2);
+const fansFor=n=>n<=REC_N1?n*n*1e6:n<=REC_N2?REC_K1*(n/REC_N1)**4:REC_K2*10**((n-REC_N2)/REC_PER_DECADE);
 const pending=()=>Math.max(0,Math.floor(recOf(S.total)+1e-9)-S.earned);
 
 function gain(n){S.fans+=n;S.run+=n;S.total+=n;}

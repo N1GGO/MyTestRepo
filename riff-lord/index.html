@@ -769,7 +769,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:7});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:8});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -783,8 +783,8 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<4){for(let i=NG+3;i<GENS.length;i++){S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);}}   // v4 repriced the touring members completely, so their old levels are returned to zero
   if((S.v||0)<5){let back=0;GUEST_COST.forEach((c,j)=>{if(S.guest[NG+j])back+=c;});S.guest={};if(back){S.records+=back;S.refund=back;}}   // v5: guest stars no longer cost records, so what was paid comes back
   if((S.v||0)<6){let back=0;for(const k in S.ets){const L=S.ets[k];if(L>1){back+=(L-1)*L/2;S.ets[k]=1;}}if(back){S.et=(S.et||0)+back;S.etRefund=back;}}   // v6: eternity levels cost 1, 2, 4, 8… instead of 1, 2, 3…, so levels above 1 are refunded at what they cost
-  if((S.v||0)<7)S.capFix=1;   // v7: skill caps are back, see capFix() at the end of the script
-  S.v=7;
+  if((S.v||0)<8)S.capFix=1;   // v7: skill caps are back, v8: Auto-Shredder 3 and Speed Picking 5. See S.capFix at the end of the script
+  S.v=8;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
 const save=()=>{if(noSave)return;S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
@@ -1122,8 +1122,8 @@ ABIL.forEach(a=>{const b=$(a.el);b.innerHTML=`<b>${a.n}</b><small></small><small
 
 /* ---------- solo skill: hourly solo + technique upgrades bought with skill ---------- */
 const TECH=[
- {id:'auto',n:ic('robot')+' Auto-Shredder',d:'+1 autoclicker that clicks for you',c:l=>150*4**l,max:20},
- {id:'speed',n:ic('bolt')+' Speed Picking',d:'Each autoclicker +1 click per second',c:l=>250*4**l,max:20},
+ {id:'auto',n:ic('robot')+' Auto-Shredder',d:'+1 autoclicker that clicks for you',c:l=>150*4**l,max:3},
+ {id:'speed',n:ic('bolt')+' Speed Picking',d:'Each autoclicker +1 click per second',c:l=>250*4**l,max:5},
  {id:'crowd',n:'Crowd Work',d:'Max hype bonus +25%',c:l=>Math.round(10*1.8**l),max:20},
  {id:'prec',n:'Precision',d:'Crit chance +1%',c:l=>Math.round(8*1.7**l),max:20},
  {id:'brut',n:'Brutality',d:'Crits hit +5× harder',c:l=>Math.round(12*1.7**l),max:20},
@@ -1624,7 +1624,7 @@ if(S.capFix){let rec=0,sk=0,et=0;const cut=(list,lv,set,cur)=>list.forEach(t=>{l
   const top=S.boss.lvl>BOSS_TOP;if(top){S.boss.lvl=BOSS_TOP;delete S.boss.hp;}
   const fin=x=>isFinite(x)?x:1e300;rec=fin(rec);sk=fin(sk);et=fin(et);S.records+=rec;S.skill+=sk;S.et+=et;delete S.capFix;
   calcFx();buildPerks();buildTech();buildBoss();buildEt();render();save();
-  if(rec||sk||et||top)note('Skill Caps Are Back',`Skills have a maximum level again: 20 for every perk and skill, 10 for Power Nap and Quick Turnaround, and no cooldown goes below 10 minutes. Boss stages now end at 1000, and every boss has 10× more HP.<br><br>`+
+  if(rec||sk||et||top)note('Skill Caps Are Back',`Skills have a maximum level: 20 for most perks and skills, 10 for Power Nap and Quick Turnaround, 5 for Speed Picking and 3 for Auto-Shredder. No cooldown goes below 10 minutes. Boss stages end at 1000, and every boss has 10× more HP.<br><br>`+
     [rec&&`<b>+${fmt(rec)} ${ic('rec')}</b> platinum records`,sk&&`<b>+${fmt(sk)} ${ic('skill')}</b> solo skill`,et&&`<b>+${fmt(et)} ${ic('eternity')}</b> Eternity`].filter(Boolean).join(' · ')+
     (rec||sk||et?' came back for the levels above the caps.':'')+(top?'<br>Your boss stage was set to 1000.':''));}
 if(S.etRefund){note('Eternity Rebalanced',`Eternity skill levels used to cost 1, 2, 3, 4… points, so one long run bought dozens of levels and broke every later tour. Now each level costs twice the one before: 1, 2, 4, 8…<br><br>Your eternity skills are back at level 1, and the <b style="color:#e9c6ff">${fmt(S.etRefund)} ${ic('eternity')} Eternity</b> you spent on higher levels is yours again. Spend it in the Legend tab; the <b>Max</b> button on a skill buys as many levels as you can afford.`);delete S.etRefund;save();}

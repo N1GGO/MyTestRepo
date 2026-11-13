@@ -404,6 +404,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @keyframes flash{0%{opacity:1}100%{opacity:0}}
 .ic{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.28em;overflow:visible}
 #fBoss .ic,#bEmo .ic{width:1em;height:1em;vertical-align:middle}
+#mT .ic{margin-right:.3em}
 #tabs button span .ic{width:1.1em;height:1.1em;vertical-align:middle}
 </style>
 </head>
@@ -412,7 +413,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <header>
   <h1><span data-ic="bolt"></span> Riff Lord</h1>
   <div id="hfans"></div>
-  <div class="hbtns"><button id="mute"></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button><button id="wipe"><span data-ic="trash"></span><span class="lbl"> Wipe save</span></button></div>
+  <div class="hbtns"><button id="setBtn" aria-label="Settings"><span data-ic="cog"></span><span class="lbl"> Settings</span></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button><button id="wipe"><span data-ic="trash"></span><span class="lbl"> Wipe save</span></button></div>
 </header>
 <nav id="tabs">
   <button data-tab="gear" class="on"><span data-ic="tabBand"></span>Band</button>
@@ -744,8 +745,9 @@ let noSave=false;   // set while an imported save is waiting for the reload
 const save=()=>{if(noSave)return;S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
 
 const SUF=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','UDc','DDc','TDc','QaDc','QiDc','SxDc','SpDc','OcDc','NoDc','Vg','UVg','DVg','TVg','QaVg','QiVg','SxVg','SpVg'];
+const fmtSci=n=>n.toExponential(2).replace('+','');   // 15300000000 → 1.53e10
 function fmt(n){ if(n<1000) return n<10&&n%1?n.toFixed(1):Math.floor(n).toString();
-  const e=Math.floor(Math.log10(n)/3); if(e>=SUF.length) return n.toExponential(2).replace('+','');
+  const e=Math.floor(Math.log10(n)/3); if(S.sci||e>=SUF.length) return fmtSci(n);   // scientific numbers setting, and past the last suffix
   const v=n/10**(e*3); return (v<10?v.toFixed(2):v<100?v.toFixed(1):v.toFixed(0))+SUF[e]; }
 const pl=id=>S.perks[id]||0, etl=id=>S.ets[id]||0;   // legend perk level, eternity skill level
 const tl=id=>S.tech[id]||0;
@@ -1001,7 +1003,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
   if($('etTxt').innerHTML!==t)$('etTxt').innerHTML=t;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`This ends everything. Fans, band and gear, platinum records and perks, solo skill and techniques, bosses, achievements: all gone.<br>Your songs, pick skins and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
-  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,songOff:S.songOff,skins:S.skins,skin:S.skin,mute:S.mute,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1};
+  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,songOff:S.songOff,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();
@@ -1199,8 +1201,13 @@ function buildAch(){let lv=0;achBonus=0;const h=ACH.map(a=>{const l=S.achL[a[0]]
   $('achN').textContent=`${lv}/${ACH.length*3} levels · +${achBonus}% fans`;$('ach').innerHTML=h;}
 function checkAch(){let n=0,last;ACH.forEach(a=>{const v=a[3](),l=a[4].filter(t=>v>=t).length;if(l>(S.achL[a[0]]||0)){S.achL[a[0]]=l;n++;last=a;}});
   buildAch();if(n)toast(n>1?`${ic('trophy')} <b>${n} achievements levelled up</b>`:`${ic('trophy')} <b>${last[1]}</b> level ${S.achL[last[0]]} · +${ACH_PCT[S.achL[last[0]]]}% fans`);}
-const muteLbl=()=>{$('mute').innerHTML=S.mute?ic('soundOff')+'<span class="lbl"> Muted</span>':ic('soundOn')+'<span class="lbl"> Sound</span>';};
-$('mute').onclick=()=>{S.mute=!S.mute;muteLbl();};muteLbl();
+/* ---------- settings: sound and number style. Both are saved with the game and survive transcending. ---------- */
+function openSettings(){const row=(id,ico,t,on,d)=>`<button class="pk" id="${id}"><span class="pe">${ic(ico)}</span><span><b>${t}</b> · <b style="color:${on?'#8fd04a':'#ff9a9a'}">${on?'ON':'OFF'}</b><br><i>${d}</i></span></button>`;
+  modal(ic('cog')+' Settings',row('stSnd',S.mute?'soundOff':'soundOn','Sound',!S.mute,'Riffs, band music and effects. Tap to switch.')+
+    row('stSci','calc','Scientific numbers',!!S.sci,`From 1000 on, numbers show as ${fmtSci(1.53e10)} instead of 15.3B. Tap to switch.`),[['Close',null,1]]);
+  $('stSnd').onclick=()=>{S.mute=!S.mute;if(!S.mute)wakeAudio();save();openSettings();};
+  $('stSci').onclick=()=>{S.sci=!S.sci;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();render();save();openSettings();};}
+$('setBtn').onclick=openSettings;
 
 /* ---------- underworld tour: boss fights, every stat skilled with platinum records ---------- */
 const BOSS_COST=50;

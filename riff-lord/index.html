@@ -123,6 +123,7 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 :is(.perk,.tech,.bsk,.etk) .t{padding-right:40px}
 .maxb{position:absolute;top:6px;right:6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid currentColor;color:var(--gold);background:rgba(0,0,0,.35);cursor:pointer;opacity:.35}
 :is(.perk,.tech,.bsk,.etk).ok .maxb{opacity:1}
+.maxed .maxb{display:none}
 .maxb:hover{background:rgba(255,207,74,.15)}
 .etk{font:inherit;color:inherit;text-align:left;background:#1a1226;border:1px solid #4a2f6a;border-radius:9px;padding:9px;cursor:pointer}
 .etk .t{font-weight:500;color:#f3d9ff}.etk .t small{color:#b9a3d8;font-weight:400}
@@ -735,10 +736,10 @@ const wCount=()=>WLD.reduce((a,_,t)=>a+(S.ups['w'+t]?1:0),0);
 const CLK=[100,1e3,2e4,5e5,2e7,1e9,1e11,1e13,1e15,1e17,1e19,1e21,1e24,1e27,1e30];
 const CN=['Heavier Strings','Drop-D Tuning','Palm Muting','Sweep Picking','Tapping Solo','Seven Strings','Eight Strings','Shred Mastery','Fingers of Fury','Nine Strings','Double-Neck Madness','Lightning Fingers','Time Signature Abuse','Riff Singularity','The Chord of Creation'];
 const PERKS=[
- {id:'crew',n:'Roadie Army',d:'+25% all fans per level',c:l=>2*2**l,max:Infinity},
- {id:'pick',n:'Golden Pick',d:'Riff power ×1.5 per level',c:l=>3**l,max:Infinity},
- {id:'cheap',n:'Endorsement Deal',d:'Band members 5% cheaper per level',c:l=>3*2**l,max:Infinity},
- {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:Infinity}
+ {id:'crew',n:'Roadie Army',d:'+25% all fans per level',c:l=>2*2**l,max:20},
+ {id:'pick',n:'Golden Pick',d:'Riff power ×1.5 per level',c:l=>3**l,max:20},
+ {id:'cheap',n:'Endorsement Deal',d:'Band members 5% cheaper per level',c:l=>3*2**l,max:20},
+ {id:'start',n:'Hype Train',d:'Start each tour with more fans',c:l=>2*3**l,max:20}
 ];
 const RANKS=[[0,'Garage Band'],[1e3,'Bar Regulars'],[1e5,'Club Act'],[1e7,'Opening Act'],[1e9,'Headliners'],[1e11,'Arena Titans'],[1e13,'Metal Gods'],[1e16,'Riff Lords of the Cosmos']];
 /* ---------- big numbers. Fans, income and costs grow far past 1.8e308, where plain JS numbers turn into Infinity and then NaN.
@@ -768,7 +769,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:6});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:7});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -782,7 +783,8 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<4){for(let i=NG+3;i<GENS.length;i++){S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);}}   // v4 repriced the touring members completely, so their old levels are returned to zero
   if((S.v||0)<5){let back=0;GUEST_COST.forEach((c,j)=>{if(S.guest[NG+j])back+=c;});S.guest={};if(back){S.records+=back;S.refund=back;}}   // v5: guest stars no longer cost records, so what was paid comes back
   if((S.v||0)<6){let back=0;for(const k in S.ets){const L=S.ets[k];if(L>1){back+=(L-1)*L/2;S.ets[k]=1;}}if(back){S.et=(S.et||0)+back;S.etRefund=back;}}   // v6: eternity levels cost 1, 2, 4, 8… instead of 1, 2, 3…, so levels above 1 are refunded at what they cost
-  S.v=6;
+  if((S.v||0)<7)S.capFix=1;   // v7: skill caps are back, see capFix() at the end of the script
+  S.v=7;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
 const save=()=>{if(noSave)return;S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
@@ -961,13 +963,13 @@ function placeBoss(){const w=wideMQ.matches,b=$('pBoss');document.querySelector(
 placeBoss();wideMQ.addEventListener('change',placeBoss);
 let perkBtns=[];
 /* "Max" in the top right corner of every skill tile: buys level after level while the currency lasts (cost is re-read for each level) */
-function maxBtn(b,cost,have,buy,done){const m=document.createElement('span');m.className='maxb';m.textContent='Max';m.setAttribute('role','button');m.title='Buy as many levels as you can afford';
-  m.onclick=e=>{e.stopPropagation();let n=0;while(n<1e4&&have()>=cost()){buy(cost());n++;}if(n){chord(2.5);toast(`<b>+${n} level${n>1?'s':''}</b>`);done();save();}};b.appendChild(m);}
+function maxBtn(b,cost,have,buy,done,room){const m=document.createElement('span');m.className='maxb';m.textContent='Max';m.setAttribute('role','button');m.title='Buy as many levels as you can afford';
+  m.onclick=e=>{e.stopPropagation();let n=0;while(n<1e4&&room()&&have()>=cost()){buy(cost());n++;}if(n){chord(2.5);toast(`<b>+${n} level${n>1?'s':''}</b>`);done();save();}};b.appendChild(m);}
 function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earned)return;
-  PERKS.forEach(p=>{const l=pl(p.id),mx=l>=p.max,c=p.c(l);const b=document.createElement('button');b.className='perk';
+  PERKS.forEach(p=>{const l=pl(p.id),mx=l>=p.max,c=p.c(l);const b=document.createElement('button');b.className='perk'+(mx?' maxed':'');
     b.innerHTML=`<div class="t">${p.n} <small>Lv ${l}</small></div><div class="d">${p.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.perks[p.id]=l+1;chord(2);buildPerks();render();}};
-    maxBtn(b,()=>p.c(pl(p.id)),()=>S.records,c=>{S.records-=c;S.perks[p.id]=pl(p.id)+1;},()=>{buildPerks();render();});el.appendChild(b);perkBtns.push({b,c,mx});});}
+    maxBtn(b,()=>p.c(pl(p.id)),()=>S.records,c=>{S.records-=c;S.perks[p.id]=pl(p.id)+1;},()=>{buildPerks();render();},()=>pl(p.id)<p.max);el.appendChild(b);perkBtns.push({b,c,mx});});}
 
 let lastUpCount=-1;
 function render(){
@@ -1050,14 +1052,14 @@ const ES=[
  ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +10%'],
  ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Boss damage ×10'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
- ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
-const ET_MAX=Infinity, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etLvlCost=l=>2**(l-1);   // going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles
+ ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter (never below 10 min)'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
+const ET_MAX=20, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etLvlCost=l=>2**(l-1);   // going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles
 let etBtns=[];
 function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
-  etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=ET_MAX,c=etLvlCost(l),b=document.createElement('button');b.className='etk';
+  etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=ET_MAX,c=etLvlCost(l),b=document.createElement('button');b.className='etk'+(mx?' maxed':'');
     b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}</small></div><div class="d">${k[2]} per level</div><div class="c">${mx?'MAXED':ic('eternity')+' '+c}</div>`;
     b.onclick=()=>{if(!mx&&S.et>=c){S.et-=c;S.ets[k[0]]=l+1;chord(2);afterEt();}};
-    maxBtn(b,()=>etLvlCost(etl(k[0])),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt);box.appendChild(b);etBtns.push({b,c,mx});});
+    maxBtn(b,()=>etLvlCost(etl(k[0])),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt,()=>etl(k[0])<ET_MAX);box.appendChild(b);etBtns.push({b,c,mx});});
   if(etOwned().length<ES.length){const c=etNewCost(),b=document.createElement('button');b.className='etk new';
     b.innerHTML=`<div class="t">＋ New eternity skill</div><div class="d">Choose one of three</div><div class="c">${S.etOffer?'your offer is waiting':ic('eternity')+' '+c}</div>`;
     b.onclick=()=>{if(!S.etOffer){if(S.et<c)return;S.et-=c;const pool=ES.filter(k=>!etl(k[0])).map(k=>k[0]).sort(()=>Math.random()-.5);S.etOffer=pool.slice(0,3);buildEt();save();render();}openOffer();};
@@ -1120,23 +1122,23 @@ ABIL.forEach(a=>{const b=$(a.el);b.innerHTML=`<b>${a.n}</b><small></small><small
 
 /* ---------- solo skill: hourly solo + technique upgrades bought with skill ---------- */
 const TECH=[
- {id:'auto',n:ic('robot')+' Auto-Shredder',d:'+1 autoclicker that clicks for you',c:l=>150*4**l,max:Infinity},
- {id:'speed',n:ic('bolt')+' Speed Picking',d:'Each autoclicker +1 click per second',c:l=>250*4**l,max:Infinity},
- {id:'crowd',n:'Crowd Work',d:'Max hype bonus +25%',c:l=>Math.round(10*1.8**l),max:Infinity},
- {id:'prec',n:'Precision',d:'Crit chance +1%',c:l=>Math.round(8*1.7**l),max:Infinity},
- {id:'brut',n:'Brutality',d:'Crits hit +5× harder',c:l=>Math.round(12*1.7**l),max:Infinity},
- {id:'stam',n:'Stamina',d:'Timed boosts last +5s',c:l=>Math.round(10*1.8**l),max:Infinity},
- {id:'pres',n:'Stage Presence',d:'Stage divers 10% more often',c:l=>Math.round(15*2**l),max:Infinity},
- {id:'cool',n:'Power Nap',d:'Solo cooldown −5 min (down to 10)',c:l=>Math.round(60*1.6**l),max:Infinity},
- {id:'encore',n:'Standing Ovation',d:'Encore pays 1 more minute of fans',c:l=>Math.round(30*1.7**l),max:Infinity},
- {id:'label',n:'Record Deal',d:'+10% platinum records from ascending',c:l=>1000*4**l,max:Infinity}];
-const soloCd=()=>Math.max(60,Math.max(600,3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.1*tl('label'))*(1+.1*etl('plat'))*songRec(), skX=()=>3**etl('virt');
+ {id:'auto',n:ic('robot')+' Auto-Shredder',d:'+1 autoclicker that clicks for you',c:l=>150*4**l,max:20},
+ {id:'speed',n:ic('bolt')+' Speed Picking',d:'Each autoclicker +1 click per second',c:l=>250*4**l,max:20},
+ {id:'crowd',n:'Crowd Work',d:'Max hype bonus +25%',c:l=>Math.round(10*1.8**l),max:20},
+ {id:'prec',n:'Precision',d:'Crit chance +1%',c:l=>Math.round(8*1.7**l),max:20},
+ {id:'brut',n:'Brutality',d:'Crits hit +5× harder',c:l=>Math.round(12*1.7**l),max:20},
+ {id:'stam',n:'Stamina',d:'Timed boosts last +5s',c:l=>Math.round(10*1.8**l),max:20},
+ {id:'pres',n:'Stage Presence',d:'Stage divers 10% more often',c:l=>Math.round(15*2**l),max:20},
+ {id:'cool',n:'Power Nap',d:'Solo cooldown −5 min (down to 10)',c:l=>Math.round(60*1.6**l),max:10},
+ {id:'encore',n:'Standing Ovation',d:'Encore pays 1 more minute of fans',c:l=>Math.round(30*1.7**l),max:20},
+ {id:'label',n:'Record Deal',d:'+10% platinum records from ascending',c:l=>1000*4**l,max:20}];
+const soloCd=()=>Math.max(600,(3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.1*tl('label'))*(1+.1*etl('plat'))*songRec(), skX=()=>3**etl('virt');
 let techBtns=[];
 function buildTech(){const el=$('tech');el.innerHTML='';techBtns=[];
-  TECH.forEach(t=>{const l=tl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='tech';
+  TECH.forEach(t=>{const l=tl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='tech'+(mx?' maxed':'');
     b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':ic('skill')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.skill>=c){S.skill-=c;S.tech[t.id]=l+1;chord(2);buildTech();render();}};
-    maxBtn(b,()=>t.c(tl(t.id)),()=>S.skill,c=>{S.skill-=c;S.tech[t.id]=tl(t.id)+1;},()=>{buildTech();render();});el.appendChild(b);techBtns.push({b,c,mx});});}
+    maxBtn(b,()=>t.c(tl(t.id)),()=>S.skill,c=>{S.skill-=c;S.tech[t.id]=tl(t.id)+1;},()=>{buildTech();render();},()=>tl(t.id)<t.max);el.appendChild(b);techBtns.push({b,c,mx});});}
 const LICK=[0,3,5,7,10,12,15,17,19,22,24,27,24,27,31];
 /* Play Solo is a short rhythm game: 16 notes run into the ring, tap in time. Accuracy picks the spot in the solo range
    (0% = the minimum, 100% = the maximum); a flawless solo (every note perfect) pays ×1.5. Stray taps cost half a note. */
@@ -1284,23 +1286,24 @@ $('setBtn').onclick=openSettings;
 const BOSS_COST=50;
 const BOSSES=[[ic('boss0'),'Count Feedback','#c4122f'],[ic('boss1'),'The Howling Roadie','#7aa0ff'],[ic('boss2'),'Skullcrusher Sid','#e8e0c8'],[ic('boss3'),'Kraken of the Pit','#3ad0c0'],[ic('boss4'),'The Undead Manager','#8fd04a'],[ic('boss5'),'Dragon of Distortion','#ff8a1f'],[ic('boss6'),'Lord Tritone','#ff3a5a'],[ic('boss7'),'The Crossroads Devil','#b05aff']];
 const BSK=[
- {id:'dmg',n:'Riff Damage',d:'Damage against bosses ×2',c:l=>Math.round(5*1.6**l),max:Infinity},
- {id:'time',n:'Extended Set',d:'Fight timer +5s',c:l=>Math.round(6*1.6**l),max:Infinity},
- {id:'loot',n:'Loot Sense',d:'Epic drop chance +3%',c:l=>Math.round(8*1.7**l),max:Infinity},
- {id:'weak',n:'Weak Spot',d:'Boss crit chance +5% (crits ×4)',c:l=>Math.round(10*1.8**l),max:Infinity},
- {id:'combo',n:'Shred Combo',d:'Fast hits stack up to +50% more damage',c:l=>Math.round(10*1.9**l),max:Infinity},
- {id:'band',n:'Backing Band',d:'+1 automatic hit per second',c:l=>Math.round(12*1.8**l),max:Infinity},
- {id:'final',n:'Final Chorus',d:'+100% damage below 30% boss HP',c:l=>30*3**l,max:Infinity},
- {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −5 min (down to 10)',c:l=>Math.round(15*2**l),max:Infinity}];
+ {id:'dmg',n:'Riff Damage',d:'Damage against bosses ×2',c:l=>Math.round(5*1.6**l),max:20},
+ {id:'time',n:'Extended Set',d:'Fight timer +5s',c:l=>Math.round(6*1.6**l),max:20},
+ {id:'loot',n:'Loot Sense',d:'Epic drop chance +3%',c:l=>Math.round(8*1.7**l),max:20},
+ {id:'weak',n:'Weak Spot',d:'Boss crit chance +5% (crits ×4)',c:l=>Math.round(10*1.8**l),max:20},
+ {id:'combo',n:'Shred Combo',d:'Fast hits stack up to +50% more damage',c:l=>Math.round(10*1.9**l),max:20},
+ {id:'band',n:'Backing Band',d:'+1 automatic hit per second',c:l=>Math.round(12*1.8**l),max:20},
+ {id:'final',n:'Final Chorus',d:'+100% damage below 30% boss HP',c:l=>30*3**l,max:20},
+ {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −5 min (down to 10)',c:l=>Math.round(15*2**l),max:10}];
 const bl=id=>S.bs[id]||0;
 const BOSS_REGEN=.01; // bosses heal 1% of their max HP per second
-const bossHP=k=>1200*3**k, bossDmg=()=>10*2**bl('dmg')*FX.boss*10**etl('slay'), bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
-      bossCd=()=>Math.max(60,Math.max(600,3600-300*bl('quick'))*.85**etl('quick')), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
+const BOSS_TOP=999;   // stage 1000 is the last one; beating it again keeps you there
+const bossHP=k=>B(12000).mul(Big.pow10(k*LG(3))), bossDmg=()=>10*2**bl('dmg')*FX.boss*10**etl('slay'), bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
+      bossCd=()=>Math.max(600,(3600-300*bl('quick'))*.85**etl('quick')), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
 /* every 10th stage is a headliner: ten times the HP, it roams the arena and half of all automatic hits miss it,
    but it never heals and keeps its damage between fights (S.boss.hp), so it can be worn down over several attempts. */
 const HEAD=[[ic('head0'),'The Lip-Sync King','#ffd76a'],[ic('head1'),'Auto-Tune Overlord','#5ad0ff'],[ic('head2'),'The Scorpion of Silence','#ff7a3a'],[ic('head3'),'The All-Seeing Critic','#d06aff']];
 const isHead=k=>(k+1)%10==0, HEAD_HP=10;
-const bossMax=k=>bossHP(k)*(isHead(k)?HEAD_HP:1), bossLeft=k=>isHead(k)&&S.boss.hp>0?Math.min(S.boss.hp,bossMax(k)):bossMax(k);
+const bossMax=k=>bossHP(k).mul(isHead(k)?HEAD_HP:1), bossLeft=k=>{const m=bossMax(k),h=B(S.boss.hp||0);return isHead(k)&&h.m>0&&h.lt(m)?h:m;};   // boss HP is a Big: stage 1000 has about 1e481
 const headRecs=k=>Math.ceil((k+1)/2);
 const bossOf=k=>{if(isHead(k)){const n=(k+1)/10-1,h=HEAD[n%HEAD.length],t=Math.floor(n/HEAD.length);return {e:h[0],c:h[2],n:h[1]+(t?' '+'★'.repeat(Math.min(t,5)):''),sp:1};}
   const b=BOSSES[k%BOSSES.length],t=Math.floor(k/BOSSES.length);return {e:b[0],c:b[2],n:b[1]+(t?' '+'★'.repeat(Math.min(t,5)):'')};};
@@ -1313,11 +1316,11 @@ function rollLoot(head){const r=Math.random(),e=bossDrop(),q=head?(r<Math.max(.1
 let F=null,bskBtns=[],autoAcc=0,bandAcc=0;
 function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.boss.on;$('bossUnlock').innerHTML=`Open the gate · ${ic('rec')} ${BOSS_COST}`;
   const el=$('bskills');el.innerHTML='';bskBtns=[];
-  BSK.forEach(t=>{const l=bl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='bsk';
+  BSK.forEach(t=>{const l=bl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='bsk'+(mx?' maxed':'');
     b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};
-    maxBtn(b,()=>t.c(bl(t.id)),()=>S.records,c=>{S.records-=c;S.bs[t.id]=bl(t.id)+1;},()=>{buildBoss();render();});el.appendChild(b);bskBtns.push({b,c,mx});});
-  const k=S.boss.lvl,b=bossOf(k);$('bEmo').innerHTML=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}`;
+    maxBtn(b,()=>t.c(bl(t.id)),()=>S.records,c=>{S.records-=c;S.bs[t.id]=bl(t.id)+1;},()=>{buildBoss();render();},()=>bl(t.id)<t.max);el.appendChild(b);bskBtns.push({b,c,mx});});
+  const k=S.boss.lvl,b=bossOf(k);$('bEmo').innerHTML=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}${k>=BOSS_TOP?' (final)':''}`;
   $('bStats').innerHTML=(b.sp?`<b style="color:#ffd76a">★ HEADLINER ★</b> roams the arena · never heals · keeps its damage between fights · half of all automatic hits miss<br>Reward: epic or legendary gear, a pick skin, triple solo skill and <b>${headRecs(k)} ${ic('rec')}</b><br>HP <b>${fmt(bossLeft(k))} / ${fmt(bossMax(k))}</b>`:`HP <b>${fmt(bossHP(k))}</b> · heals <b>1%</b>/s`)+` · your hit <b>${fmt(bossDmg())}</b> · <b>${bossTime()}s</b> timer<br>epic drop <b>${Math.round(bossDrop()*100)}%</b> · auto hits <b>${bossAuto()}/s</b> · cooldown <b>${fmtT(bossCd())}</b>`;
   const e=bossDrop(),pc=x=>(x*100>=10?(x*100).toFixed(0):(x*100).toFixed(1))+'%';
   $('epicN').innerHTML=`Band gear found: <b>${itemCount()}/${ITEM_IDS.length}</b> kinds · every win drops one item<br>Drop chances: common <b>${pc(Math.max(0,1-e-RARE_CHANCE))}</b> · rare <b>${pc(RARE_CHANCE)}</b> · epic <b>${pc(e*.9)}</b> · legendary <b>${pc(e*.1)}</b><br>Every win also teaches the band a song, drops a pick skin 25% of the time, and adds <b>+15%</b> riff power for good (now <b>+${S.boss.wins*15}%</b>).`;}
@@ -1325,10 +1328,11 @@ $('bossUnlock').onclick=()=>{if(S.boss.on||S.records<BOSS_COST)return;S.records-
 function bossFloat(txt,crit){const r=$('fBoss').getBoundingClientRect(),s=document.createElement('div');s.className='float bf'+(crit?' crit':'');s.textContent=txt;
   s.style.left=r.left+r.width*(.2+Math.random()*.6)-20+'px';s.style.top=r.top+r.height*(.1+Math.random()*.4)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);}
 function drawFight(){const now=Date.now(),tl_=Math.max(0,F.end-now)/1e3;if(now-F.last>1500)F.combo=0;
-  $('fHp').style.width=Math.max(0,F.hp/F.max*100)+'%';$('fHpT').textContent=`${fmt(Math.max(0,F.hp))} / ${fmt(F.max)} HP`;
+  $('fHp').style.width=Math.max(0,hpFrac()*100)+'%';$('fHpT').textContent=`${fmt(F.daily?Math.max(0,F.hp):Big.max(F.hp,0))} / ${fmt(F.max)} HP`;
   $('fTm').style.width=tl_/(F.dur||bossTime())*100+'%';$('fTmT').textContent=tl_.toFixed(1)+'s';
   const cm=1+Math.min(F.combo*.02,.5*bl('combo'));
-  $('fInfo').innerHTML=F.daily?`<b>${Math.ceil(Math.max(0,F.hp))}</b> taps to go`:`Hit <b>${fmt(bossDmg())}</b>${bl('combo')?` · combo <b>×${cm.toFixed(2)}</b>`:''}${bossAuto()?` · <b>${bossAuto()}</b> auto hits/s`:''}${F.hp/F.max<.3&&bl('final')?' · <b>FINAL CHORUS</b>':''}`;}
+  $('fInfo').innerHTML=F.daily?`<b>${Math.ceil(Math.max(0,F.hp))}</b> taps to go`:`Hit <b>${fmt(bossDmg())}</b>${bl('combo')?` · combo <b>×${cm.toFixed(2)}</b>`:''}${bossAuto()?` · <b>${bossAuto()}</b> auto hits/s`:''}${hpFrac()<.3&&bl('final')?' · <b>FINAL CHORUS</b>':''}`;}
+const hpFrac=()=>F.daily?F.hp/F.max:F.hp.div(F.max).toNumber();   // daily gig taps are plain numbers, boss HP is a Big
 function startFight(){if(F||!S.boss.on||(S.cd.boss||0)>Date.now())return;const k=S.boss.lvl,b=bossOf(k),now=Date.now();
   F={k,max:bossMax(k),hp:bossLeft(k),end:now+bossTime()*1e3,combo:0,last:0,sp:!!b.sp,nm:now+600};bandAcc=0;
   $('fight').classList.toggle('roam',F.sp);$('fRing').style.transform='';$('fSub').textContent=F.sp?'Headliner: it will not hold still, but every hit sticks · it never heals':'Tap the boss to hit it · it heals 1% per second';
@@ -1342,15 +1346,15 @@ function hitBoss(auto,quiet){if(!F)return;
   if(!auto){F.combo=now-F.last<1500?F.combo+1:1;F.last=now;}
   d*=1+Math.min(F.combo*.02,.5*bl('combo'));
   const crit=Math.random()<bossCrit();if(crit)d*=4;
-  if(F.hp/F.max<.3)d*=1+bl('final');
-  F.hp-=d;
+  if(hpFrac()<.3)d*=1+bl('final');
+  F.hp=F.hp.sub(d);
   const fb=$('fBoss');fb.classList.remove('hit');void fb.offsetWidth;fb.classList.add('hit');
   if(!auto||Math.random()<.4)bossFloat((crit?'CRIT! ':'')+'-'+fmt(d),crit);
   if(!auto&&(!quiet||sndOk()))chord(crit?2:.6);
-  if(F.hp<=0)endFight(true);else if(!auto)drawFight();}
-function endFight(win,fled){if(F.daily)return endDaily(win);const k=F.k,left=Math.max(0,F.hp)/F.max,b=bossOf(k),sp=F.sp;if(sp){if(win)delete S.boss.hp;else S.boss.hp=Math.max(1,F.hp);}F=null;$('fight').classList.remove('show','roam');$('fRing').style.transform='';S.cd.boss=Date.now()+bossCd()*1e3;
+  if(!(F.hp.m>0))endFight(true);else if(!auto)drawFight();}
+function endFight(win,fled){if(F.daily)return endDaily(win);const k=F.k,left=Math.max(0,hpFrac()),b=bossOf(k),sp=F.sp;if(sp){if(win)delete S.boss.hp;else S.boss.hp=Big.max(F.hp,1);}F=null;$('fight').classList.remove('show','roam');$('fRing').style.transform='';S.cd.boss=Date.now()+bossCd()*1e3;
   if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>${sp?'A headliner does not heal: the damage you dealt stays for the next fight.':'Spend platinum records on Riff Damage or Extended Set and come back.'}`,[['Retreat',null,1]]);buildBoss();render();save();return;}
-  S.boss.lvl++;S.boss.wins++;const g=Big.max(baseFps().mul(900),clickPow().mul(100)),sk=(5+2*k)*(sp?3:1)*skX(),hr=sp?headRecs(k):0;gain(g);S.skill+=sk;
+  S.boss.lvl=Math.min(BOSS_TOP,S.boss.lvl+1);S.boss.wins++;const g=Big.max(baseFps().mul(900),clickPow().mul(100)),sk=(5+2*k)*(sp?3:1)*skX(),hr=sp?headRecs(k):0;gain(g);S.skill+=sk;
   if(hr){S.records+=hr;S.earned+=hr;S.gift=(S.gift||0)+hr;buildPerks();}
   const skn=sp||Math.random()<.25?dropSkin():null;
   const it=rollLoot(sp),eqd=giveItem(it),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');drawSlots();
@@ -1599,7 +1603,7 @@ function away(sec){hype=0;const cap=CAP+4*3600*etl('night'),dt=Math.min(sec,cap)
   modal('Welcome back!',`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>cap?` (the ${cap/3600} hour limit)`:''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`,[['Rock on',null,1]]);}
 let prev=S.last||Date.now();
 function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
-  if(dt>AWAY)away(dt);else if(dt>0){gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp)F.hp=Math.min(F.max,F.hp+F.max*BOSS_REGEN*dt);if(F.sp&&Date.now()>F.nm)roam();}}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
+  if(dt>AWAY)away(dt);else if(dt>0){gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp){const h=F.hp.add(F.max.mul(BOSS_REGEN*dt));F.hp=h.lt(F.max)?h:F.max;}if(F.sp&&Date.now()>F.nm)roam();}}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
   if(F&&now>F.end)endFight(false);
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();drawDaily();drawEt();}evTick(now);
@@ -1609,8 +1613,21 @@ setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});
 buildPerks();tick();
-if(S.etRefund){const etNote=()=>{if($('modal').classList.contains('show')||$('tour').classList.contains('show'))return setTimeout(etNote,600);   // wait until the welcome-back popup or the guide is closed
-  modal('Eternity Rebalanced',`Eternity skill levels used to cost 1, 2, 3, 4… points, so one long run bought dozens of levels and broke every later tour. Now each level costs twice the one before: 1, 2, 4, 8…<br><br>Your eternity skills are back at level 1, and the <b style="color:#e9c6ff">${fmt(S.etRefund)} ${ic('eternity')} Eternity</b> you spent on higher levels is yours again. Spend it in the Legend tab; the <b>Max</b> button on a skill buys as many levels as you can afford.`,[['Got it',null,1]]);delete S.etRefund;save();};setTimeout(etNote,800);}
+/* start-up notices wait until the welcome-back popup or the guide is closed, and show one after another */
+const notes=[];function note(t,h){notes.push([t,h]);if(notes.length==1)setTimeout(pumpNote,800);}
+function pumpNote(){if(!notes.length)return;if($('modal').classList.contains('show')||$('tour').classList.contains('show'))return setTimeout(pumpNote,600);
+  const [t,h]=notes.shift();modal(t,h,[['Got it',null,1]]);if(notes.length)setTimeout(pumpNote,600);}
+/* v7: skill levels have caps again (20, the two cooldown skills 10) and boss stages end at 1000. Levels above a cap are refunded at what they cost. */
+if(S.capFix){let rec=0,sk=0,et=0;const cut=(list,lv,set,cur)=>list.forEach(t=>{let L=lv(t.id);if(L<=t.max)return;while(L>t.max){L--;cur(t.c(L));}set(t.id,L);});
+  cut(PERKS,pl,(id,L)=>S.perks[id]=L,c=>rec+=c);cut(TECH,tl,(id,L)=>S.tech[id]=L,c=>sk+=c);cut(BSK,bl,(id,L)=>S.bs[id]=L,c=>rec+=c);
+  for(const k in S.ets){let L=S.ets[k];while(L>ET_MAX){L--;et+=etLvlCost(L);}S.ets[k]=L;}
+  const top=S.boss.lvl>BOSS_TOP;if(top){S.boss.lvl=BOSS_TOP;delete S.boss.hp;}
+  const fin=x=>isFinite(x)?x:1e300;rec=fin(rec);sk=fin(sk);et=fin(et);S.records+=rec;S.skill+=sk;S.et+=et;delete S.capFix;
+  calcFx();buildPerks();buildTech();buildBoss();buildEt();render();save();
+  if(rec||sk||et||top)note('Skill Caps Are Back',`Skills have a maximum level again: 20 for every perk and skill, 10 for Power Nap and Quick Turnaround, and no cooldown goes below 10 minutes. Boss stages now end at 1000, and every boss has 10× more HP.<br><br>`+
+    [rec&&`<b>+${fmt(rec)} ${ic('rec')}</b> platinum records`,sk&&`<b>+${fmt(sk)} ${ic('skill')}</b> solo skill`,et&&`<b>+${fmt(et)} ${ic('eternity')}</b> Eternity`].filter(Boolean).join(' · ')+
+    (rec||sk||et?' came back for the levels above the caps.':'')+(top?'<br>Your boss stage was set to 1000.':''));}
+if(S.etRefund){note('Eternity Rebalanced',`Eternity skill levels used to cost 1, 2, 3, 4… points, so one long run bought dozens of levels and broke every later tour. Now each level costs twice the one before: 1, 2, 4, 8…<br><br>Your eternity skills are back at level 1, and the <b style="color:#e9c6ff">${fmt(S.etRefund)} ${ic('eternity')} Eternity</b> you spent on higher levels is yours again. Spend it in the Legend tab; the <b>Max</b> button on a skill buys as many levels as you can afford.`);delete S.etRefund;save();}
 if(S.refund){toast(`${ic('rec')} Guest stars are free now: <b>${S.refund} platinum records</b> refunded`);delete S.refund;save();}
 /* ---------- onboarding guide: [panel to highlight, mobile tab, title, text] ---------- */
 const TOUR=[

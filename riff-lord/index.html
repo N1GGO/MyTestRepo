@@ -764,7 +764,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,v:5});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,v:6});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -777,7 +777,8 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
     for(const sl in S.eq){const n=conv(S.eq[sl]);if(n)S.eq[sl]=n;else delete S.eq[sl];}}
   if((S.v||0)<4){for(let i=NG+3;i<GENS.length;i++){S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);}}   // v4 repriced the touring members completely, so their old levels are returned to zero
   if((S.v||0)<5){let back=0;GUEST_COST.forEach((c,j)=>{if(S.guest[NG+j])back+=c;});S.guest={};if(back){S.records+=back;S.refund=back;}}   // v5: guest stars no longer cost records, so what was paid comes back
-  S.v=5;
+  if((S.v||0)<6){let back=0;for(const k in S.ets){const L=S.ets[k];if(L>1){back+=(L-1)*L/2;S.ets[k]=1;}}if(back){S.et=(S.et||0)+back;S.etRefund=back;}}   // v6: eternity levels cost 1, 2, 4, 8… instead of 1, 2, 3…, so levels above 1 are refunded at what they cost
+  S.v=6;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
 const save=()=>{if(noSave)return;S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
@@ -1045,7 +1046,7 @@ const ES=[
  ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Boss damage ×10'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
  ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
-const ET_MAX=Infinity, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etLvlCost=l=>l;
+const ET_MAX=Infinity, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etLvlCost=l=>2**(l-1);   // going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles
 let etBtns=[];
 function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
   etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=ET_MAX,c=etLvlCost(l),b=document.createElement('button');b.className='etk';
@@ -1584,6 +1585,8 @@ setInterval(tick,100);
 setInterval(save,5000);addEventListener('beforeunload',save);addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else tick();});
 buildPerks();tick();
+if(S.etRefund){const etNote=()=>{if($('modal').classList.contains('show')||$('tour').classList.contains('show'))return setTimeout(etNote,600);   // wait until the welcome-back popup or the guide is closed
+  modal('Eternity Rebalanced',`Eternity skill levels used to cost 1, 2, 3, 4… points, so one long run bought dozens of levels and broke every later tour. Now each level costs twice the one before: 1, 2, 4, 8…<br><br>Your eternity skills are back at level 1, and the <b style="color:#e9c6ff">${fmt(S.etRefund)} ${ic('eternity')} Eternity</b> you spent on higher levels is yours again. Spend it in the Legend tab; the <b>Max</b> button on a skill buys as many levels as you can afford.`,[['Got it',null,1]]);delete S.etRefund;save();};setTimeout(etNote,800);}
 if(S.refund){toast(`${ic('rec')} Guest stars are free now: <b>${S.refund} platinum records</b> refunded`);delete S.refund;save();}
 /* ---------- onboarding guide: [panel to highlight, mobile tab, title, text] ---------- */
 const TOUR=[

@@ -189,6 +189,9 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 
 /* now playing */
 .songbar{position:relative;display:flex;align-items:baseline;gap:8px;width:100%;margin-top:9px;padding:7px 11px 9px;font:inherit;color:var(--text);text-align:left;background:#140c0e;border:1px solid var(--line);border-radius:9px;cursor:pointer;overflow:hidden}
+.songfx{font-size:12px;margin-top:5px;color:#e9c6ff}
+#modal .sgr small{display:block;font-size:11.5px;color:#d5b0ff;margin-top:1px}
+#modal .sgl{flex:none;font-size:12px;padding:4px 8px;letter-spacing:0;white-space:nowrap}
 .songbar:hover{border-color:var(--fire2)}
 .songbar .sl{flex:none;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--fire2)}
 .songbar b{flex:1;min-width:0;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -459,6 +462,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       <div class="pickbtns"><button id="skinBtn" class="autobtn"><span data-ic="palette"></span> Pick skins</button><button id="autoBtn" class="autobtn" hidden></button></div>
       <div class="eq" id="eq"></div>
       <button class="songbar" id="songBtn" aria-label="Choose song"><span class="sl">♪ Now playing</span><b id="song"></b><small id="songN"></small><i id="songBar"></i></button>
+      <div class="sub songfx" id="songFx"></div>
       <div class="hype"><div class="hbar"><i id="hypeBar"></i></div><span id="hypeTxt"></span></div>
       <div class="abil"><button id="aSolo"></button><button id="aEnc"></button><button id="aHorn" hidden></button><button id="aPyro" hidden></button><button id="aOrch" hidden></button></div>
       <div class="sub skmini"><span data-ic="skill"></span> <b id="skMini">0</b> solo skill to spend</div>
@@ -764,7 +768,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,v:6});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:6});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -812,7 +816,8 @@ let FX=FX0();
 function calcFx(){const f=FX0(),sk=(SKINS[S.skin]||SKINS[0]).fx;for(const k in sk){if(k=='crit'||k=='auto'||k=='off'||k=='hype')f[k]+=sk[k];else f[k]*=sk[k];}
   GENS.forEach((_,i)=>{if(!S.gens[i])return;for(const k of 'ie'){const it=ITEM[S.eq[i+k]];if(!it)continue;const x=it.fx;
     if(x.self)f.m[i]*=x.self;if(x.buff)for(const j in x.buff)f.m[j]*=x.buff[j];if(x.all)f.all*=x.all;if(x.click)f.click*=x.click;
-    if(x.crit)f.crit+=x.crit;if(x.boss)f.boss*=x.boss;if(x.off)f.off+=x.off;if(x.hype)f.hype+=x.hype;}});FX=f;}
+    if(x.crit)f.crit+=x.crit;if(x.boss)f.boss*=x.boss;if(x.off)f.off+=x.off;if(x.hype)f.hype+=x.hype;}});
+  songFxApply(f);FX=f;}
 const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.self}`);if(x.buff)for(const j in x.buff)p.push(`${GENS[j][1]} ×${x.buff[j]}`);
   if(x.all)p.push(`All fans ×${x.all}`);if(x.click)p.push(`Riff power ×${x.click}`);if(x.crit)p.push(`Crit chance +${Math.round(x.crit*100)}%`);
   if(x.boss)p.push(`Boss damage ×${x.boss}`);if(x.off)p.push(`Offline earnings +${Math.round(x.off*100)}%`);if(x.hype)p.push(`Max hype bonus +${Math.round(x.hype*100)}%`);return p.join(' · ');};
@@ -821,7 +826,7 @@ const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.se
 const DIA_FROM=100, DIA_UP=1.02;
 const recBonus=()=>B(1+.1*S.earned).mul(Big.pow10(LG(DIA_UP)*Math.max(0,S.earned-DIA_FROM)));
 let SB=1;   // setlist bonus, refreshed whenever the song list changes
-const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2))).mul(SB*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
+const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2))).mul(SB*stageX()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
 const tierMult=i=>TIERS.reduce((a,_,t)=>a*(S.ups['g'+i+'t'+t]?TX(t):1),1);
 /* milestones (free): ×2 at levels 10 and 25, then every 50 levels a bonus that grows with the level:
    ×5 at 50, ×10 at 100, ×10 at 150, ×20 at 200, ×15 at 250, ×30 at 300 … (5 or 10, times the hundred you are in).
@@ -863,8 +868,8 @@ function bulk(i){ const b=B(GENS[i][3]*cdisc()).mul(Big.pow10(S.gens[i]*LG(G)));
 /* platinum records from all-time fans, in three segments that each make the next record cost more:
    up to 1B fans     square root          (1B   = about 31 records)
    1B to 100B        fourth root          (100B = 100 records)
-   past 100B         25 records per ×10   (1T = 125, 1Qa = 200): every record costs about 10% more fans than the last */
-const REC_K1=1e9, REC_N1=Math.sqrt(REC_K1/1e6), REC_K2=1e11, REC_N2=REC_N1*(REC_K2/REC_K1)**.25, REC_PER_DECADE=25;
+   past 100B         10 records per ×10   (1T = 110, 1Qa = 140): every record costs about 26% more fans than the last */
+const REC_K1=1e9, REC_N1=Math.sqrt(REC_K1/1e6), REC_K2=1e11, REC_N2=REC_N1*(REC_K2/REC_K1)**.25, REC_PER_DECADE=10;
 const recOf=t=>{t=B(t);if(!(t.m>0))return 0;const l=t.log10();return l<=9?Math.sqrt(t.toNumber()/1e6):l<=11?REC_N1*(t.toNumber()/REC_K1)**.25:REC_N2+REC_PER_DECADE*(l-LG(REC_K2));};
 const fansFor=n=>n<=REC_N1?B(n*n*1e6):n<=REC_N2?B(REC_K1*(n/REC_N1)**4):Big.pow10(LG(REC_K2)+(n-REC_N2)/REC_PER_DECADE);
 const pending=()=>Math.max(0,Math.floor(recOf(S.total)*recMult()+1e-9)-(S.earned-(S.gift||0)));   // Record Deal multiplies every step; records gifted by label scouts come on top
@@ -1042,7 +1047,7 @@ const ET_NEED=500, etAt=e=>e>=ET_NEED?Math.floor((e/250)**1.5):0, etGain=()=>etA
 const etRange=()=>{const g=etGain();let hi=g?Math.floor(250*(g+1)**(2/3)):ET_NEED;while(etAt(hi)<=g)hi++;let lo=g?Math.floor(250*g**(2/3)):0;while(lo>0&&etAt(lo-1)>=g)lo--;return [lo,hi];};
 const startFans=()=>Big.max(pl('start')?Big.pow10(2+pl('start')):Big.Z,etl('start')?Big.pow10(6+3*etl('start')):Big.Z);
 const ES=[
- ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +50%'],
+ ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +10%'],
  ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Boss damage ×10'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
  ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
@@ -1125,7 +1130,7 @@ const TECH=[
  {id:'cool',n:'Power Nap',d:'Solo cooldown −5 min (down to 10)',c:l=>Math.round(60*1.6**l),max:Infinity},
  {id:'encore',n:'Standing Ovation',d:'Encore pays 1 more minute of fans',c:l=>Math.round(30*1.7**l),max:Infinity},
  {id:'label',n:'Record Deal',d:'+10% platinum records from ascending',c:l=>1000*4**l,max:Infinity}];
-const soloCd=()=>Math.max(60,Math.max(600,3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.1*tl('label'))*(1+.5*etl('plat')), skX=()=>3**etl('virt');
+const soloCd=()=>Math.max(60,Math.max(600,3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.1*tl('label'))*(1+.1*etl('plat'))*songRec(), skX=()=>3**etl('virt');
 let techBtns=[];
 function buildTech(){const el=$('tech');el.innerHTML='';techBtns=[];
   TECH.forEach(t=>{const l=tl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='tech';
@@ -1501,7 +1506,23 @@ const SETS=[['Bach',/^Bach/],['Mozart',/^Mozart/],['Beethoven',/^Beethoven/],['W
  .map(([n,re])=>({n,ids:SONGS.map((x,i)=>re.test(x.n)?i:-1).filter(i=>i>=0)})).filter(x=>x.ids.length>1);
 const setHave=x=>x.ids.filter(i=>S.songs[i]).length, setsDone=()=>SETS.filter(x=>setHave(x)==x.ids.length).length;
 const songBonus=()=>(1+.01*unlocked().length)*(1+.1*setsDone());
-const showSong=()=>{SB=songBonus();$('song').textContent=SONGS[curSong].n;$('songN').textContent=`${unlocked().length}/${SONGS.length} songs`;};
+/* ---------- song levels. The song on stage boosts all fans (×1.25 per level, ×1.25 already at level 0) and gives the
+   secondary effect of its composer or theme. Levels cost platinum records (5, 10, 20, 40…), stay when ascending and are
+   reset when transcending; the songs themselves stay. n = level + 1 is the effect strength. ---------- */
+const SFX={click:['Riff power',n=>`×${(1+.2*n).toFixed(1)}`],crit:['Crit chance',n=>`+${n}%`],boss:['Boss damage',n=>`×${(1+.5*n).toFixed(1)}`],
+ off:['Offline earnings',n=>`+${5*n}%`],hype:['Max hype bonus',n=>`+${10*n}%`],solo:['Skill from solos',n=>`+${10*n}%`],
+ diver:['Stage divers come',n=>`${Math.round((1/Math.max(.2,.95**n)-1)*100)}% more often`],keep:['Crowd hype drains',n=>`${Math.round((1-Math.max(.1,.95**n))*100)}% slower`],
+ auto:['Autoclickers',n=>`+${(.5*n).toFixed(1)} clicks/s each`],rec:['Platinum records from ascending',n=>`+${2*n}%`]};
+const SFX_KEYS=Object.keys(SFX), SET_FX={Bach:'click',Mozart:'crit',Beethoven:'boss',Wagner:'hype',Strauss:'keep',Haydn:'solo',Grieg:'off',Chopin:'diver',Bizet:'auto',Christmas:'rec',Anthems:'boss',Nursery:'diver'};
+const songLv=i=>(S.songLv||{})[i]||0, songCost=l=>5*2**l, stageX=()=>1.25**(songLv(curSong)+1);
+const songFxOf=i=>{const set=SETS.find(x=>x.ids.includes(i));return set&&SET_FX[set.n]||SFX_KEYS[i%SFX_KEYS.length];};   // songs outside a set take turns through the list
+const songFxText=i=>{const k=songFxOf(i),n=songLv(i)+1;return `${SFX[k][0]} ${SFX[k][1](n)}`;};
+const songRec=()=>songFxOf(curSong)=='rec'?1+.02*(songLv(curSong)+1):1;
+function songFxApply(f){const k=songFxOf(curSong),n=songLv(curSong)+1;
+  if(k=='click')f.click*=1+.2*n;else if(k=='crit')f.crit+=.01*n;else if(k=='boss')f.boss*=1+.5*n;else if(k=='off')f.off+=.05*n;else if(k=='hype')f.hype+=.1*n;
+  else if(k=='solo')f.solo*=1+.1*n;else if(k=='diver')f.diver*=Math.max(.2,.95**n);else if(k=='keep')f.hypeKeep*=Math.max(.1,.95**n);else if(k=='auto')f.auto+=.5*n;}
+const songInfo=i=>`Lv ${songLv(i)} · fans ×${(1.25**(songLv(i)+1)).toFixed(2)} · ${songFxText(i)}`;
+const showSong=()=>{SB=songBonus();calcFx();$('song').textContent=SONGS[curSong].n;$('songFx').innerHTML=`On stage: ${songInfo(curSong)}`;$('songN').textContent=`${unlocked().length}/${SONGS.length} songs`;};
 /* songs can be switched off in the setlist; if every song is switched off the band plays all of them anyway */
 const playable=()=>{const u=unlocked(),e=u.filter(i=>!S.songOff[i]);return e.length?e:u;};
 function pickSong(){const u=playable();curSong=u[Math.floor(Math.random()*u.length)];stepI=0;beatPos=0;showSong();}
@@ -1546,13 +1567,16 @@ setInterval(pump,30);
 function openSongs(){const u=unlocked();
   let h=`<div class="pf" style="color:#ffe9a8">Setlist bonus: all fans <b>×${songBonus().toFixed(2)}</b><br><span style="color:#a08c84">+1% per song you know · +10% per complete set</span></div><div class="setc">${SETS.map(x=>`<span class="${setHave(x)==x.ids.length?'ok':''}">${x.n} ${setHave(x)}/${x.ids.length}</span>`).join('')}</div>`;
   h+=`<div class="sgt"><button data-all="1">Check all</button><button data-all="0">Uncheck all</button></div>`;
-  u.forEach(i=>h+=`<label class="sgr"><input type="checkbox" data-i="${i}"${S.songOff[i]?'':' checked'}><span>${i==curSong?ic('soundOn')+' ':''}${SONGS[i].n}</span><button class="sgp" data-p="${i}" aria-label="Play now">▶</button></label>`);
-  h+=`<div class="pf" style="color:#a08c84;margin-top:8px">The band plays the ticked songs in turn; ▶ plays one right away. ${SONGS.length-u.length} more songs to find: every boss you beat teaches the band one, and a caught stage diver has a 0.5% chance.</div>`;
+  u.forEach(i=>h+=`<label class="sgr"><input type="checkbox" data-i="${i}"${S.songOff[i]?'':' checked'}><span>${i==curSong?ic('soundOn')+' ':''}${SONGS[i].n}<small data-sl="${i}">${songInfo(i)}</small></span><button class="sgl" data-l="${i}" aria-label="Level up"${S.records<songCost(songLv(i))?' disabled':''}>▲ ${ic('rec')} ${fmt(songCost(songLv(i)))}</button><button class="sgp" data-p="${i}" aria-label="Play now">▶</button></label>`);
+  h+=`<div class="pf" style="color:#a08c84;margin-top:8px">The band plays the ticked songs in turn; ▶ plays one right away. Only the song on stage counts: it boosts all fans and gives its composer's or theme's bonus. ▲ levels a song up with platinum records (levels reset when you transcend). ${SONGS.length-u.length} more songs to find: every boss you beat teaches the band one, and a caught stage diver has a 0.5% chance.</div>`;
   modal(`Setlist · ${u.length}/${SONGS.length}`,h,[['Close']]);
   const box=$('mP'),fix=()=>{if(S.songOff[curSong]&&playable().indexOf(curSong)<0)nextSong();save();};
   box.querySelectorAll('input').forEach(c=>c.onchange=()=>{if(c.checked)delete S.songOff[c.dataset.i];else S.songOff[c.dataset.i]=1;fix();});
   box.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const on=b.dataset.all=='1';u.forEach(i=>{if(on)delete S.songOff[i];else S.songOff[i]=1;});box.querySelectorAll('input').forEach(c=>c.checked=on);fix();});
-  box.querySelectorAll('.sgp').forEach(b=>b.onclick=e=>{e.preventDefault();curSong=+b.dataset.p;stepI=0;beatPos=0;showSong();fundMusic(false,5);});}
+  box.querySelectorAll('.sgp').forEach(b=>b.onclick=e=>{e.preventDefault();curSong=+b.dataset.p;stepI=0;beatPos=0;showSong();fundMusic(false,5);});
+  box.querySelectorAll('.sgl').forEach(b=>b.onclick=e=>{e.preventDefault();const i=+b.dataset.l,c=songCost(songLv(i));if(S.records<c)return;
+    S.records-=c;S.songLv=S.songLv||{};S.songLv[i]=songLv(i)+1;chord(2);showSong();buildPerks();render();save();
+    box.querySelector(`[data-sl="${i}"]`).textContent=songInfo(i);box.querySelectorAll('.sgl').forEach(x=>{const j=+x.dataset.l,cj=songCost(songLv(j));x.innerHTML=`▲ ${ic('rec')} ${fmt(cj)}`;x.disabled=S.records<cj;});});}
 $('songBtn').onclick=openSongs;
 
 /* ---------- embers ---------- */

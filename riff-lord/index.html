@@ -119,6 +119,11 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 #etBtn{width:100%;font-family:"Metal Mania",serif;font-size:20px;letter-spacing:2px;padding:11px;border-radius:9px;border:1px solid #e9c6ff;color:#1a0628;background:linear-gradient(#fff,#d29bff);cursor:pointer}
 #etBtn:disabled{opacity:.4;cursor:not-allowed}
 #etSk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+:is(.perk,.tech,.bsk,.etk){position:relative}
+:is(.perk,.tech,.bsk,.etk) .t{padding-right:40px}
+.maxb{position:absolute;top:6px;right:6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid currentColor;color:var(--gold);background:rgba(0,0,0,.35);cursor:pointer;opacity:.35}
+:is(.perk,.tech,.bsk,.etk).ok .maxb{opacity:1}
+.maxb:hover{background:rgba(255,207,74,.15)}
 .etk{font:inherit;color:inherit;text-align:left;background:#1a1226;border:1px solid #4a2f6a;border-radius:9px;padding:9px;cursor:pointer}
 .etk .t{font-weight:500;color:#f3d9ff}.etk .t small{color:#b9a3d8;font-weight:400}
 .etk .d{font-size:12.5px;color:#b9a3d8;margin:2px 0 4px}.etk .c{font-size:13px;color:#fff}
@@ -949,10 +954,14 @@ function placeBoss(){const w=wideMQ.matches,b=$('pBoss');document.querySelector(
   if(w&&b.parentNode.id!=='colR')$('colR').appendChild(b);else if(!w&&b.parentNode.id==='colR')$('pUps').before(b);}
 placeBoss();wideMQ.addEventListener('change',placeBoss);
 let perkBtns=[];
+/* "Max" in the top right corner of every skill tile: buys level after level while the currency lasts (cost is re-read for each level) */
+function maxBtn(b,cost,have,buy,done){const m=document.createElement('span');m.className='maxb';m.textContent='Max';m.setAttribute('role','button');m.title='Buy as many levels as you can afford';
+  m.onclick=e=>{e.stopPropagation();let n=0;while(n<1e4&&have()>=cost()){buy(cost());n++;}if(n){chord(2.5);toast(`<b>+${n} level${n>1?'s':''}</b>`);done();save();}};b.appendChild(m);}
 function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earned)return;
   PERKS.forEach(p=>{const l=pl(p.id),mx=l>=p.max,c=p.c(l);const b=document.createElement('button');b.className='perk';
     b.innerHTML=`<div class="t">${p.n} <small>Lv ${l}</small></div><div class="d">${p.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
-    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.perks[p.id]=l+1;chord(2);buildPerks();render();}};el.appendChild(b);perkBtns.push({b,c,mx});});}
+    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.perks[p.id]=l+1;chord(2);buildPerks();render();}};
+    maxBtn(b,()=>p.c(pl(p.id)),()=>S.records,c=>{S.records-=c;S.perks[p.id]=pl(p.id)+1;},()=>{buildPerks();render();});el.appendChild(b);perkBtns.push({b,c,mx});});}
 
 let lastUpCount=-1;
 function render(){
@@ -1041,7 +1050,8 @@ let etBtns=[];
 function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
   etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=ET_MAX,c=etLvlCost(l),b=document.createElement('button');b.className='etk';
     b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}</small></div><div class="d">${k[2]} per level</div><div class="c">${mx?'MAXED':ic('eternity')+' '+c}</div>`;
-    b.onclick=()=>{if(!mx&&S.et>=c){S.et-=c;S.ets[k[0]]=l+1;chord(2);afterEt();}};box.appendChild(b);etBtns.push({b,c,mx});});
+    b.onclick=()=>{if(!mx&&S.et>=c){S.et-=c;S.ets[k[0]]=l+1;chord(2);afterEt();}};
+    maxBtn(b,()=>etLvlCost(etl(k[0])),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt);box.appendChild(b);etBtns.push({b,c,mx});});
   if(etOwned().length<ES.length){const c=etNewCost(),b=document.createElement('button');b.className='etk new';
     b.innerHTML=`<div class="t">＋ New eternity skill</div><div class="d">Choose one of three</div><div class="c">${S.etOffer?'your offer is waiting':ic('eternity')+' '+c}</div>`;
     b.onclick=()=>{if(!S.etOffer){if(S.et<c)return;S.et-=c;const pool=ES.filter(k=>!etl(k[0])).map(k=>k[0]).sort(()=>Math.random()-.5);S.etOffer=pool.slice(0,3);buildEt();save();render();}openOffer();};
@@ -1119,7 +1129,8 @@ let techBtns=[];
 function buildTech(){const el=$('tech');el.innerHTML='';techBtns=[];
   TECH.forEach(t=>{const l=tl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='tech';
     b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':ic('skill')+' '+fmt(c)}</div>`;
-    b.onclick=()=>{if(!mx&&S.skill>=c){S.skill-=c;S.tech[t.id]=l+1;chord(2);buildTech();render();}};el.appendChild(b);techBtns.push({b,c,mx});});}
+    b.onclick=()=>{if(!mx&&S.skill>=c){S.skill-=c;S.tech[t.id]=l+1;chord(2);buildTech();render();}};
+    maxBtn(b,()=>t.c(tl(t.id)),()=>S.skill,c=>{S.skill-=c;S.tech[t.id]=tl(t.id)+1;},()=>{buildTech();render();});el.appendChild(b);techBtns.push({b,c,mx});});}
 const LICK=[0,3,5,7,10,12,15,17,19,22,24,27,24,27,31];
 /* Play Solo is a short rhythm game: 16 notes run into the ring, tap in time. Accuracy picks the spot in the solo range
    (0% = the minimum, 100% = the maximum); a flawless solo (every note perfect) pays ×1.5. Stray taps cost half a note. */
@@ -1298,7 +1309,8 @@ function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.bo
   const el=$('bskills');el.innerHTML='';bskBtns=[];
   BSK.forEach(t=>{const l=bl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='bsk';
     b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
-    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};el.appendChild(b);bskBtns.push({b,c,mx});});
+    b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};
+    maxBtn(b,()=>t.c(bl(t.id)),()=>S.records,c=>{S.records-=c;S.bs[t.id]=bl(t.id)+1;},()=>{buildBoss();render();});el.appendChild(b);bskBtns.push({b,c,mx});});
   const k=S.boss.lvl,b=bossOf(k);$('bEmo').innerHTML=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}`;
   $('bStats').innerHTML=(b.sp?`<b style="color:#ffd76a">★ HEADLINER ★</b> roams the arena · never heals · keeps its damage between fights · half of all automatic hits miss<br>Reward: epic or legendary gear, a pick skin, triple solo skill and <b>${headRecs(k)} ${ic('rec')}</b><br>HP <b>${fmt(bossLeft(k))} / ${fmt(bossMax(k))}</b>`:`HP <b>${fmt(bossHP(k))}</b> · heals <b>1%</b>/s`)+` · your hit <b>${fmt(bossDmg())}</b> · <b>${bossTime()}s</b> timer<br>epic drop <b>${Math.round(bossDrop()*100)}%</b> · auto hits <b>${bossAuto()}/s</b> · cooldown <b>${fmtT(bossCd())}</b>`;
   const e=bossDrop(),pc=x=>(x*100>=10?(x*100).toFixed(0):(x*100).toFixed(1))+'%';

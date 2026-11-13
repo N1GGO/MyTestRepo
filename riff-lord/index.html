@@ -340,15 +340,20 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 #evBtn[hidden]{display:none}
 @keyframes evp{to{box-shadow:0 0 44px rgba(255,179,0,.95);transform:translateX(-50%) scale(1.05)}}
 @media(max-width:1050px){#evBtn{bottom:calc(88px + env(safe-area-inset-bottom))}}
-#rs{position:fixed;inset:0;z-index:19;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,3,14,.95);touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;text-align:center;padding:16px}
+#rs{position:fixed;inset:0;z-index:19;display:none;flex-direction:column;align-items:center;background:#08030e;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;text-align:center;padding:calc(10px + env(safe-area-inset-top)) 0 env(safe-area-inset-bottom);overscroll-behavior:none}
 #rs.show{display:flex}
-#rs h2{font-family:"Metal Mania",serif;font-weight:400;font-size:32px;color:#f0e0ff;text-shadow:0 0 18px #9b4dff;margin:0 0 6px}
-.rslane{position:relative;width:min(560px,94vw);height:96px;margin:20px 0 14px;border-top:2px solid #4a2f6a;border-bottom:2px solid #4a2f6a;overflow:hidden;background:linear-gradient(90deg,rgba(155,77,255,.28),transparent 45%)}
-.rshit{position:absolute;left:18%;top:50%;width:66px;height:66px;margin:-33px;border-radius:50%;border:3px solid #f0e0ff;box-shadow:0 0 18px #9b4dff,inset 0 0 14px rgba(155,77,255,.6)}
-.rshit.pop{animation:rspop .15s}
-@keyframes rspop{50%{transform:scale(1.25);border-color:#fff}}
-.rsn{position:absolute;top:50%;left:0;width:44px;height:44px;margin:-22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d5b0ff 40%,#7a2cff);box-shadow:0 0 14px #9b4dff;will-change:transform}
-#rsFb{font-family:"Metal Mania",serif;font-size:30px;height:40px;color:#ffd76a;text-shadow:0 0 14px var(--fire)}
+#rs h2{font-family:"Metal Mania",serif;font-weight:400;font-size:28px;color:#f0e0ff;text-shadow:0 0 18px #9b4dff;margin:0 0 2px}
+/* the fretboard: four lanes, notes fall from the top into the rings at the bottom */
+.rsf{position:relative;flex:1;width:min(460px,100%);display:flex;margin-top:6px;overflow:hidden;cursor:pointer;background:linear-gradient(#08030e,#1a0a2a 60%,#2a1040);border-left:2px solid #4a2f6a;border-right:2px solid #4a2f6a;perspective:600px}
+.rsl{position:relative;flex:1;border-right:1px solid rgba(155,77,255,.22)}
+.rsl:last-child{border-right:0}
+.rsl.on{background:linear-gradient(transparent 40%,color-mix(in srgb,var(--lc) 30%,transparent))}
+.rsl::after{content:"";position:absolute;left:50%;bottom:var(--hb);width:58px;height:58px;margin:0 0 -29px -29px;border-radius:50%;border:4px solid var(--lc);box-shadow:0 0 16px var(--lc),inset 0 0 12px var(--lc);opacity:.85}
+.rsl.pop::after{animation:rspop .15s}
+@keyframes rspop{50%{transform:scale(1.25);border-color:#fff;opacity:1}}
+.rsl .key{position:absolute;left:0;right:0;bottom:8px;font-size:13px;color:var(--lc);opacity:.7;letter-spacing:1px}
+.rsn{position:absolute;left:50%;top:0;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--lc) 45%,#12042a);box-shadow:0 0 14px var(--lc);will-change:transform}
+#rsFb{position:absolute;left:0;right:0;top:32%;pointer-events:none;font-family:"Metal Mania",serif;font-size:34px;color:#ffd76a;text-shadow:0 0 14px var(--fire)}
 #rs .sub{color:#b9a3d8}
 .daily{border:1px solid #6a5420;border-radius:10px;padding:10px 12px;margin-bottom:12px;background:linear-gradient(160deg,#241a08,#140c0e)}
 .daily .sub{margin-bottom:8px;line-height:1.45}
@@ -545,8 +550,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <div id="flash"></div>
 <div id="toast"></div>
 <button id="evBtn" hidden><span data-ic="dice"></span> Tour event · tap to decide</button>
-<div id="rs"><h2>Play the Solo!</h2><div class="sub">Tap anywhere (or press Space) when a note is inside the ring</div>
-  <div class="rslane" id="rsLane"><div class="rshit" id="rsHit"></div></div><div id="rsFb"></div><div class="sub" id="rsInfo"></div></div>
+<div id="rs"><h2>Play the Solo!</h2><div class="sub" id="rsHelp">Tap a lane when its note reaches the ring</div><div class="sub" id="rsInfo"></div>
+  <div class="rsf" id="rsF"><div id="rsFb"></div></div></div>
 <div id="tour"><div class="tbox">
   <div class="tstep" id="tStep"></div><h3 id="tT"></h3><p id="tP"></p>
   <div class="tbtn"><button id="tSkip">Skip guide</button><span></span><button id="tBack">Back</button><button id="tNext" class="go">Next</button></div>
@@ -1150,33 +1155,44 @@ function buildTech(){const el=$('tech');el.innerHTML='';techBtns=[];
     b.onclick=()=>{if(!mx&&S.skill>=c){S.skill-=c;S.tech[t.id]=l+1;chord(2);buildTech();render();}};
     maxBtn(b,()=>t.c(tl(t.id)),()=>S.skill,c=>{S.skill-=c;S.tech[t.id]=tl(t.id)+1;},()=>{buildTech();render();},()=>tl(t.id)<t.max);el.appendChild(b);techBtns.push({b,c,mx});});}
 const LICK=[0,3,5,7,10,12,15,17,19,22,24,27,24,27,31];
-/* Play Solo is a short rhythm game: 16 notes run into the ring, tap in time. Accuracy picks the spot in the solo range
-   (0% = the minimum, 100% = the maximum); a flawless solo (every note perfect) pays ×1.5. Stray taps cost half a note. */
-const RS_PAT=[1,1,.5,.5,1,1,.5,.5,1,.5,.5,1,1,.5,.5,1], RS_BPM=104, RS_LEAD=1.8;
+/* Play Solo is a short rhythm game: 24 notes fall down four lanes into the rings, tap the lane in time (keys D F J K).
+   Accuracy picks the spot in the solo range (0% = the minimum, 100% = the maximum); a flawless solo (every note perfect)
+   pays ×1.5. Stray taps cost half a note. */
+const RS_PAT=[1,1,.5,.5,1,1,.5,.5,1,.5,.5,1,1,.5,.5,1,.5,.5,.5,.5,1,.5,.5,1], RS_BPM=104, RS_LEAD=1.8, RS_FALL=1.5,
+      RS_LC=['#4fd01c','#ff3a4a','#ffc21a','#5ab4ff'], RS_KEYS=['KeyD','KeyF','KeyJ','KeyK'];
 let RS=null;
-function startSolo(){if(RS||F||(S.cd.play||0)>Date.now())return;wakeAudio();const bd=60/RS_BPM,lane=$('rsLane');let t=RS_LEAD;
-  lane.querySelectorAll('.rsn').forEach(e=>e.remove());
-  const notes=RS_PAT.map(b=>{const el=document.createElement('div');el.className='rsn';lane.appendChild(el);const n={t,el,j:null};t+=b*bd;return n;});
-  RS={t0:performance.now(),notes,score:0,stray:0,perf:0,hits:0,end:notes[notes.length-1].t+.5,w:lane.clientWidth};
+function rsBuild(){const f=$('rsF');f.querySelectorAll('.rsl').forEach(e=>e.remove());const touch=matchMedia('(pointer:coarse)').matches;
+  $('rsHelp').textContent=touch?'Tap a lane when its note reaches the ring':'Click a lane or press D F J K when its note reaches the ring';
+  return RS_LC.map((c,i)=>{const l=document.createElement('div');l.className='rsl';l.style.setProperty('--lc',c);l.style.setProperty('--hb','64px');
+    if(!touch)l.innerHTML=`<div class="key">${'DFJK'[i]}</div>`;f.insertBefore(l,$('rsFb'));return l;});}
+function startSolo(){if(RS||F||(S.cd.play||0)>Date.now())return;wakeAudio();const bd=60/RS_BPM,lanes=rsBuild();let t=RS_LEAD,last=-1;
+  const notes=RS_PAT.map(b=>{let k;do k=Math.floor(Math.random()*4);while(k==last);last=k;
+    const el=document.createElement('div');el.className='rsn';el.style.setProperty('--lc',RS_LC[k]);lanes[k].appendChild(el);const n={t,k,el,j:null};t+=b*bd;return n;});
+  RS={t0:performance.now(),notes,lanes,score:0,stray:0,perf:0,hits:0,end:notes[notes.length-1].t+.5};
   try{if(audioOn()&&!S.mute)notes.forEach(n=>tone('square',1400,AC.currentTime+n.t,.04,.05,clean));}catch(e){}
   $('rsFb').textContent='Get ready…';$('rsInfo').textContent='';$('rs').classList.add('show');requestAnimationFrame(rsFrame);}
-function rsFrame(){if(!RS)return;const now=(performance.now()-RS.t0)/1e3,w=$('rsLane').clientWidth;
-  RS.notes.forEach(n=>{if(n.j)return;if(now>n.t+.2){n.j='miss';n.el.remove();$('rsFb').textContent='Miss';return;}n.el.style.transform=`translateX(${(w*.18+(n.t-now)*w*.5).toFixed(1)}px)`;});
+function rsFrame(){if(!RS)return;const now=(performance.now()-RS.t0)/1e3,hy=$('rsF').clientHeight-64,v=hy/RS_FALL;
+  RS.notes.forEach(n=>{if(n.j)return;if(now>n.t+.2){n.j='miss';n.el.remove();$('rsFb').textContent='Miss';return;}n.el.style.transform=`translateY(${(hy-(n.t-now)*v).toFixed(1)}px)`;});
   $('rsInfo').textContent=`${RS.hits}/${RS.notes.length} notes hit`;
   if(now>RS.end)endSolo();else requestAnimationFrame(rsFrame);}
-function rsTap(){if(!RS)return;const now=(performance.now()-RS.t0)/1e3;let best=null,bd=.2;
-  RS.notes.forEach(n=>{const d=Math.abs(n.t-now);if(!n.j&&d<=bd){bd=d;best=n;}});
+function rsTap(k){if(!RS)return;const now=(performance.now()-RS.t0)/1e3,L=RS.lanes[k];let best=null,bd=.2;
+  L.classList.add('on');setTimeout(()=>L.classList.remove('on'),110);
+  RS.notes.forEach(n=>{const d=Math.abs(n.t-now);if(!n.j&&n.k==k&&d<=bd){bd=d;best=n;}});
   if(!best){if(now>RS_LEAD-.3){RS.stray++;$('rsFb').textContent='Too eager';}return;}
   best.j=bd<=.07?'perfect':bd<=.13?'good':'ok';best.el.remove();RS.hits++;RS.score+=best.j=='perfect'?1:best.j=='good'?.6:.25;if(best.j=='perfect')RS.perf++;
-  $('rsFb').textContent=best.j=='perfect'?'PERFECT!':best.j=='good'?'Good':'Sloppy';const h=$('rsHit');h.classList.remove('pop');void h.offsetWidth;h.classList.add('pop');
+  $('rsFb').textContent=best.j=='perfect'?'PERFECT!':best.j=='good'?'Good':'Sloppy';L.classList.remove('pop');void L.offsetWidth;L.classList.add('pop');
   chord(.35,220*2**(LICK[RS.hits%LICK.length]/12));}
 function endSolo(){const R=RS,n=R.notes.length;RS=null;$('rs').classList.remove('show');R.notes.forEach(x=>x.el.remove());
   const acc=Math.max(0,Math.min(1,(R.score-.5*R.stray)/n)),flaw=R.perf==n&&!R.stray,l=soloLvl(),[lo,hi]=soloRange(),g=Math.round((lo+acc*(hi-lo))*(flaw?1.5:1)*FX.solo*skX());
   S.cd.play=Date.now()+soloCd()*1e3;S.skill+=g;S.solos++;if(flaw)S.flawless=(S.flawless||0)+1;chord(4);
   modal(flaw?'FLAWLESS SOLO!':acc>=.75?'Face-Melting Solo!':acc>=.4?'Decent Solo':'Well… It Was Loud',`Accuracy <b>${Math.round(acc*100)}%</b> · ${R.perf} perfect · ${R.hits}/${n} hit${R.stray?` · ${R.stray} stray taps`:''}<br>A level ${l} solo is worth ${fmt(lo)}–${fmt(hi)}${flaw?', and flawless pays ×1.5':''}.<br><b style="font-size:38px;color:#d5b0ff;text-shadow:0 0 18px #9b4dff">+${fmt(g)} ${ic('skill')}</b><br>Your next solo is ready in ${fmtT(soloCd())} minutes.`,[['Rock on',null,1]]);
   render();save();}
-$('playSolo').onclick=startSolo;$('rs').addEventListener('pointerdown',e=>{e.preventDefault();rsTap();});
-addEventListener('keydown',e=>{if(RS&&e.code=='Space'){e.preventDefault();if(!e.repeat)rsTap();}});
+$('playSolo').onclick=startSolo;
+/* every finger counts on its own (pointerdown per touch); the lane is the column under the finger. iOS still zooms on a quick
+   double tap and pinches even with touch-action:none, so the raw touch and gesture events are cancelled too. */
+$('rs').addEventListener('pointerdown',e=>{e.preventDefault();if(!RS)return;const r=$('rsF').getBoundingClientRect();rsTap(Math.max(0,Math.min(3,Math.floor((e.clientX-r.left)/r.width*4))));});
+['touchstart','touchend','touchmove','dblclick','gesturestart','gesturechange'].forEach(ev=>$('rs').addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+addEventListener('keydown',e=>{if(!RS)return;const k=RS_KEYS.indexOf(e.code);if(k>=0||e.code=='Space')e.preventDefault();if(k>=0&&!e.repeat)rsTap(k);});
 
 /* ---------- tour events: every 12 to 20 minutes a decision card. The chip waits two minutes, then the offer is gone. ---------- */
 const evMin=m=>Big.max(baseFps().mul(60*m),clickPow().mul(10*m)), evGain=n=>{gain(n);return `<b style="color:#ffd76a">+${fmt(n)} fans</b>`;}, evLose=f=>{const c=S.fans.mul(f);S.fans=S.fans.sub(c);return `<b style="color:#ff9a9a">−${fmt(c)} fans</b>`;},

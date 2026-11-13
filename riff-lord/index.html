@@ -408,6 +408,14 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:16px}
 #modal.show{display:flex}
 #modal .box{max-width:420px;width:100%;text-align:center}
+#modal.fin .box{border-color:#ffd76a;box-shadow:0 0 60px rgba(255,207,74,.45);background:linear-gradient(170deg,#3a2408,#160e10 60%)}
+#modal.fin #mT{color:#ffd76a;font-size:28px}
+#modal .finbig{font-size:54px;line-height:1;margin:4px 0 10px;filter:drop-shadow(0 0 16px rgba(255,207,74,.6))}
+#modal .finbig .ic:nth-child(2){font-size:1.3em}
+#modal .finst{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
+#modal .finst div{background:rgba(0,0,0,.3);border:1px solid #6a5020;border-radius:8px;padding:6px}
+#modal .finst b{display:block;font-size:17px;color:#ffd76a}
+#modal .finst span{font-size:11.5px;color:var(--dim)}
 #modal h2{justify-content:center;font-size:28px}
 #modal p{color:#d8ccc4;line-height:1.5;margin-bottom:16px}
 #modal .btns{display:flex;gap:10px;justify-content:center}
@@ -1034,7 +1042,7 @@ function riff(e,auto,cp,quiet){let v=cp||clickPow();const crit=Math.random()<.04
 $('pick').onclick=e=>riff(e);
 
 /* ---------- ascend ---------- */
-function modal(t,p,btns){$('mT').innerHTML=t;$('mP').innerHTML=p;$('mB').innerHTML='';
+function modal(t,p,btns){$('modal').classList.remove('fin');$('mT').innerHTML=t;$('mP').innerHTML=p;$('mB').innerHTML='';
   btns.forEach(([l,fn,go])=>{const b=document.createElement('button');b.textContent=l;if(go)b.className='go';b.onclick=()=>{$('modal').classList.remove('show');fn&&fn();};$('mB').appendChild(b);});
   $('modal').classList.add('show');}
 $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
@@ -1075,7 +1083,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
   const need=ehi-S.earned;$('etNext').textContent=`Next Eternity point in ${need.toLocaleString('en-US')} more earned platinum record${need==1?'':'s'} (at ${ehi.toLocaleString('en-US')}). Ascending banks your new records.`;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`This ends everything. Fans, band and gear, platinum records and perks, solo skill and techniques, bosses, achievements: all gone.<br>Your songs, pick skins and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
-  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,songOff:S.songOff,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1};
+  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,songOff:S.songOff,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();
@@ -1333,6 +1341,16 @@ function drawFight(){const now=Date.now(),tl_=Math.max(0,F.end-now)/1e3;if(now-F
   const cm=1+Math.min(F.combo*.02,.5*bl('combo'));
   $('fInfo').innerHTML=F.daily?`<b>${Math.ceil(Math.max(0,F.hp))}</b> taps to go`:`Hit <b>${fmt(bossDmg())}</b>${bl('combo')?` · combo <b>×${cm.toFixed(2)}</b>`:''}${bossAuto()?` · <b>${bossAuto()}</b> auto hits/s`:''}${hpFrac()<.3&&bl('final')?' · <b>FINAL CHORUS</b>':''}`;}
 const hpFrac=()=>F.daily?F.hp/F.max:F.hp.div(F.max).toNumber();   // daily gig taps are plain numbers, boss HP is a Big
+/* the end of the game: shown once, the first time the final boss (stage 1000) goes down */
+function showFinale(){const st=(n,l)=>`<div><b>${n}</b><span>${l}</span></div>`;
+  modal(`${ic('trophy')} You Finished Riff Lord!`,`<div class="finbig">${ic('m3')}${ic('trophy')}${ic('m19')}</div>
+    <p>The final boss is down. Stage 1000 is yours, the underworld has gone quiet, and every venue on Earth (and a few beyond it) knows your name.</p>
+    <p><b style="color:#ffd76a">You are the Riff Lord.</b></p>
+    <div class="finst">${st(fmt(S.boss.wins),'bosses beaten')}${st(S.trans||0,'transcensions')}${st(unlocked().length+'/'+SONGS.length,'songs learned')}${st(itemCount()+'/'+ITEM_IDS.length,'gear kinds found')}${st(fmt(S.total),'fans this transcension')}${st(fmt(S.etT||0),'Eternity earned')}</div>
+    <p class="pf" style="color:#a08c84">Thank you for playing! The show goes on: the final boss keeps dropping loot, and there are still songs, gear and Eternity to collect.</p>`,[['Keep rocking',null,1]]);
+  $('modal').classList.add('fin');chord(4);setTimeout(()=>chord(4),400);setTimeout(()=>chord(4),800);
+  $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');
+  for(let i=0;i<14;i++)setTimeout(()=>burst(innerWidth*(.1+.8*Math.random()),innerHeight*(.15+.6*Math.random())),i*120);}
 function startFight(){if(F||!S.boss.on||(S.cd.boss||0)>Date.now())return;const k=S.boss.lvl,b=bossOf(k),now=Date.now();
   F={k,max:bossMax(k),hp:bossLeft(k),end:now+bossTime()*1e3,combo:0,last:0,sp:!!b.sp,nm:now+600};bandAcc=0;
   $('fight').classList.toggle('roam',F.sp);$('fRing').style.transform='';$('fSub').textContent=F.sp?'Headliner: it will not hold still, but every hit sticks · it never heals':'Tap the boss to hit it · it heals 1% per second';
@@ -1354,13 +1372,14 @@ function hitBoss(auto,quiet){if(!F)return;
   if(!(F.hp.m>0))endFight(true);else if(!auto)drawFight();}
 function endFight(win,fled){if(F.daily)return endDaily(win);const k=F.k,left=Math.max(0,hpFrac()),b=bossOf(k),sp=F.sp;if(sp){if(win)delete S.boss.hp;else S.boss.hp=Big.max(F.hp,1);}F=null;$('fight').classList.remove('show','roam');$('fRing').style.transform='';S.cd.boss=Date.now()+bossCd()*1e3;
   if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>${sp?'A headliner does not heal: the damage you dealt stays for the next fight.':'Spend platinum records on Riff Damage or Extended Set and come back.'}`,[['Retreat',null,1]]);buildBoss();render();save();return;}
+  const fin=k===BOSS_TOP&&!S.finished;if(fin)S.finished=Date.now();   // first win against the final boss: the finale screen follows the victory popup
   S.boss.lvl=Math.min(BOSS_TOP,S.boss.lvl+1);S.boss.wins++;const g=Big.max(baseFps().mul(900),clickPow().mul(100)),sk=(5+2*k)*(sp?3:1)*skX(),hr=sp?headRecs(k):0;gain(g);S.skill+=sk;
   if(hr){S.records+=hr;S.earned+=hr;S.gift=(S.gift||0)+hr;buildPerks();}
   const skn=sp||Math.random()<.25?dropSkin():null;
   const it=rollLoot(sp),eqd=giveItem(it),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');drawSlots();
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
   const sg=unlockSong();
-  modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} ${ic('skill')}${hr?` · +${hr} ${ic('rec')}`:''}${loot}${sg?`<br><br>${ic('note')} <b style="color:#d5b0ff">New song for the setlist</b><br>${sg.n}`:''}${skn?`<br><br>${ic('palette')} <b style="color:#ffd76a">New pick skin</b><br>${skn.n} · ${skn.d}`:''}<br><br>${ic('swords')} Riff power +15% for good`,[['Rock on',null,1]]);buildBoss();render();save();}
+  modal('Boss Defeated!',`${b.e} ${b.n} is down.<br>+${fmt(g)} fans · +${sk} ${ic('skill')}${hr?` · +${hr} ${ic('rec')}`:''}${loot}${sg?`<br><br>${ic('note')} <b style="color:#d5b0ff">New song for the setlist</b><br>${sg.n}`:''}${skn?`<br><br>${ic('palette')} <b style="color:#ffd76a">New pick skin</b><br>${skn.n} · ${skn.d}`:''}<br><br>${ic('swords')} Riff power +15% for good`,[[fin?'Continue':'Rock on',fin?showFinale:null,1]]);buildBoss();render();save();}
 $('skipCd').onclick=()=>{const c=skipCost();if((S.cd.boss||0)<=Date.now()||S.skill<c)return;S.skill-=c;S.cd.boss=0;chord(3);toast(ic('bolt')+' <b>The boss accepts your challenge</b>');render();save();};
 $('fightBtn').onclick=startFight;$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
 /* automatic riffs (Auto-Shredder) and automatic boss hits (Auto-Shredder + Backing Band) */

@@ -459,7 +459,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <nav id="tabs">
   <button data-tab="gear" class="on"><span data-ic="tabBand"></span>Band</button>
   <button data-tab="ups"><span data-ic="bolt"></span>Upgrades</button>
-  <button data-tab="skill"><span data-ic="skill"></span>Skill</button>
+  <button data-tab="skill"><span data-ic="skill"></span>Solo</button>
   <button data-tab="boss"><span data-ic="skull"></span>Boss</button>
   <button data-tab="legend"><span data-ic="rec"></span>Legend</button>
 </nav>
@@ -1041,7 +1041,7 @@ function render(){
   const sc=$('skipCd'),scH=!(bcd>0&&!F),scT=`${ic('bolt')} Call the boss out now · ${skipCost()} ${ic('skill')}`;if(sc.hidden!==scH)sc.hidden=scH;setH(sc,scT);sc.disabled=S.skill<skipCost();
   tabBtns[3].classList.toggle('hot',S.boss.on?bcd<=0:S.records>=BOSS_COST);
   if(F)drawFight();
-  tabBtns[4].classList.toggle('hot',p<1&&perkBtns.some(x=>!x.mx&&S.records>=x.c));const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
+  tabBtns[4].classList.toggle('hot',p<1&&etGain()>0);const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
 document.body.dataset.tab='gear';

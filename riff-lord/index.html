@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:Oswald,system-ui,sans-se
   background-image:radial-gradient(ellipse at 50% 110%,rgba(255,90,31,.28),transparent 60%),radial-gradient(ellipse at 15% -10%,rgba(196,18,47,.25),transparent 50%),radial-gradient(ellipse at 90% 0%,rgba(120,60,255,.12),transparent 45%);
   background-attachment:fixed}
 #embers{position:fixed;inset:0;pointer-events:none;z-index:0}
-header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:linear-gradient(#150c0e,rgba(21,12,14,.6));backdrop-filter:blur(6px)}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(21,12,14,.95);backdrop-filter:blur(6px)}
 h1{font-family:"Metal Mania",serif;font-size:clamp(26px,4vw,42px);letter-spacing:2px;font-weight:400;
   background:linear-gradient(180deg,#fff3c4,var(--fire2) 40%,var(--fire) 70%,var(--blood));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,90,31,.5))}
 .hbtns{display:flex;gap:8px}
@@ -367,18 +367,22 @@ h2 small{font-family:Oswald,sans-serif;font-size:13px;color:var(--dim);letter-sp
 html{-webkit-text-size-adjust:100%}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#tabs,#hfans{display:none}
+#tabs{display:none}
+#hfans{flex:1;text-align:center;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gold)}
+#hfans small{color:var(--dim);font-size:14px;font-weight:400;margin-left:4px}
+@media(max-width:480px){h1 .ttl{display:none}}
 @media(max-width:1050px){
   header{position:sticky;top:0;z-index:10;padding:calc(8px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));background:rgba(21,12,14,.94)}
   h1{font-size:22px;letter-spacing:1px;white-space:nowrap}
-  #hfans{display:block;flex:1;text-align:right;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gold)}
+  #hfans{display:block;flex:1;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gold)}
   #hfans small{color:var(--dim);font-size:12px;font-weight:400}
   .hbtns .lbl{display:none}
   .hbtns button{padding:6px 7px;font-size:14px}
   .hbtns{gap:5px}
   header{gap:8px}
   h1{font-size:19px!important}
-  #hfans{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  #hfans{min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;line-height:1.15}
+  #hfans small{display:block;margin:0}
   #tour{bottom:calc(74px + env(safe-area-inset-bottom))}
   main{display:flex;flex-direction:column;gap:12px;padding:12px max(12px,env(safe-area-inset-right)) calc(78px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
   .col{display:contents}
@@ -408,6 +412,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   #tabs button.on{color:var(--gold)}
   #tabs button.on span{filter:drop-shadow(0 0 8px var(--fire))}
   #tabs button.on:before{content:"";position:absolute;top:-1px;left:25%;right:25%;height:2px;background:linear-gradient(90deg,transparent,var(--fire2),transparent)}
+  #tabs button[data-n]:after{content:attr(data-n);position:absolute;top:4px;left:calc(50% + 10px);padding:1px 5px;border-radius:999px;font-size:10px;letter-spacing:0;line-height:14px;color:#0a1420;background:#cfe6ff;box-shadow:0 0 8px #5ab4ff;white-space:nowrap}
   #tabs button.hot:after{content:"";position:absolute;top:8px;left:calc(50% + 12px);width:9px;height:9px;border-radius:50%;background:var(--fire2);box-shadow:0 0 8px var(--fire)}
 }
 
@@ -440,7 +445,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <body>
 <canvas id="embers"></canvas>
 <header>
-  <h1><span data-ic="bolt"></span> Riff Lord</h1>
+  <h1><span data-ic="bolt"></span><span class="ttl"> Riff Lord</span></h1>
   <div id="hfans"></div>
   <div class="hbtns"><button id="setBtn" aria-label="Settings"><span data-ic="cog"></span><span class="lbl"> Settings</span></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button><button id="wipe"><span data-ic="trash"></span><span class="lbl"> Wipe save</span></button></div>
 </header>
@@ -784,7 +789,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},v:8});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},songOff:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:9});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -799,7 +804,8 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<5){let back=0;GUEST_COST.forEach((c,j)=>{if(S.guest[NG+j])back+=c;});S.guest={};if(back){S.records+=back;S.refund=back;}}   // v5: guest stars no longer cost records, so what was paid comes back
   if((S.v||0)<6){let back=0;for(const k in S.ets){const L=S.ets[k];if(L>1){back+=(L-1)*L/2;S.ets[k]=1;}}if(back){S.et=(S.et||0)+back;S.etRefund=back;}}   // v6: eternity levels cost 1, 2, 4, 8… instead of 1, 2, 3…, so levels above 1 are refunded at what they cost
   if((S.v||0)<8)S.capFix=1;   // v7: skill caps are back, v8: Auto-Shredder 3 and Speed Picking 5. See S.capFix at the end of the script
-  S.v=8;
+  if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
+  S.v=9;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
 const save=()=>{if(noSave)return;S.last=Date.now();try{localStorage.setItem('rifflord',JSON.stringify(S))}catch(e){}};
@@ -889,7 +895,7 @@ function bulk(i){ const b=B(GENS[i][3]*cdisc()).mul(Big.pow10(S.gens[i]*LG(G)));
 const REC_K1=1e9, REC_N1=Math.sqrt(REC_K1/1e6), REC_K2=1e11, REC_N2=REC_N1*(REC_K2/REC_K1)**.25, REC_PER_DECADE=10;
 const recOf=t=>{t=B(t);if(!(t.m>0))return 0;const l=t.log10();return l<=9?Math.sqrt(t.toNumber()/1e6):l<=11?REC_N1*(t.toNumber()/REC_K1)**.25:REC_N2+REC_PER_DECADE*(l-LG(REC_K2));};
 const fansFor=n=>n<=REC_N1?B(n*n*1e6):n<=REC_N2?B(REC_K1*(n/REC_N1)**4):Big.pow10(LG(REC_K2)+(n-REC_N2)/REC_PER_DECADE);
-const pending=()=>Math.max(0,Math.floor(recOf(S.total)*recMult()+1e-9)-(S.earned-(S.gift||0)));   // Record Deal multiplies every step; records gifted by label scouts come on top
+const pending=()=>Math.max(0,Math.floor((recOf(S.total)-(S.rawE||0))*recMult()+1e-9));   // record bonuses only multiply records not banked yet (S.rawE = raw records already ascended)
 
 function gain(n){n=B(n);S.fans=S.fans.add(n);S.run=S.run.add(n);S.total=S.total.add(n);}
 /* saves store fans as numbers, or as "m e" strings once they pass 1e300. Saves broken by the old number limit (NaN or Infinity,
@@ -899,6 +905,7 @@ function fixNums(){const bad=x=>typeof x!='number'||!isFinite(x),big=v=>v instan
   if(bad(S.records))S.records=S.earned;if(bad(S.gift))S.gift=0;if(bad(S.skill))S.skill=0;if(bad(S.et))S.et=0;
   S.total=big(S.total)||fansFor(Math.max(0,S.earned-S.gift));S.run=big(S.run)||Big.Z;S.fans=big(S.fans)||S.run;}
 fixNums();
+if(S.rawFix){S.rawE=recOf(S.total.sub(S.run));delete S.rawFix;}   // everything before this run counts as banked
 
 /* ---------- build DOM ---------- */
 const gensEl=$('gens'), genRows=[];
@@ -1002,7 +1009,7 @@ function render(){
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
   upBtns.forEach(u=>u.b.classList.toggle('ok',S.fans.gte(u.c)));
   perkBtns.forEach(p=>p.b.classList.toggle('ok',!p.mx&&S.records>=p.c));
-  const p=pending(),have=S.earned-(S.gift||0)+p,lo=fansFor(have/recMult()),hi=fansFor((have+1)/recMult());
+  const p=pending(),rm=recMult(),lo=fansFor((S.rawE||0)+p/rm),hi=fansFor((S.rawE||0)+(p+1)/rm);
   $('recs').textContent=fmt(S.records);$('earned').textContent=fmt(S.earned);$('recBon').textContent='×'+fmt(recBonus());setH($('gain'),'+'+fmt(p)+' '+ic('rec'));
   $('ascBar').style.width=Math.min(100,Math.max(0,S.total.sub(lo).div(hi.sub(lo)).toNumber()*100))+'%';
   $('ascNext').textContent=`Next record at ${fmt(hi)} all-time fans`;
@@ -1015,7 +1022,7 @@ function render(){
   setH($('skRange'),`Earns ${fmt(slo)}–${fmt(shi)} ${ic('skill')} per solo · grows with riff power`);
   $('playSolo').disabled=pcd>0;$('skCd').textContent=pcd>0?'ready in '+fmtT(pcd):'READY';
   techBtns.forEach(t=>t.b.classList.toggle('ok',!t.mx&&S.skill>=t.c));
-  tabBtns[2].classList.toggle('hot',pcd<=0||techBtns.some(t=>!t.mx&&S.skill>=t.c));
+  tabBtns[2].classList.toggle('hot',pcd<=0);
   $('buffs').innerHTML=[['pit','Circle Pit · fans ×'+PIT_X],['tour','On a roll · fans ×3'],['frenzy','Mosh Pit · fans ×7'],['pyro','Pyro Blast · fans ×5'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
   $('hfans').innerHTML=`${fmt(S.fans)} <small>+${fmt(f)}/s</small>`;
   const canUp=upBtns.some(u=>S.fans.gte(u.c));tabBtns[1].classList.toggle('hot',canUp);if($('buyAll').hidden===canUp)$('buyAll').hidden=!canUp;
@@ -1027,7 +1034,7 @@ function render(){
   const sc=$('skipCd'),scH=!(bcd>0&&!F),scT=`${ic('bolt')} Call the boss out now · ${skipCost()} ${ic('skill')}`;if(sc.hidden!==scH)sc.hidden=scH;setH(sc,scT);sc.disabled=S.skill<skipCost();
   tabBtns[3].classList.toggle('hot',S.boss.on?bcd<=0:S.records>=BOSS_COST);
   if(F)drawFight();
-  tabBtns[4].classList.toggle('hot',p>=1||perkBtns.some(x=>!x.mx&&S.records>=x.c));
+  tabBtns[4].classList.toggle('hot',p<1&&perkBtns.some(x=>!x.mx&&S.records>=x.c));const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
 document.body.dataset.tab='gear';
@@ -1054,7 +1061,7 @@ function modal(t,p,btns){$('modal').classList.remove('fin');$('mT').innerHTML=t;
   $('modal').classList.add('show');}
 $('ascBtn').onclick=()=>{const p=pending();if(p<1)return;
   modal('Ascend to Legend?',`Break up the band at its peak. You lose all fans, gear and upgrades, but gain <b style="color:#cfe6ff">${fmt(p)} platinum records</b> — each one boosts all fans by 10% forever (from the 101st on also ×1.02 on top) and can be spent on legend perks.`,
-  [['Keep touring'],['Ascend',()=>{S.records+=p;S.earned+=p;S.asc++;S.fans=startFans();S.run=Big.Z;S.gens=GENS.map(()=>0);S.ups={};
+  [['Keep touring'],['Ascend',()=>{S.rawE=(S.rawE||0)+p/recMult();S.records+=p;S.earned+=p;S.asc++;S.fans=startFans();S.run=Big.Z;S.gens=GENS.map(()=>0);S.ups={};
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(3);upsDirty=true;buildPerks();render();save();},1]]);};
 /* ---------- transcendence: the third layer. Wipes everything except songs, pick skins and settings and pays Eternity points,
    which buy eternity skills. A new skill is a pick from three random ones (the offer is kept in the save, so it cannot be rerolled);
@@ -1064,7 +1071,7 @@ const ET_NEED=500, etAt=e=>e>=ET_NEED?Math.floor((e/250)**1.5):0, etGain=()=>etA
 const etRange=()=>{const g=etGain();let hi=g?Math.floor(250*(g+1)**(2/3)):ET_NEED;while(etAt(hi)<=g)hi++;let lo=g?Math.floor(250*g**(2/3)):0;while(lo>0&&etAt(lo-1)>=g)lo--;return [lo,hi];};
 const startFans=()=>Big.max(pl('start')?Big.pow10(2+pl('start')):Big.Z,etl('start')?Big.pow10(6+3*etl('start')):Big.Z);
 const ES=[
- ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +10%'],
+ ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +20%'],
  ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Boss damage ×10'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
  ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter (never below 10 min)'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
@@ -1146,8 +1153,8 @@ const TECH=[
  {id:'pres',n:'Stage Presence',d:'Stage divers 10% more often',c:l=>Math.round(15*2**l),max:20},
  {id:'cool',n:'Power Nap',d:'Solo cooldown −5 min (down to 10)',c:l=>Math.round(60*1.6**l),max:10},
  {id:'encore',n:'Standing Ovation',d:'Encore pays 1 more minute of fans',c:l=>Math.round(30*1.7**l),max:20},
- {id:'label',n:'Record Deal',d:'+10% platinum records from ascending',c:l=>1000*4**l,max:20}];
-const soloCd=()=>Math.max(600,(3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.1*tl('label'))*(1+.1*etl('plat'))*songRec(), skX=()=>3**etl('virt');
+ {id:'label',n:'Record Deal',d:'+15% platinum records from ascending',c:l=>1000*4**l,max:20}];
+const soloCd=()=>Math.max(600,(3600-300*tl('cool'))*.85**etl('quick')), encoreMin=()=>3+tl('encore'), recMult=()=>(1+.15*tl('label'))*(1+.2*etl('plat'))*songRec(), skX=()=>3**etl('virt');
 let techBtns=[];
 function buildTech(){const el=$('tech');el.innerHTML='';techBtns=[];
   TECH.forEach(t=>{const l=tl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='tech'+(mx?' maxed':'');

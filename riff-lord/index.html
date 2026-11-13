@@ -20,6 +20,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+/* no double-tap zoom anywhere (iOS zooms on a quick second tap outside buttons); scrolling and pinch zoom still work */
+html,body,*{touch-action:manipulation}
 body{background:var(--bg);color:var(--text);font-family:Oswald,system-ui,sans-serif;overflow-x:hidden;
   background-image:radial-gradient(ellipse at 50% 110%,rgba(255,90,31,.28),transparent 60%),radial-gradient(ellipse at 15% -10%,rgba(196,18,47,.25),transparent 50%),radial-gradient(ellipse at 90% 0%,rgba(120,60,255,.12),transparent 45%);
   background-attachment:fixed}

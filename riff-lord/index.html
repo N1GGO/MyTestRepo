@@ -19,14 +19,14 @@
   --fire:#ff5a1f; --fire2:#ffb300; --blood:#c4122f; --gold:#ffd76a; --plat:#cfe6ff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html{height:100%}body{min-height:100%}   /* min-height, not height: a sticky header can only stick inside the body */
 /* no double-tap zoom anywhere (iOS zooms on a quick second tap outside buttons); scrolling and pinch zoom still work */
 html,body,*{touch-action:manipulation}
-body{background:var(--bg);color:var(--text);font-family:Oswald,system-ui,sans-serif;overflow-x:hidden;
+body{background:var(--bg);color:var(--text);font-family:Oswald,system-ui,sans-serif;overflow-x:clip;
   background-image:radial-gradient(ellipse at 50% 110%,rgba(255,90,31,.28),transparent 60%),radial-gradient(ellipse at 15% -10%,rgba(196,18,47,.25),transparent 50%),radial-gradient(ellipse at 90% 0%,rgba(120,60,255,.12),transparent 45%);
   background-attachment:fixed}
 #embers{position:fixed;inset:0;pointer-events:none;z-index:0}
-header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(21,12,14,.95);backdrop-filter:blur(6px)}
+header{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(21,12,14,.95);backdrop-filter:blur(6px)}
 h1{font-family:"Metal Mania",serif;font-size:clamp(26px,4vw,42px);letter-spacing:2px;font-weight:400;
   background:linear-gradient(180deg,#fff3c4,var(--fire2) 40%,var(--fire) 70%,var(--blood));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,90,31,.5))}
 .hbtns{display:flex;gap:8px}
@@ -160,8 +160,14 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 .abil button.rdy{border-color:var(--fire);box-shadow:0 0 14px rgba(255,90,31,.35)}
 .abil button.rdy small{color:var(--fire2)}
 .abil button:not(.rdy){opacity:.55;cursor:not-allowed}
-#buffs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px;position:relative}
-#buffs span{font-size:12px;padding:2px 10px;border-radius:20px;background:linear-gradient(var(--fire2),var(--fire));color:#160a04;font-weight:700;font-variant-numeric:tabular-nums}
+.bufrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;position:relative}
+#buffs{margin-top:10px}
+#buffs:empty{display:none}
+#hbuffs{order:9;flex-basis:100%;margin-top:6px}
+#hbuffs[hidden]{display:none}
+.bufrow span{font-size:16px;padding:5px 14px;border-radius:20px;background:linear-gradient(var(--fire2),var(--fire));color:#160a04;font-weight:700;font-variant-numeric:tabular-nums;box-shadow:0 0 16px rgba(255,90,31,.6);animation:bufp 1s ease-in-out infinite alternate}
+#hbuffs span{font-size:14px;padding:3px 12px}
+@keyframes bufp{to{box-shadow:0 0 26px rgba(255,179,0,.9)}}
 .float.crit{font-size:32px;color:#fff;text-shadow:0 0 14px var(--blood),0 0 4px var(--blood)}
 .diver{position:fixed;z-index:15;width:68px;height:68px;border-radius:50%;border:2px solid var(--gold);background:radial-gradient(circle at 35% 30%,#fff3c4,var(--fire2) 35%,var(--fire) 65%,var(--blood));font-size:34px;line-height:1;cursor:pointer;box-shadow:0 0 30px var(--fire),0 0 60px rgba(255,179,0,.5);animation:bob 1.2s ease-in-out infinite alternate,fadein .4s}
 .diver.rare{width:84px;height:84px;font-size:42px;border-color:#e9d5ff;background:radial-gradient(circle at 35% 30%,#fff,#d5b0ff 30%,#7a2cff 62%,#1c0638);box-shadow:0 0 34px #a855f7,0 0 80px rgba(168,85,247,.65);animation:bob .7s ease-in-out infinite alternate,fadein .4s}
@@ -447,6 +453,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <header>
   <h1><span data-ic="bolt"></span><span class="ttl"> Riff Lord</span></h1>
   <div id="hfans"></div>
+  <div id="hbuffs" class="bufrow" hidden></div>
   <div class="hbtns"><button id="setBtn" aria-label="Settings"><span data-ic="cog"></span><span class="lbl"> Settings</span></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button><button id="wipe"><span data-ic="trash"></span><span class="lbl"> Wipe save</span></button></div>
 </header>
 <nav id="tabs">
@@ -462,6 +469,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       <div class="rank" id="rank">Garage Band</div>
       <div id="fans">0</div>
       <div class="sub">fans &nbsp;·&nbsp; <b id="fps">0</b> / sec</div>
+      <div id="buffs" class="bufrow"></div>
       <button id="pick" aria-label="Shred">
         <svg viewBox="0 0 200 200">
           <defs>
@@ -487,7 +495,6 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       <div class="hype"><div class="hbar"><i id="hypeBar"></i></div><span id="hypeTxt"></span></div>
       <div class="abil"><button id="aSolo"></button><button id="aEnc"></button><button id="aHorn" hidden></button><button id="aPyro" hidden></button><button id="aOrch" hidden></button></div>
       <div class="sub skmini"><span data-ic="skill"></span> <b id="skMini">0</b> solo skill to spend</div>
-      <div id="buffs"></div>
     </section>
     <section class="panel skill" id="pSkill">
       <h2>Solo Skill <span class="skamt" id="skN">0</span></h2>
@@ -1023,7 +1030,7 @@ function render(){
   $('playSolo').disabled=pcd>0;$('skCd').textContent=pcd>0?'ready in '+fmtT(pcd):'READY';
   techBtns.forEach(t=>t.b.classList.toggle('ok',!t.mx&&S.skill>=t.c));
   tabBtns[2].classList.toggle('hot',pcd<=0);
-  $('buffs').innerHTML=[['pit','Circle Pit · fans ×'+PIT_X],['tour','On a roll · fans ×3'],['frenzy','Mosh Pit · fans ×7'],['pyro','Pyro Blast · fans ×5'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');
+  {const bh=[['pit','Circle Pit · fans ×'+PIT_X],['tour','On a roll · fans ×3'],['frenzy','Mosh Pit · fans ×7'],['pyro','Pyro Blast · fans ×5'],['solo','Shredding · riffs ×10']].filter(b=>buff(b[0])).map(b=>`<span>${b[1]} · ${Math.ceil((S.buffs[b[0]]-now)/1e3)}s</span>`).join('');setH($('buffs'),bh);const r=$('buffs').getBoundingClientRect(),hb=document.querySelector('header').getBoundingClientRect().bottom,off=!!bh&&(r.height==0||r.bottom<hb||r.top>innerHeight);if($('hbuffs').hidden===off)$('hbuffs').hidden=!off;if(off)setH($('hbuffs'),bh);}   // boosts follow you into the top bar while the stage is out of sight
   $('hfans').innerHTML=`${fmt(S.fans)} <small>+${fmt(f)}/s</small>`;
   const canUp=upBtns.some(u=>S.fans.gte(u.c));tabBtns[1].classList.toggle('hot',canUp);if($('buyAll').hidden===canUp)$('buyAll').hidden=!canUp;
   const ar=autoRate();setH($('autoTxt'),ar?(S.autoOff?' · '+ic('robot')+' paused':` · ${ic('robot')} ${ar} clicks/s`):'');const abt=$('autoBtn'),abl=S.autoOff?'▶ Resume':'⏸ Pause';if(abt.hidden!==!ar)abt.hidden=!ar;if(abt.textContent!==abl)abt.textContent=abl;   // only touch the button when it changes, so a tap is never interrupted

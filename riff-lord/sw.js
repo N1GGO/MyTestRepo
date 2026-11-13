@@ -1,6 +1,6 @@
 // Riff Lord service worker: network-first so updates arrive, cache fallback so it plays offline.
-const CACHE = 'riff-lord-v1';
-const SHELL = ['./', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'riff-lord-v2';
+const SHELL = ['./', 'icons.js', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));

@@ -1206,7 +1206,7 @@ const BSK=[
  {id:'combo',n:'Shred Combo',d:'Fast hits stack up to +50% more damage',c:l=>Math.round(10*1.9**l),max:6},
  {id:'band',n:'Backing Band',d:'+1 automatic hit per second',c:l=>Math.round(12*1.8**l),max:8},
  {id:'final',n:'Final Chorus',d:'+100% damage below 30% boss HP',c:l=>30*3**l,max:3},
- {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −5 min',c:l=>Math.round(15*2**l),max:6}];
+ {id:'quick',n:'Quick Turnaround',d:'Fight cooldown −5 min (down to 10)',c:l=>Math.round(15*2**l),max:10}];
 const bl=id=>S.bs[id]||0;
 const BOSS_REGEN=.01; // bosses heal 1% of their max HP per second
 const bossHP=k=>1200*3**k, bossDmg=()=>10*2**bl('dmg')*FX.boss*10**etl('slay'), bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),

@@ -1080,16 +1080,19 @@ const etRange=()=>{const g=etGain();let hi=g?Math.floor(250*(g+1)**(2/3)):ET_NEE
 const startFans=()=>Big.max(pl('start')?Big.pow10(2+pl('start')):Big.Z,etl('start')?Big.pow10(6+3*etl('start')):Big.Z);
 const ES=[
  ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +20%'],
- ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Boss damage ×10'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
+ ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Riff Damage multiplier doubled'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
  ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter (never below 10 min)'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
-const ET_MAX=20, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etLvlCost=l=>2**(l-1);   // going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles
+const ET_MAX=20, SLAY_MAX=80, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etMax=id=>id=='slay'?SLAY_MAX:ET_MAX;
+/* going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles. Boss Slayer goes on past 20 up to 80
+   (about level 77 is needed for the final boss); from level 20 on its price only grows 10% per level, starting at 288K */
+const etLvlCost=(l,id)=>id=='slay'&&l>=20?Math.round(2**18*1.1**(l-19)):2**(l-1);
 let etBtns=[];
 function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
-  etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=ET_MAX,c=etLvlCost(l),b=document.createElement('button');b.className='etk'+(mx?' maxed':'');
-    b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}</small></div><div class="d">${k[2]} per level</div><div class="c">${mx?'MAXED':ic('eternity')+' '+c}</div>`;
+  etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=etMax(k[0]),c=etLvlCost(l,k[0]),b=document.createElement('button');b.className='etk'+(mx?' maxed':'');
+    b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}${k[0]=='slay'?'/'+SLAY_MAX:''}</small></div><div class="d">${k[0]=='slay'?`Every Riff Damage level: boss damage ×${fmt(2**(l+1))}${mx?'':` (next ×${fmt(2**(l+2))})`}`:k[2]+' per level'}</div><div class="c">${mx?'MAXED':ic('eternity')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.et>=c){S.et-=c;S.ets[k[0]]=l+1;chord(2);afterEt();}};
-    maxBtn(b,()=>etLvlCost(etl(k[0])),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt,()=>etl(k[0])<ET_MAX);box.appendChild(b);etBtns.push({b,c,mx});});
+    maxBtn(b,()=>etLvlCost(etl(k[0]),k[0]),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt,()=>etl(k[0])<etMax(k[0]));box.appendChild(b);etBtns.push({b,c,mx});});
   if(etOwned().length<ES.length){const c=etNewCost(),b=document.createElement('button');b.className='etk new';
     b.innerHTML=`<div class="t">＋ New eternity skill</div><div class="d">Choose one of three</div><div class="c">${S.etOffer?'your offer is waiting':ic('eternity')+' '+c}</div>`;
     b.onclick=()=>{if(!S.etOffer){if(S.et<c)return;S.et-=c;const pool=ES.filter(k=>!etl(k[0])).map(k=>k[0]).sort(()=>Math.random()-.5);S.etOffer=pool.slice(0,3);buildEt();save();render();}openOffer();};
@@ -1338,7 +1341,8 @@ const BSK=[
 const bl=id=>S.bs[id]||0;
 const BOSS_REGEN=.01; // bosses heal 1% of their max HP per second
 const BOSS_TOP=999;   // stage 1000 is the last one; beating it again keeps you there
-const bossHP=k=>B(12000).mul(Big.pow10(k*LG(3))), bossDmg=()=>10*2**bl('dmg')*FX.boss*10**etl('slay'), bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
+const bossHP=k=>B(12000).mul(Big.pow10(k*LG(3))), bossDmg=()=>Big.pow10(LG(10*FX.boss)+bl('dmg')*(1+etl('slay'))*LG(2)),   // every Riff Damage level doubles boss damage, and every Boss Slayer level doubles that again
+       bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
       bossCd=()=>Math.max(600,(3600-300*bl('quick'))*.85**etl('quick')), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
 /* every 10th stage is a headliner: ten times the HP, it roams the arena and half of all automatic hits miss it,
    but it never heals and keeps its damage between fights (S.boss.hp), so it can be worn down over several attempts. */
@@ -1358,7 +1362,7 @@ let F=null,bskBtns=[],autoAcc=0,bandAcc=0;
 function buildBoss(){$('bossLocked').hidden=S.boss.on;$('bossOpen').hidden=!S.boss.on;$('bossUnlock').innerHTML=`Open the gate · ${ic('rec')} ${BOSS_COST}`;
   const el=$('bskills');el.innerHTML='';bskBtns=[];
   BSK.forEach(t=>{const l=bl(t.id),mx=l>=t.max,c=t.c(l);const b=document.createElement('button');b.className='bsk'+(mx?' maxed':'');
-    b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
+    b.innerHTML=`<div class="t">${t.n} <small>Lv ${l}</small></div><div class="d">${t.id=='dmg'&&etl('slay')?`Damage against bosses ×${fmt(2**(1+etl('slay')))} (Boss Slayer)`:t.d}</div><div class="c">${mx?'MAXED':ic('rec')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.records>=c){S.records-=c;S.bs[t.id]=l+1;chord(2);buildBoss();render();}};
     maxBtn(b,()=>t.c(bl(t.id)),()=>S.records,c=>{S.records-=c;S.bs[t.id]=bl(t.id)+1;},()=>{buildBoss();render();},()=>bl(t.id)<t.max);el.appendChild(b);bskBtns.push({b,c,mx});});
   const k=S.boss.lvl,b=bossOf(k);$('bEmo').innerHTML=b.e;$('bName').textContent=`${b.n} · Stage ${k+1}${k>=BOSS_TOP?' (final)':''}`;
@@ -1395,9 +1399,9 @@ function hitBoss(auto,quiet){if(!F)return;
   if(F.sp&&(auto||quiet)&&Math.random()<.5)return;   // a headliner dodges half of the automatic hits
   const now=Date.now();let d=bossDmg();
   if(!auto){F.combo=now-F.last<1500?F.combo+1:1;F.last=now;}
-  d*=1+Math.min(F.combo*.02,.5*bl('combo'));
-  const crit=Math.random()<bossCrit();if(crit)d*=4;
-  if(hpFrac()<.3)d*=1+bl('final');
+  d=d.mul(1+Math.min(F.combo*.02,.5*bl('combo')));
+  const crit=Math.random()<bossCrit();if(crit)d=d.mul(4);
+  if(hpFrac()<.3)d=d.mul(1+bl('final'));
   F.hp=F.hp.sub(d);
   const fb=$('fBoss');fb.classList.remove('hit');void fb.offsetWidth;fb.classList.add('hit');
   if(!auto||Math.random()<.4)bossFloat((crit?'CRIT! ':'')+'-'+fmt(d),crit);
@@ -1696,7 +1700,7 @@ function pumpNote(){if(!notes.length)return;if($('modal').classList.contains('sh
 /* v7: skill levels have caps again (20, the two cooldown skills 10) and boss stages end at 1000. Levels above a cap are refunded at what they cost. */
 if(S.capFix){let rec=0,sk=0,et=0;const cut=(list,lv,set,cur)=>list.forEach(t=>{let L=lv(t.id);if(L<=t.max)return;while(L>t.max){L--;cur(t.c(L));}set(t.id,L);});
   cut(PERKS,pl,(id,L)=>S.perks[id]=L,c=>rec+=c);cut(TECH,tl,(id,L)=>S.tech[id]=L,c=>sk+=c);cut(BSK,bl,(id,L)=>S.bs[id]=L,c=>rec+=c);
-  for(const k in S.ets){let L=S.ets[k];while(L>ET_MAX){L--;et+=etLvlCost(L);}S.ets[k]=L;}
+  for(const k in S.ets){let L=S.ets[k];while(L>etMax(k)){L--;et+=etLvlCost(L,k);}S.ets[k]=L;}
   const top=S.boss.lvl>BOSS_TOP;if(top){S.boss.lvl=BOSS_TOP;delete S.boss.hp;}
   const fin=x=>isFinite(x)?x:1e300;rec=fin(rec);sk=fin(sk);et=fin(et);S.records+=rec;S.skill+=sk;S.et+=et;delete S.capFix;
   calcFx();buildPerks();buildTech();buildBoss();buildEt();render();save();

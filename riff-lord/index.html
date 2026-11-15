@@ -778,6 +778,12 @@ const TX=t=>t<5?2:3;   // member upgrades: ×2 up to level 200, the late ones (e
 const WLD=[1e18,1e20,1e22,1e24,1e26,1e28,1e30,1e33,1e36];
 const WN=['Stadium Tour','World Tour','Festival Headliner','Antarctic Gig','Moon Landing Show','Orbital Stage','Galactic Tour','Black Hole Residency','Multiverse Farewell Tour'];
 const wCount=()=>WLD.reduce((a,_,t)=>a+(S.ups['w'+t]?1:0),0);
+/* cosmic tour: picks up after the Multiverse Farewell Tour, one every ×10,000 fans from 1e40 to 1e100, each ×10 all fans,
+   so the stretch past 1e36 where nothing global was left still has goals */
+const XLD=Array.from({length:16},(_,i)=>10**(40+4*i));
+const XN=['Mars Colony Concert','Asteroid Belt Tour','Saturn Ring Rave','Supernova Spectacular','Nebula Night','Quasar Festival','Dark Matter Matinee','Wormhole Weekender',
+ 'Pulsar Pit','Event Horizon Encore','Big Bang Reunion','Heat Death Headliner','Dimension Hopper Tour','Infinity Arena','Reality Collapse Gig','The Last Riff in the Universe'];
+const xCount=()=>XLD.reduce((a,_,t)=>a+(S.ups['x'+t]?1:0),0);
 const CLK=[100,1e3,2e4,5e5,2e7,1e9,1e11,1e13,1e15,1e17,1e19,1e21,1e24,1e27,1e30];
 const CN=['Heavier Strings','Drop-D Tuning','Palm Muting','Sweep Picking','Tapping Solo','Seven Strings','Eight Strings','Shred Mastery','Fingers of Fury','Nine Strings','Double-Neck Madness','Lightning Fingers','Time Signature Abuse','Riff Singularity','The Chord of Creation'];
 const PERKS=[
@@ -876,7 +882,7 @@ const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.se
 const DIA_FROM=100, DIA_UP=1.02;
 const recBonus=()=>B(1+.1*S.earned).mul(Big.pow10(LG(DIA_UP)*Math.max(0,S.earned-DIA_FROM)));
 let SB=1;   // setlist bonus, refreshed whenever the song list changes
-const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2))).mul(SB*songFans()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
+const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2)+xCount())).mul(SB*songFans()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
 const tierMult=i=>TIERS.reduce((a,_,t)=>a*(S.ups['g'+i+'t'+t]?TX(t):1),1);
 /* milestones (free): ×2 at levels 10 and 25, then every 50 levels a bonus that grows with the level:
    ×5 at 50, ×10 at 100, ×10 at 150, ×20 at 200, ×15 at 250, ×30 at 300 … (5 or 10, times the hundred you are in).
@@ -998,6 +1004,7 @@ function upList(){const L=[];
   CLK.forEach((c,t)=>{if(!S.ups['c'+t]&&S.run.gte(c/5)&&(t==0||S.ups['c'+(t-1)]))L.push({id:'c'+t,t:CN[t],d:'Riff power ×1.5',c});});
   GENS.forEach((g,i)=>TIERS.forEach((n,t)=>{if(!S.ups['g'+i+'t'+t]&&S.gens[i]>=n)L.push({id:'g'+i+'t'+t,t:`${g[0]} ${TN[t]}`,d:`${g[1]} ×${TX(t)}`,c:g[3]*TMULT[t]});}));
   WLD.forEach((c,t)=>{if(!S.ups['w'+t]&&S.run.gte(c/5)&&(t==0||S.ups['w'+(t-1)]))L.push({id:'w'+t,t:ic('globe')+' '+WN[t],d:'All fans ×2',c});});
+  XLD.forEach((c,t)=>{if(!S.ups['x'+t]&&S.run.gte(c/5)&&(t?S.ups['x'+(t-1)]:S.ups['w'+(WLD.length-1)]))L.push({id:'x'+t,t:ic('globe')+' '+XN[t],d:'All fans ×10',c});});
   return L.sort((a,b)=>a.c-b.c);}
 function buildUps(){const L=upList();$('ups').innerHTML=L.length?'':'<div class="empty">Hire band members and gather fans to unlock upgrades…</div>';upBtns=[];
   L.forEach(u=>{const b=document.createElement('button');b.className='up';b.innerHTML=`<div class="t">${u.t}</div><div class="d">${u.d}</div><div class="c">${fmt(u.c)} fans</div>`;

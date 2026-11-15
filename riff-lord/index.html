@@ -120,6 +120,15 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 #etBox p{font-size:14px;color:#d9c9e6;line-height:1.45;margin-bottom:10px}
 #etBtn{width:100%;font-family:"Metal Mania",serif;font-size:20px;letter-spacing:2px;padding:11px;border-radius:9px;border:1px solid #e9c6ff;color:#1a0628;background:linear-gradient(#fff,#d29bff);cursor:pointer}
 #etBtn:disabled{opacity:.4;cursor:not-allowed}
+.chest{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;padding:14px;border:1px solid #6b3d26;border-radius:12px;background:linear-gradient(135deg,rgba(107,61,38,.25),rgba(20,10,12,.4))}
+.chest .ci{font-size:58px;line-height:1}.chest .ci .ic{width:1em;height:1em}
+.chest h3{margin:0 0 4px;font-family:"Metal Mania",serif;font-weight:400;letter-spacing:1px;color:var(--gold)}
+.chest .cn{font-size:13px;color:var(--dim)}
+.chest .odds{grid-column:1/-1;font-size:13px;color:#cbb8ae;line-height:1.6}
+.chest .slots{display:flex;gap:6px;margin:6px 0}.chest .slots i{width:22px;height:8px;border-radius:4px;background:#2a1a18;border:1px solid #6b3d26}.chest .slots i.f{background:linear-gradient(90deg,#ffd76a,#ff8a3d);box-shadow:0 0 8px #ff8a3d}
+#chestBtn{grid-column:1/-1;width:100%;font-family:"Metal Mania",serif;font-size:20px;letter-spacing:2px;padding:11px;border-radius:9px;border:1px solid #ffd76a;color:#1a0f0a;background:linear-gradient(#ffe9a8,#ff9a4d);cursor:pointer}
+#chestBtn:disabled{opacity:.4;cursor:not-allowed}
+.loot{display:flex;flex-direction:column;gap:8px;margin:6px 0}.loot div{padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.loot .rare{border-color:#ffd76a;box-shadow:0 0 12px rgba(255,215,106,.25)}
 #etSk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 :is(.perk,.tech,.bsk,.etk){position:relative}
 :is(.perk,.tech,.bsk,.etk) .t{padding-right:40px}
@@ -406,13 +415,14 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   #ups{grid-template-columns:1fr 1fr}
   .up,.perk{padding:11px 10px}
   #pAch{order:6}
-  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill,#pBoss),
-  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill,#pBoss),
-  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pBoss),
-  body[data-tab=boss] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill),
-  body[data-tab=legend] :is(#pUps,#pGens,#pSkill,#pBoss){display:none}
-  #tabs button{font-size:10.5px!important;letter-spacing:.8px!important}
-  #tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill,#pBoss,#pShop),
+  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill,#pBoss,#pShop),
+  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pBoss,#pShop),
+  body[data-tab=boss] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pShop),
+  body[data-tab=legend] :is(#pUps,#pGens,#pSkill,#pBoss,#pShop),
+  body[data-tab=shop] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pBoss){display:none}
+  #tabs button{font-size:9.5px!important;letter-spacing:.4px!important}
+  #tabs{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   #tabs button{position:relative;font:inherit;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);background:none;border:0;padding:9px 4px 10px;cursor:pointer}
   #tabs button span{display:block;font-size:22px;line-height:1.2;filter:grayscale(.8) opacity(.7)}
   #tabs button.on{color:var(--gold)}
@@ -462,6 +472,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   <button data-tab="skill"><span data-ic="skill"></span>Solo</button>
   <button data-tab="boss"><span data-ic="skull"></span>Boss</button>
   <button data-tab="legend"><span data-ic="rec"></span>Legend</button>
+  <button data-tab="shop"><span data-ic="coffin"></span>Shop</button>
 </nav>
 <main>
   <div class="col">
@@ -548,6 +559,13 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     <section class="panel" id="pUps">
       <h2>Upgrades <button id="buyAll" class="buyall" hidden>Buy all</button></h2>
       <div id="ups"></div>
+    </section>
+    <section class="panel" id="pShop">
+      <h2>Shop</h2>
+      <div class="chest"><div class="ci"><span data-ic="coffin"></span></div>
+        <div><h3>Iron Coffin</h3><div class="cn">Something heavy fell off the tour bus. One every 6 hours, up to 3 stored.</div><div class="slots" id="chestSlots"></div><div class="cn" id="chestNext"></div></div>
+        <div class="odds">Always: <b>10 minutes of fans</b><br>10%: <b>+100 solo skill</b> · 5%: <b>+10 platinum records</b> · 2.5%: <b>a new song</b></div>
+        <button id="chestBtn">Open the Coffin</button></div>
     </section>
   </div>
 
@@ -796,7 +814,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -813,6 +831,7 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<8)S.capFix=1;   // v7: skill caps are back, v8: Auto-Shredder 3 and Speed Picking 5. See S.capFix at the end of the script
   if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
   if((S.v||0)<10){const off=S.songOff||{},lv=S.songLv||{};S.set=Object.keys(S.songs).map(Number).filter(i=>S.songs[i]&&!off[i]).sort((a,b)=>(lv[b]||0)-(lv[a]||0)).slice(0,10);S.setPick=1;delete S.songOff;}   // v10: songs work as a setlist of up to 10, all always on. Old saves start with their best songs and may pick freely once
+  if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Iron Coffin: everyone starts with one ready
   S.v=10;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
@@ -1005,7 +1024,7 @@ function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earn
 
 let lastUpCount=-1;
 function render(){
-  calcFx();
+  calcFx();if(S.chest)drawShop();
   const f=fps();
   $('fans').textContent=fmt(S.fans);$('fps').textContent=fmt(f);$('cp').textContent=fmt(clickPow());
   $('sRun').textContent=fmt(S.run);$('sTot').textContent=fmt(S.total);$('sClk').textContent=fmt(S.clicks);$('sAsc').textContent=S.asc;
@@ -1047,6 +1066,26 @@ function render(){
   tabBtns[4].classList.toggle('hot',p<1&&etGain()>0);const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
+/* ---------- shop: the Iron Coffin. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
+   fans for sure, and with some luck solo skill, platinum records (they count as earned, like every other drop) or a new song. ---------- */
+const CHEST_MS=6*36e5, CHEST_MAX=3;
+function chestTick(){const c=S.chest,now=Date.now();while(c.n<CHEST_MAX&&now-c.t>=CHEST_MS){c.n++;c.t+=CHEST_MS;}if(c.n>=CHEST_MAX)c.t=now;}
+const hm=ms=>{const m=Math.ceil(ms/6e4),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`;};
+function drawShop(){chestTick();const c=S.chest,sl=$('chestSlots'),h=Array.from({length:CHEST_MAX},(_,i)=>`<i class="${i<c.n?'f':''}"></i>`).join('');
+  if(sl.innerHTML!==h)sl.innerHTML=h;
+  const nx=c.n>=CHEST_MAX?`${c.n}/${CHEST_MAX} ready · storage full, open one to keep them coming`:`${c.n}/${CHEST_MAX} ready · next one in ${hm(CHEST_MS-(Date.now()-c.t))}`;
+  if($('chestNext').textContent!==nx)$('chestNext').textContent=nx;$('chestBtn').disabled=c.n<1;
+  const b=tabBtns[5],pn=c.n?''+c.n:'';if(b.dataset.n!==pn){if(pn)b.dataset.n=pn;else delete b.dataset.n;}}
+$('chestBtn').onclick=()=>{chestTick();if(S.chest.n<1)return;
+  if(S.chest.n>=CHEST_MAX)S.chest.t=Date.now();S.chest.n--;   // the 6-hour timer starts again once there is room
+  const g=fps().mul(600),L=[`<div>${ic('horns')} <b>+${fmt(g)} fans</b> (10 minutes of your band)</div>`];gain(g);
+  const recs=n=>{S.records+=n;S.earned+=n;S.gift=(S.gift||0)+n;buildPerks();};
+  if(Math.random()<.1){S.skill+=100;L.push(`<div class="rare">${ic('skill')} <b>+100 solo skill</b></div>`);}
+  if(Math.random()<.05){recs(10);L.push(`<div class="rare">${ic('rec')} <b>+10 platinum records</b></div>`);}
+  if(Math.random()<.025){const s=unlockSong();if(s)L.push(`<div class="rare">${ic('note')} <b>New song: ${s.n}</b></div>`);else{recs(10);L.push(`<div class="rare">${ic('rec')} You know every song already, so you get <b>+10 platinum records</b> instead</div>`);}}
+  chord(L.length>1?4:2.5);render();save();
+  modal(`${ic('coffin')} Iron Coffin`,`<div class="loot">${L.join('')}</div>`+(L.length==1?`<span class="pf" style="color:#a08c84">Just fans this time. Solo skill, records and songs are in there somewhere.</span>`:''),[['Rock on',null,1]]);};
+
 document.body.dataset.tab='gear';
 $('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;
   if(!S.autoOff){autoAcc=1;wakeAudio();fundMusic(false);}   // resume: first autoclick fires at once, and the audio is woken inside this tap (browsers only allow that from a real tap)
@@ -1110,7 +1149,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
   const need=ehi-S.earned;$('etNext').textContent=`Next Eternity point in ${need.toLocaleString('en-US')} more earned platinum record${need==1?'':'s'} (at ${ehi.toLocaleString('en-US')}). Ascending banks your new records.`;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`This ends everything. Fans, band and gear, platinum records and perks, solo skill and techniques, bosses, achievements: all gone.<br>Your songs, pick skins and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
-  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
+  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();

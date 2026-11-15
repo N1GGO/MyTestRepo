@@ -563,9 +563,9 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     <section class="panel" id="pShop">
       <h2>Shop</h2>
       <div class="chest"><div class="ci"><span data-ic="coffin"></span></div>
-        <div><h3>Iron Coffin</h3><div class="cn">Something heavy fell off the tour bus. One every 6 hours, up to 3 stored.</div><div class="slots" id="chestSlots"></div><div class="cn" id="chestNext"></div></div>
-        <div class="odds">Always: <b>10 minutes of fans</b><br>10%: <b>+100 solo skill</b> · 5%: <b>+10 platinum records</b> · 2.5%: <b>a new song</b></div>
-        <button id="chestBtn">Open the Coffin</button></div>
+        <div><h3>Headbanger’s Road Case</h3><div class="cn">Fell off the back of the tour bus. Nobody knows whose it is. One every 6 hours, up to 3 stored.</div><div class="slots" id="chestSlots"></div><div class="cn" id="chestNext"></div></div>
+        <div class="odds" id="chestOdds"></div>
+        <button id="chestBtn">Crack It Open</button></div>
     </section>
   </div>
 
@@ -837,7 +837,7 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<8)S.capFix=1;   // v7: skill caps are back, v8: Auto-Shredder 3 and Speed Picking 5. See S.capFix at the end of the script
   if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
   if((S.v||0)<10){const off=S.songOff||{},lv=S.songLv||{};S.set=Object.keys(S.songs).map(Number).filter(i=>S.songs[i]&&!off[i]).sort((a,b)=>(lv[b]||0)-(lv[a]||0)).slice(0,10);S.setPick=1;delete S.songOff;}   // v10: songs work as a setlist of up to 10, all always on. Old saves start with their best songs and may pick freely once
-  if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Iron Coffin: everyone starts with one ready
+  if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Headbanger’s Road Case: everyone starts with one ready
   S.v=10;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
@@ -1073,25 +1073,30 @@ function render(){
   tabBtns[4].classList.toggle('hot',p<1&&etGain()>0);const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
-/* ---------- shop: the Iron Coffin. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
+/* ---------- shop: the Headbanger’s Road Case. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
    fans for sure, and with some luck solo skill, platinum records (they count as earned, like every other drop) or a new song. ---------- */
 const CHEST_MS=6*36e5, CHEST_MAX=3;
 function chestTick(){const c=S.chest,now=Date.now();while(c.n<CHEST_MAX&&now-c.t>=CHEST_MS){c.n++;c.t+=CHEST_MS;}if(c.n>=CHEST_MAX)c.t=now;}
+/* solo skill: 10% of the most one solo could pay right now (top accuracy, flawless, with every solo bonus);
+   records: 10% of the platinum records earned this transcension (at least 1 each) */
+const chestSkill=()=>Math.max(1,Math.round(.1*soloRange()[1]*1.5*FX.solo*skX())), chestRecs=()=>Math.max(1,Math.round(.1*S.earned));
 const hm=ms=>{const m=Math.ceil(ms/6e4),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`;};
 function drawShop(){chestTick();const c=S.chest,sl=$('chestSlots'),h=Array.from({length:CHEST_MAX},(_,i)=>`<i class="${i<c.n?'f':''}"></i>`).join('');
   if(sl.innerHTML!==h)sl.innerHTML=h;
   const nx=c.n>=CHEST_MAX?`${c.n}/${CHEST_MAX} ready · storage full, open one to keep them coming`:`${c.n}/${CHEST_MAX} ready · next one in ${hm(CHEST_MS-(Date.now()-c.t))}`;
-  if($('chestNext').textContent!==nx)$('chestNext').textContent=nx;$('chestBtn').disabled=c.n<1;
+  if($('chestNext').textContent!==nx)$('chestNext').textContent=nx;
+  const od=`Always: <b>10 minutes of fans</b><br>10%: <b>+${fmt(chestSkill())} solo skill</b> <small>(10% of your best solo)</small><br>5%: <b>+${fmt(chestRecs())} platinum records</b> <small>(10% of the records earned this transcension)</small><br>2.5%: <b>a new song</b>`;
+  if($('chestOdds').innerHTML!==od)$('chestOdds').innerHTML=od;$('chestBtn').disabled=c.n<1;
   const b=tabBtns[5],pn=c.n?''+c.n:'';if(b.dataset.n!==pn){if(pn)b.dataset.n=pn;else delete b.dataset.n;}}
 $('chestBtn').onclick=()=>{chestTick();if(S.chest.n<1)return;
   if(S.chest.n>=CHEST_MAX)S.chest.t=Date.now();S.chest.n--;   // the 6-hour timer starts again once there is room
   const g=fps().mul(600),L=[`<div>${ic('horns')} <b>+${fmt(g)} fans</b> (10 minutes of your band)</div>`];gain(g);
   const recs=n=>{S.records+=n;S.earned+=n;S.gift=(S.gift||0)+n;buildPerks();};
-  if(Math.random()<.1){S.skill+=100;L.push(`<div class="rare">${ic('skill')} <b>+100 solo skill</b></div>`);}
-  if(Math.random()<.05){recs(10);L.push(`<div class="rare">${ic('rec')} <b>+10 platinum records</b></div>`);}
-  if(Math.random()<.025){const s=unlockSong();if(s)L.push(`<div class="rare">${ic('note')} <b>New song: ${s.n}</b></div>`);else{recs(10);L.push(`<div class="rare">${ic('rec')} You know every song already, so you get <b>+10 platinum records</b> instead</div>`);}}
+  if(Math.random()<.1){const k=chestSkill();S.skill+=k;L.push(`<div class="rare">${ic('skill')} <b>+${fmt(k)} solo skill</b></div>`);}
+  if(Math.random()<.05){const r=chestRecs();recs(r);L.push(`<div class="rare">${ic('rec')} <b>+${fmt(r)} platinum records</b></div>`);}
+  if(Math.random()<.025){const s=unlockSong();if(s)L.push(`<div class="rare">${ic('note')} <b>New song: ${s.n}</b></div>`);else{const r=chestRecs();recs(r);L.push(`<div class="rare">${ic('rec')} You know every song already, so you get <b>+${fmt(r)} platinum records</b> instead</div>`);}}
   chord(L.length>1?4:2.5);render();save();
-  modal(`${ic('coffin')} Iron Coffin`,`<div class="loot">${L.join('')}</div>`+(L.length==1?`<span class="pf" style="color:#a08c84">Just fans this time. Solo skill, records and songs are in there somewhere.</span>`:''),[['Rock on',null,1]]);};
+  modal(`${ic('coffin')} Headbanger’s Road Case`,`<div class="loot">${L.join('')}</div>`+(L.length==1?`<span class="pf" style="color:#a08c84">Just fans this time. Solo skill, records and songs are in there somewhere.</span>`:''),[['Rock on',null,1]]);};
 
 document.body.dataset.tab='gear';
 $('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;

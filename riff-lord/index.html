@@ -862,9 +862,9 @@ const tierMult=i=>TIERS.reduce((a,_,t)=>a*(S.ups['g'+i+'t'+t]?TX(t):1),1);
 /* milestones (free): ×2 at levels 10 and 25, then every 50 levels a bonus that grows with the level:
    ×5 at 50, ×10 at 100, ×10 at 150, ×20 at 200, ×15 at 250, ×30 at 300 … (5 or 10, times the hundred you are in).
    Cheap early members reach far higher levels than late ones, so the growing bonus keeps them relevant.
-   Every 1000th level (1000, 2000…) then squares the member's whole milestone multiplier. */
-const msStep=L=>(L%100?5:10)*Math.ceil(L/100);
-const msLog=n=>{let l=LG(2)*((n>=10)+(n>=25));for(let L=50;L<=n;L+=50){l+=LG(msStep(L));if(L%1000==0)l*=2;}return l;};   // every 1000th level squares the member's whole milestone multiplier
+   Every 1000th level (1000, 2000…) squares its own bonus: ×10,000 at 1000 instead of ×100. */
+const msStep=L=>{const s=(L%100?5:10)*Math.ceil(L/100);return L%1000?s:s*s;};   // every 1000th level squares that level's bonus: ×10,000 at 1000, ×40,000 at 2000
+const msLog=n=>{let l=LG(2)*((n>=10)+(n>=25));for(let L=50;L<=n;L+=50)l+=LG(msStep(L));return l;};
 const msMult=n=>Big.pow10(msLog(n));
 const msPrev=n=>n>=50?Math.floor(n/50)*50:n>=25?25:n>=10?10:0;
 const msNext=n=>n<10?10:n<25?25:(Math.floor(n/50)+1)*50;
@@ -1015,7 +1015,7 @@ function render(){
     const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans.gte(cost));
     row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run.lt(GENS[i][3]/4));
     row.cost.textContent=(S.gens[i]?'':'Hire: ')+`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(gm(i).mul(GENS[i][4]*FX.m[i]).mul(gmult()))}/s per level`;row.own.textContent=S.gens[i];
-    const n=S.gens[i],a=msPrev(n),z=msNext(n);const sh=totF.m>0?genFps(i).div(totF).toNumber()*100:0;row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ${z%1000?'×'+msBonus(z):'×'+msBonus(z)+' and squared'} at level ${z} · <span class="shr">${sh>=10?sh.toFixed(0):sh>=.1?sh.toFixed(1):sh>0?'<0.1':'0'}%</span> of fans/s`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
+    const n=S.gens[i],a=msPrev(n),z=msNext(n);const sh=totF.m>0?genFps(i).div(totF).toNumber()*100:0;row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${fmt(msBonus(z))} at level ${z} · <span class="shr">${sh>=10?sh.toFixed(0):sh>=.1?sh.toFixed(1):sh>0?'<0.1':'0'}%</span> of fans/s`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
   const n=upList().length;if(upsDirty||n!==lastUpCount){buildUps();lastUpCount=n;}
   upBtns.forEach(u=>u.b.classList.toggle('ok',S.fans.gte(u.c)));
   perkBtns.forEach(p=>p.b.classList.toggle('ok',!p.mx&&S.records>=p.c));

@@ -858,7 +858,7 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
   if((S.v||0)<10){const off=S.songOff||{},lv=S.songLv||{};S.set=Object.keys(S.songs).map(Number).filter(i=>S.songs[i]&&!off[i]).sort((a,b)=>(lv[b]||0)-(lv[a]||0)).slice(0,10);S.setPick=1;delete S.songOff;}   // v10: songs work as a setlist of up to 10, all always on. Old saves start with their best songs and may pick freely once
   if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Headbanger’s Road Case: everyone starts with one ready
-  if(!S.map)S.map={on:0,v:0,cur:-1,end:0};if(!S.stars)S.stars={};   // World Tour map and solo-career stars
+  if(!S.map)S.map={on:0,v:0,cur:-1,end:0};if(!S.stars)S.stars={};for(const i in S.stars)if(S.stars[i]>1)S.stars[i]=1;   // one star per member   // World Tour map and solo-career stars
   S.v=10;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
@@ -941,7 +941,7 @@ const soloLvl=()=>1+Math.floor(3*Math.max(0,riffBase().log10()));
 const soloRange=()=>{const l=soloLvl();return [4*l,8*l];};
 const fmtT=s=>s>=60?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:Math.ceil(s)+'s';
 const cdisc=()=>(pl('cheap')<=10?1-.05*pl('cheap'):.5*.95**(pl('cheap')-10))*.8**etl('road');   // −5% per level up to 50% off, then 5% of what is left
-function bulk(i){ const b=B(GENS[i][3]*cdisc()).mul(Big.pow10(S.gens[i]*LG(G))); let k=qty;
+function bulk(i){ const b=B(GENS[i][3]*cdisc()*(stars(i)?STAR_COST:1)).mul(Big.pow10(S.gens[i]*LG(G))); let k=qty;
   if(qty<0){k=Math.max(1,Math.floor(S.fans.mul(G-1).div(b).add(1).log10()/LG(G)));}
   return {k,cost:b.mul(Big.pow10(k*LG(G)).sub(1)).div(G-1)}; }
 /* platinum records from all-time fans, in three segments that each make the next record cost more:
@@ -1061,8 +1061,8 @@ function render(){
   const totF=baseFps();
   genRows.forEach((row,i)=>{
     const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans.gte(cost));
-    const st=stars(i)?`★${stars(i)} ×${fmt(Big.pow10(starLog(i)))}`:'';if(row.star.textContent!==st)row.star.textContent=st;
-    row.gs.hidden=S.gens[i]<SOLO_LV;if(!row.gs.hidden){const gt=`★ Go solo · start over as a ★${stars(i)+1} star (×${fmt(Big.pow10(starX()))})`;if(row.gs.textContent!==gt)row.gs.textContent=gt;}
+    const st=stars(i)?`★ ×${fmt(Big.pow10(starLog(i)))}`:'';if(row.star.textContent!==st)row.star.textContent=st;
+    row.gs.hidden=S.gens[i]<SOLO_LV||!!stars(i);if(!row.gs.hidden){const gt=`★ Go solo · start over as a star (×${fmt(Big.pow10(starX()))}, levels cost ×${STAR_COST})`;if(row.gs.textContent!==gt)row.gs.textContent=gt;}
     row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run.lt(GENS[i][3]/4));
     row.cost.textContent=(S.gens[i]?'':'Hire: ')+`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(gm(i).mul(GENS[i][4]*FX.m[i]).mul(gmult()))}/s per level`;row.own.textContent=S.gens[i];
     const n=S.gens[i],a=msPrev(n),z=msNext(n);const sh=totF.m>0?genFps(i).div(totF).toNumber()*100:0;row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${fmt(msBonus(z))} at level ${z} · <span class="shr">${sh>=10?sh.toFixed(0):sh>=.1?sh.toFixed(1):sh>0?'<0.1':'0'}%</span> of fans/s`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
@@ -1157,14 +1157,14 @@ function drawMap(){const m=S.map;if(!m||!m.on)return;if($('pMap').hidden){$('pMa
 $('mapGo').onclick=()=>{const m=S.map,j=m.v;if(m.cur>=0||j>=VENUES.length||!S.run.gte(venueNeed(j)))return;m.cur=j;m.end=Date.now()+VENUES[j][2]*36e5;mapDirty=true;chord(3);
   toast(`${VENUES[j][1]} The band is on its way to <b>${VENUES[j][0]}</b>`);render();save();};
 
-/* ---------- solo careers: a member at level 1000+ can leave for a solo career. Their level and their member upgrades start
-   over, and they gain a star: ×1,000 for that member per star (×10,000 after Moon Base Alpha). Stars stay through ascensions
-   and are lost when transcending. ---------- */
-const SOLO_LV=1000, starX=()=>mapHas(7)?4:3, stars=i=>(S.stars||{})[i]||0, starLog=i=>stars(i)*starX();
-function goSolo(i){const g=GENS[i];if(S.gens[i]<SOLO_LV)return;
-  modal(`${g[0]} ${g[1]} goes solo?`,`${g[1]} leaves for a solo career and comes back a star.<br><br>Level <b>${S.gens[i]} → 0</b> and their member upgrades have to be bought again, but they gain <b>★ ${stars(i)+1}</b>: their fans ×${fmt(Big.pow10(starX()))} per star, for good (until you transcend).<br><br>Gear stays equipped.`,
-    [['Stay in the band'],['Go solo ★',()=>{S.stars=S.stars||{};S.stars[i]=stars(i)+1;S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);upsDirty=true;chord(4);
-      toast(`${g[0]} <b>${g[1]}</b> is now a ★${stars(i)} solo star`);render();save();},1]]);}
+/* ---------- solo careers: a member at level 1000+ can leave for a solo career, once. Their level and their member upgrades
+   start over, and they become a star: ×1,000 for that member (×10,000 after Moon Base Alpha), while their levels cost ×10.
+   The star stays through ascensions and is lost when transcending. ---------- */
+const SOLO_LV=1000, STAR_COST=10, starX=()=>mapHas(7)?4:3, stars=i=>(S.stars||{})[i]||0, starLog=i=>stars(i)*starX();
+function goSolo(i){const g=GENS[i];if(S.gens[i]<SOLO_LV||stars(i))return;
+  modal(`${g[0]} ${g[1]} goes solo?`,`${g[1]} leaves for a solo career and comes back a star.<br><br>Level <b>${S.gens[i]} → 0</b> and their member upgrades have to be bought again, but they become a <b>★ star</b>: their fans ×${fmt(Big.pow10(starX()))} for good (until you transcend), while their levels cost ×${STAR_COST}.<br><br>Each member can go solo only once. Gear stays equipped.`,
+    [['Stay in the band'],['Go solo ★',()=>{S.stars=S.stars||{};S.stars[i]=1;S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);upsDirty=true;chord(4);
+      toast(`${g[0]} <b>${g[1]}</b> is now a ★ solo star`);render();save();},1]]);}
 
 document.body.dataset.tab='gear';
 $('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;

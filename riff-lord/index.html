@@ -128,6 +128,16 @@ h2{font-family:"Metal Mania",serif;font-weight:400;font-size:22px;letter-spacing
 .chest .slots{display:flex;gap:6px;margin:6px 0}.chest .slots i{width:22px;height:8px;border-radius:4px;background:#2a1a18;border:1px solid #6b3d26}.chest .slots i.f{background:linear-gradient(90deg,#ffd76a,#ff8a3d);box-shadow:0 0 8px #ff8a3d}
 #chestBtn{grid-column:1/-1;width:100%;font-family:"Metal Mania",serif;font-size:20px;letter-spacing:2px;padding:11px;border-radius:9px;border:1px solid #ffd76a;color:#1a0f0a;background:linear-gradient(#ffe9a8,#ff9a4d);cursor:pointer}
 #chestBtn:disabled{opacity:.4;cursor:not-allowed}
+.mapnow{font-size:14px;color:#ffe9a8;text-align:center}
+#mapGo{width:100%;margin:6px 0 4px;font-family:"Metal Mania",serif;font-size:19px;letter-spacing:1.5px;padding:10px;border-radius:9px;border:1px solid #ffd76a;color:#1a0f0a;background:linear-gradient(#ffe9a8,#ff9a4d);cursor:pointer}
+#mapGo:disabled{opacity:.4;cursor:not-allowed}
+.mapart{overflow-x:auto}.mapsvg{width:100%;max-width:420px;display:block;margin:6px auto}
+.vn circle{fill:#1b1113;stroke:#4a3530;stroke-width:3}.vn.won circle{fill:#3a2a10;stroke:#ffd76a}.vn.next circle{stroke:#ff9a4d;stroke-dasharray:4 4}
+.vn.cur circle{stroke:#ff9a4d;animation:vpulse 1.4s infinite}@keyframes vpulse{50%{stroke-width:7}}
+.vn .vt{font:600 12px Oswald,system-ui,sans-serif;fill:#f4e3d7}.vn .vb{font:11px system-ui,sans-serif;fill:#a08c84}.vn.won .vb{fill:#ffd76a}.vn.lock{opacity:.5}
+.maplist{font-size:12.5px;color:#a08c84;line-height:1.7;margin-top:6px}.maplist .won{color:#ffd76a}
+.gosolo{grid-column:1/-1;width:100%;margin-top:6px;font:inherit;font-size:13px;padding:7px;border-radius:8px;border:1px solid #ffd76a;color:#ffd76a;background:rgba(255,215,106,.08);cursor:pointer}
+.gstar{color:#ffd76a;font-size:12px;margin-left:4px}
 .loot{display:flex;flex-direction:column;gap:8px;margin:6px 0}.loot div{padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.loot .rare{border-color:#ffd76a;box-shadow:0 0 12px rgba(255,215,106,.25)}
 #etSk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 :is(.perk,.tech,.bsk,.etk){position:relative}
@@ -415,14 +425,15 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   #ups{grid-template-columns:1fr 1fr}
   .up,.perk{padding:11px 10px}
   #pAch{order:6}
-  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill,#pBoss,#pShop),
-  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill,#pBoss,#pShop),
-  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pBoss,#pShop),
-  body[data-tab=boss] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pShop),
-  body[data-tab=legend] :is(#pUps,#pGens,#pSkill,#pBoss,#pShop),
-  body[data-tab=shop] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pBoss){display:none}
+  body[data-tab=gear] :is(#pAsc,#pUps,#pStats,#pAch,#pSkill,#pBoss,#pShop,#pMap),
+  body[data-tab=ups] :is(#pAsc,#pGens,#pStats,#pAch,#pSkill,#pBoss,#pShop,#pMap),
+  body[data-tab=skill] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pBoss,#pShop,#pMap),
+  body[data-tab=boss] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pShop,#pMap),
+  body[data-tab=legend] :is(#pUps,#pGens,#pSkill,#pBoss,#pShop,#pMap),
+  body[data-tab=shop] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pBoss,#pMap),
+  body[data-tab=map] :is(#pAsc,#pUps,#pGens,#pStats,#pAch,#pSkill,#pBoss,#pShop){display:none}
   #tabs button{font-size:9.5px!important;letter-spacing:.4px!important}
-  #tabs{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  #tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(16,9,11,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   #tabs button{position:relative;font:inherit;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);background:none;border:0;padding:9px 4px 10px;cursor:pointer}
   #tabs button span{display:block;font-size:22px;line-height:1.2;filter:grayscale(.8) opacity(.7)}
   #tabs button.on{color:var(--gold)}
@@ -473,6 +484,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   <button data-tab="boss"><span data-ic="skull"></span>Boss</button>
   <button data-tab="legend"><span data-ic="rec"></span>Legend</button>
   <button data-tab="shop"><span data-ic="coffin"></span>Shop</button>
+  <button data-tab="map" id="mapTab" hidden><span data-ic="globe"></span>Map</button>
 </nav>
 <main>
   <div class="col">
@@ -566,6 +578,14 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
         <div><h3>Headbanger’s Road Case</h3><div class="cn">Fell off the back of the tour bus. Nobody knows whose it is. One every 6 hours, up to 3 stored.</div><div class="slots" id="chestSlots"></div><div class="cn" id="chestNext"></div></div>
         <div class="odds" id="chestOdds"></div>
         <button id="chestBtn">Crack It Open</button></div>
+    </section>
+    <section class="panel" id="pMap" hidden>
+      <h2>World Tour</h2>
+      <div class="mapnow" id="mapNow"></div><div class="bar"><i id="mapBar"></i></div>
+      <button id="mapGo"></button>
+      <div class="mapart" id="mapArt"></div>
+      <div class="pf" style="color:#a08c84;margin-top:6px">One venue at a time. A tour needs enough fans this run to set off, then takes real hours, even while you are away. Conquered venues keep their bonus forever, through ascensions and transcensions.</div>
+      <div class="maplist" id="mapList"></div>
     </section>
   </div>
 
@@ -820,7 +840,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},map:{on:0,v:0,cur:-1,end:0},stars:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -838,6 +858,7 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
   if((S.v||0)<10){const off=S.songOff||{},lv=S.songLv||{};S.set=Object.keys(S.songs).map(Number).filter(i=>S.songs[i]&&!off[i]).sort((a,b)=>(lv[b]||0)-(lv[a]||0)).slice(0,10);S.setPick=1;delete S.songOff;}   // v10: songs work as a setlist of up to 10, all always on. Old saves start with their best songs and may pick freely once
   if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Headbanger’s Road Case: everyone starts with one ready
+  if(!S.map)S.map={on:0,v:0,cur:-1,end:0};if(!S.stars)S.stars={};   // World Tour map and solo-career stars
   S.v=10;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
@@ -873,7 +894,7 @@ function calcFx(){const f=FX0(),sk=(SKINS[S.skin]||SKINS[0]).fx;for(const k in s
   GENS.forEach((_,i)=>{if(!S.gens[i])return;for(const k of 'ie'){const it=ITEM[S.eq[i+k]];if(!it)continue;const x=it.fx;
     if(x.self)f.m[i]*=x.self;if(x.buff)for(const j in x.buff)f.m[j]*=x.buff[j];if(x.all)f.all*=x.all;if(x.click)f.click*=x.click;
     if(x.crit)f.crit+=x.crit;if(x.boss)f.boss*=x.boss;if(x.off)f.off+=x.off;if(x.hype)f.hype+=x.hype;}});
-  songFxApply(f);FX=f;}
+  songFxApply(f);mapFx(f);FX=f;}
 const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.self}`);if(x.buff)for(const j in x.buff)p.push(`${GENS[j][1]} ×${x.buff[j]}`);
   if(x.all)p.push(`All fans ×${x.all}`);if(x.click)p.push(`Riff power ×${x.click}`);if(x.crit)p.push(`Crit chance +${Math.round(x.crit*100)}%`);
   if(x.boss)p.push(`Boss damage ×${x.boss}`);if(x.off)p.push(`Offline earnings +${Math.round(x.off*100)}%`);if(x.hype)p.push(`Max hype bonus +${Math.round(x.hype*100)}%`);return p.join(' · ');};
@@ -882,7 +903,7 @@ const fxText=it=>{const x=it.fx,p=[];if(x.self)p.push(`${GENS[it.m][1]} ×${x.se
 const DIA_FROM=100, DIA_UP=1.02;
 const recBonus=()=>B(1+.1*S.earned).mul(Big.pow10(LG(DIA_UP)*Math.max(0,S.earned-DIA_FROM)));
 let SB=1;   // setlist bonus, refreshed whenever the song list changes
-const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2)+xCount())).mul(SB*songFans()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
+const gmult=()=>recBonus().mul(Big.pow10(etl('god')+wCount()*LG(2)+xCount()+mapFansLog())).mul(SB*songFans()*(1+.25*pl('crew'))*(1+achBonus/100)*FX.all);
 const tierMult=i=>TIERS.reduce((a,_,t)=>a*(S.ups['g'+i+'t'+t]?TX(t):1),1);
 /* milestones (free): ×2 at levels 10 and 25, then every 50 levels a bonus that grows with the level:
    ×5 at 50, ×10 at 100, ×10 at 150, ×20 at 200, ×15 at 250, ×30 at 300 … (5 or 10, times the hundred you are in).
@@ -894,7 +915,7 @@ const msMult=n=>Big.pow10(msLog(n));
 const msPrev=n=>n>=50?Math.floor(n/50)*50:n>=25?25:n>=10?10:0;
 const msNext=n=>n<10?10:n<25?25:(Math.floor(n/50)+1)*50;
 const msBonus=n=>n<50?2:msStep(n);
-const gm=i=>msMult(S.gens[i]).mul(tierMult(i));
+const gm=i=>Big.pow10(msLog(S.gens[i])+starLog(i)).mul(tierMult(i));   // milestones × solo-career stars × member upgrades
 const genRaw=i=>gm(i).mul(GENS[i][4]*S.gens[i]*FX.m[i]);   // one member's fans/s before the all-fans multiplier
 const genFps=i=>genRaw(i).mul(gmult());
 const baseFps=()=>{let a=Big.Z;GENS.forEach((_,i)=>{if(S.gens[i])a=a.add(genRaw(i));});return a.mul(gmult());};
@@ -946,15 +967,16 @@ if(S.rawFix){S.rawE=recOf(S.total.sub(S.run));delete S.rawFix;}   // everything 
 const gensEl=$('gens'), genRows=[];
 /* one card per band member: a button that hires / levels the member, plus an instrument slot and an equipment slot */
 GENS.forEach((g,i)=>{const d=document.createElement('div');d.className='gen mem';
-  d.innerHTML=`<button class="buy"><div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div></button>${!isGuest(i)?'<div class="slots"><button class="slot" data-k="i"></button><button class="slot" data-k="e"></button></div>':'<div class="guest">★ Guest star · brings their own gear and a special action</div>'}<i class="mbar"></i>`;
+  d.innerHTML=`<button class="buy"><div class="ico">${g[0]}</div><div><div class="nm">${g[1]}<span class="gstar"></span></div><div class="ds">${g[2]}</div><div class="cost"></div><div class="ms"></div></div><div class="own">0</div></button>${!isGuest(i)?'<div class="slots"><button class="slot" data-k="i"></button><button class="slot" data-k="e"></button></div>':'<div class="guest">★ Guest star · brings their own gear and a special action</div>'}<i class="mbar"></i>`;
   const b=d.querySelector('.buy');
   b.onclick=()=>{
     const {k,cost}=bulk(i); if(S.fans.gte(cost)){const m0=msLog(S.gens[i]),hired=!S.gens[i];S.fans=S.fans.sub(cost);S.gens[i]+=k;S.met[i]=1;const upL=msLog(S.gens[i])-m0,up=Big.pow10(upL);
     if(upL>1e-9||hired){chord(2.5);d.classList.remove('boom');void d.offsetWidth;d.classList.add('boom');
       const r=d.getBoundingClientRect(),s=document.createElement('div');s.className='float';s.textContent=hired&&upL<=1e-9?`${g[1]} joined the band!`:`${g[1]} ×${fmt(up)}!`;s.style.left=r.left+60+'px';s.style.top=r.top+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1000);burst(r.left+r.width/2,r.top+r.height/2);}
     else chord(.5);upsDirty=true;render();}};
+  const gs=document.createElement('button');gs.className='gosolo';gs.hidden=true;gs.onclick=()=>goSolo(i);d.appendChild(gs);
   const sl=[...d.querySelectorAll('.slot')];sl.forEach(s=>s.onclick=()=>openSlot(i,s.dataset.k));
-  gensEl.appendChild(d);genRows.push({b:d,cost:d.querySelector('.cost'),own:d.querySelector('.own'),ms:d.querySelector('.ms'),bar:d.querySelector('.mbar'),si:sl[0],se:sl[1]});});
+  gensEl.appendChild(d);genRows.push({b:d,cost:d.querySelector('.cost'),own:d.querySelector('.own'),ms:d.querySelector('.ms'),bar:d.querySelector('.mbar'),gs,star:d.querySelector('.gstar'),si:sl[0],se:sl[1]});});
 function drawSlots(){const tot=ITEM_IDS.reduce((a,id)=>a+(S.items[id]||0),0);$('forgeBtn').hidden=!tot;$('forgeN').textContent=tot?`· ${tot} item${tot>1?'s':''} owned`:'';
   genRows.forEach((row,i)=>{if(isGuest(i))return;for(const k of 'ie'){const el=k=='i'?row.si:row.se,it=ITEM[S.eq[i+k]],
     spare=Object.values(ITEM).filter(x=>x.m==i&&x.k==k&&S.items[x.id]&&x.id!=S.eq[i+k]).length;
@@ -1031,7 +1053,7 @@ function buildPerks(){const el=$('perks');el.innerHTML='';perkBtns=[];if(!S.earn
 
 let lastUpCount=-1;
 function render(){
-  calcFx();if(S.chest)drawShop();
+  calcFx();if(S.chest)drawShop();if(S.map){mapTick();drawMap();}
   const f=fps();
   $('fans').textContent=fmt(S.fans);$('fps').textContent=fmt(f);$('cp').textContent=fmt(clickPow());
   $('sRun').textContent=fmt(S.run);$('sTot').textContent=fmt(S.total);$('sClk').textContent=fmt(S.clicks);$('sAsc').textContent=S.asc;
@@ -1039,6 +1061,8 @@ function render(){
   const totF=baseFps();
   genRows.forEach((row,i)=>{
     const {k,cost}=bulk(i);row.b.classList.toggle('ok',S.fans.gte(cost));
+    const st=stars(i)?`★${stars(i)} ×${fmt(Big.pow10(starLog(i)))}`:'';if(row.star.textContent!==st)row.star.textContent=st;
+    row.gs.hidden=S.gens[i]<SOLO_LV;if(!row.gs.hidden){const gt=`★ Go solo · start over as a ★${stars(i)+1} star (×${fmt(Big.pow10(starX()))})`;if(row.gs.textContent!==gt)row.gs.textContent=gt;}
     row.b.classList.toggle('locked',i>0&&S.gens[i]==0&&S.gens[i-1]==0&&S.run.lt(GENS[i][3]/4));
     row.cost.textContent=(S.gens[i]?'':'Hire: ')+`${fmt(cost)} fans${k>1?' (×'+k+')':''} · +${fmt(gm(i).mul(GENS[i][4]*FX.m[i]).mul(gmult()))}/s per level`;row.own.textContent=S.gens[i];
     const n=S.gens[i],a=msPrev(n),z=msNext(n);const sh=totF.m>0?genFps(i).div(totF).toNumber()*100:0;row.ms.innerHTML=`<b>×${fmt(msMult(n))}</b>next ×${fmt(msBonus(z))} at level ${z} · <span class="shr">${sh>=10?sh.toFixed(0):sh>=.1?sh.toFixed(1):sh>0?'<0.1':'0'}%</span> of fans/s`;row.bar.style.width=(n-a)/(z-a)*100+'%';});
@@ -1076,21 +1100,21 @@ function render(){
 const tabBtns=[...$('tabs').children];
 /* ---------- shop: the Headbanger’s Road Case. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
    fans for sure, and with some luck solo skill, platinum records (they count as earned, like every other drop) or a new song. ---------- */
-const CHEST_MS=6*36e5, CHEST_MAX=3;
-function chestTick(){const c=S.chest,now=Date.now();while(c.n<CHEST_MAX&&now-c.t>=CHEST_MS){c.n++;c.t+=CHEST_MS;}if(c.n>=CHEST_MAX)c.t=now;}
+const chestMs=()=>(mapHas(2)?5:6)*36e5, chestMax=()=>mapHas(8)?5:3;   // Tokyo Dome and Mars Colosseum improve the case
+function chestTick(){const c=S.chest,now=Date.now();while(c.n<chestMax()&&now-c.t>=chestMs()){c.n++;c.t+=chestMs();}if(c.n>=chestMax())c.t=now;}
 /* solo skill: 10% of the most one solo could pay right now (top accuracy, flawless, with every solo bonus);
    records: 10% of the platinum records earned this transcension (at least 1 each) */
 const chestSkill=()=>Math.max(1,Math.round(.1*soloRange()[1]*1.5*FX.solo*skX())), chestRecs=()=>Math.max(1,Math.round(.1*S.earned));
 const hm=ms=>{const m=Math.ceil(ms/6e4),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`;};
-function drawShop(){chestTick();const c=S.chest,sl=$('chestSlots'),h=Array.from({length:CHEST_MAX},(_,i)=>`<i class="${i<c.n?'f':''}"></i>`).join('');
+function drawShop(){chestTick();const c=S.chest,sl=$('chestSlots'),h=Array.from({length:chestMax()},(_,i)=>`<i class="${i<c.n?'f':''}"></i>`).join('');
   if(sl.innerHTML!==h)sl.innerHTML=h;
-  const nx=c.n>=CHEST_MAX?`${c.n}/${CHEST_MAX} ready · storage full, open one to keep them coming`:`${c.n}/${CHEST_MAX} ready · next one in ${hm(CHEST_MS-(Date.now()-c.t))}`;
+  const nx=c.n>=chestMax()?`${c.n}/${chestMax()} ready · storage full, open one to keep them coming`:`${c.n}/${chestMax()} ready · next one in ${hm(chestMs()-(Date.now()-c.t))}`;
   if($('chestNext').textContent!==nx)$('chestNext').textContent=nx;
   const od=`Always: <b>10 minutes of fans</b><br>10%: <b>+${fmt(chestSkill())} solo skill</b> <small>(10% of your best solo)</small><br>5%: <b>+${fmt(chestRecs())} platinum records</b> <small>(10% of the records earned this transcension)</small><br>2.5%: <b>a new song</b>`;
   if($('chestOdds').innerHTML!==od)$('chestOdds').innerHTML=od;$('chestBtn').disabled=c.n<1;
   const b=tabBtns[5],pn=c.n?''+c.n:'';if(b.dataset.n!==pn){if(pn)b.dataset.n=pn;else delete b.dataset.n;}}
 $('chestBtn').onclick=()=>{chestTick();if(S.chest.n<1)return;
-  if(S.chest.n>=CHEST_MAX)S.chest.t=Date.now();S.chest.n--;   // the 6-hour timer starts again once there is room
+  if(S.chest.n>=chestMax())S.chest.t=Date.now();S.chest.n--;   // the 6-hour timer starts again once there is room
   const g=fps().mul(600),L=[`<div>${ic('horns')} <b>+${fmt(g)} fans</b> (10 minutes of your band)</div>`];gain(g);
   const recs=n=>{S.records+=n;S.earned+=n;S.gift=(S.gift||0)+n;buildPerks();};
   if(Math.random()<.1){const k=chestSkill();S.skill+=k;L.push(`<div class="rare">${ic('skill')} <b>+${fmt(k)} solo skill</b></div>`);}
@@ -1098,6 +1122,49 @@ $('chestBtn').onclick=()=>{chestTick();if(S.chest.n<1)return;
   if(Math.random()<.025){const s=unlockSong();if(s)L.push(`<div class="rare">${ic('note')} <b>New song: ${s.n}</b></div>`);else{const r=chestRecs();recs(r);L.push(`<div class="rare">${ic('rec')} You know every song already, so you get <b>+${fmt(r)} platinum records</b> instead</div>`);}}
   chord(L.length>1?4:2.5);render();save();
   modal(`${ic('coffin')} Headbanger’s Road Case`,`<div class="loot">${L.join('')}</div>`+(L.length==1?`<span class="pf" style="color:#a08c84">Just fans this time. Solo skill, records and songs are in there somewhere.</span>`:''),[['Rock on',null,1]]);};
+/* ---------- World Tour map: unlocks the first time a run reaches 1e100 fans. The band tours one venue at a time; a tour
+   needs enough fans this run to start and then takes real hours (also while away). Every venue conquered gives a permanent,
+   unique bonus that stays through ascensions and transcensions. [name, emoji, hours, bonus text] , venue j needs 10^(100+10j) fans ---------- */
+const VENUES=[['Wacken Fields','🤘',1,'All fans ×1,000,000'],['Red Rocks Amphitheatre','🪨',2,'Boss fights last 10 s longer'],
+ ['Tokyo Dome','🏯',3,'A Road Case every 5 hours instead of 6'],['Glastonbury Mud Pit','🌧️',4,'Solo skill from solos ×2'],
+ ['Rio Beach Stage','🏖️',5,'Stage divers come twice as often'],['Hellfest Altar','🔥',6,'Boss damage ×1,000'],
+ ['Antarctic Ice Stage','🧊',8,'Offline earnings +25%'],['Moon Base Alpha','🌕',10,'Solo career stars ×10,000 instead of ×1,000'],
+ ['Mars Colosseum','🔴',12,'Road Case storage 5 instead of 3'],['Saturn’s Rings','🪐',16,'Max crowd hype bonus +100%'],
+ ['The Black Hole Bar','🕳️',20,'All fans ×1e20'],['Edge of the Universe','🌌',24,'All fans ×1e30']];
+const venueNeed=j=>Big.pow10(100+10*j), mapHas=j=>(S.map&&S.map.v||0)>j;
+const mapFansLog=()=>(mapHas(0)?6:0)+(mapHas(10)?20:0)+(mapHas(11)?30:0);
+function mapFx(f){if(mapHas(3))f.solo*=2;if(mapHas(4))f.diver*=.5;if(mapHas(5))f.boss*=1000;if(mapHas(6))f.off+=.25;if(mapHas(9))f.hype+=1;}
+function mapTick(){const m=S.map;if(!m)return;if(!m.on&&S.run.gte(venueNeed(0))){m.on=1;$('mapTab').hidden=false;$('pMap').hidden=false;
+    toast(`${ic('globe')} <b>The World Tour map is open!</b> Find it in the Map tab.`);}
+  if(m.cur>=0&&Date.now()>=m.end){const j=m.cur;m.v=j+1;m.cur=-1;mapDirty=true;calcFx();chord(4);save();
+    modal(`${VENUES[j][1]} ${VENUES[j][0]} conquered!`,`The crowd will talk about this one for ages.<br><br><b style="color:#ffd76a">${VENUES[j][3]}</b>, for good.`+(j+1<VENUES.length?`<br><br>Next stop: ${VENUES[j+1][1]} ${VENUES[j+1][0]}`:'<br><br>There is nowhere left to play. You are the loudest band in existence.'),[['Rock on',null,1]]);}}
+let mapDirty=true;
+function drawMap(){const m=S.map;if(!m||!m.on)return;if($('pMap').hidden){$('pMap').hidden=false;$('mapTab').hidden=false;}const nxt=m.v,can=m.cur<0&&nxt<VENUES.length&&S.run.gte(venueNeed(nxt));
+  tabBtns.find(b=>b.dataset.tab=='map').classList.toggle('hot',can);
+  if(m.cur>=0){const left=m.end-Date.now(),tot=VENUES[m.cur][2]*36e5;$('mapBar').style.width=(100*(1-left/tot)).toFixed(1)+'%';
+    const tx=`On tour at ${VENUES[m.cur][1]} ${VENUES[m.cur][0]} · ${hm(left)} left`;if($('mapNow').textContent!==tx)$('mapNow').textContent=tx;}
+  else{$('mapBar').style.width='0';const tx=nxt>=VENUES.length?'Every venue conquered. Legends forever.':can?`Ready to tour ${VENUES[nxt][0]}!`:`Next venue needs ${fmt(venueNeed(nxt))} fans this run`;if($('mapNow').textContent!==tx)$('mapNow').textContent=tx;}
+  $('mapGo').hidden=!(nxt<VENUES.length&&m.cur<0);$('mapGo').disabled=!can;if(nxt<VENUES.length)$('mapGo').textContent=`Tour ${VENUES[nxt][0]} (${VENUES[nxt][2]} h)`;
+  if(!mapDirty)return;mapDirty=false;
+  const W=340,pts=VENUES.map((_,j)=>[j%2?78:36,34+j*58]);   // a zigzag road down the left, venue names to its right
+  let s=`<svg viewBox="0 0 ${W} ${12+VENUES.length*58}" class="mapsvg"><path d="M${pts.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="#4a3530" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round"/>`;
+  if(m.v>0)s+=`<path d="M${pts.slice(0,Math.min(m.v+1,VENUES.length)).map(p=>p.join(' ')).join(' L')}" fill="none" stroke="#ffd76a" stroke-width="4" stroke-linecap="round" opacity=".8"/>`;
+  VENUES.forEach((v,j)=>{const [x,y]=pts[j],st=j<m.v?'won':j==m.cur?'cur':j==m.v?'next':'lock',l=118;
+    s+=`<g class="vn ${st}"><circle cx="${x}" cy="${y}" r="22"/><text x="${x}" y="${y+8}" text-anchor="middle" font-size="22">${st=='lock'?'🔒':v[1]}</text>
+      <text x="${l}" y="${y-4}" class="vt">${v[0]}</text><text x="${l}" y="${y+13}" class="vb">${j<m.v?'✓ '+v[3]:fmt(venueNeed(j))+' fans · '+v[2]+' h'}</text></g>`;});
+  $('mapArt').innerHTML=s+'</svg>';
+  $('mapList').innerHTML=VENUES.map((v,j)=>`<div class="${j<m.v?'won':''}">${v[1]} <b>${v[0]}</b> · ${v[3]}</div>`).join('');}
+$('mapGo').onclick=()=>{const m=S.map,j=m.v;if(m.cur>=0||j>=VENUES.length||!S.run.gte(venueNeed(j)))return;m.cur=j;m.end=Date.now()+VENUES[j][2]*36e5;mapDirty=true;chord(3);
+  toast(`${VENUES[j][1]} The band is on its way to <b>${VENUES[j][0]}</b>`);render();save();};
+
+/* ---------- solo careers: a member at level 1000+ can leave for a solo career. Their level and their member upgrades start
+   over, and they gain a star: ×1,000 for that member per star (×10,000 after Moon Base Alpha). Stars stay through ascensions
+   and are lost when transcending. ---------- */
+const SOLO_LV=1000, starX=()=>mapHas(7)?4:3, stars=i=>(S.stars||{})[i]||0, starLog=i=>stars(i)*starX();
+function goSolo(i){const g=GENS[i];if(S.gens[i]<SOLO_LV)return;
+  modal(`${g[0]} ${g[1]} goes solo?`,`${g[1]} leaves for a solo career and comes back a star.<br><br>Level <b>${S.gens[i]} → 0</b> and their member upgrades have to be bought again, but they gain <b>★ ${stars(i)+1}</b>: their fans ×${fmt(Big.pow10(starX()))} per star, for good (until you transcend).<br><br>Gear stays equipped.`,
+    [['Stay in the band'],['Go solo ★',()=>{S.stars=S.stars||{};S.stars[i]=stars(i)+1;S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);upsDirty=true;chord(4);
+      toast(`${g[0]} <b>${g[1]}</b> is now a ★${stars(i)} solo star`);render();save();},1]]);}
 
 document.body.dataset.tab='gear';
 $('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;
@@ -1162,7 +1229,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
   const need=ehi-S.earned;$('etNext').textContent=`Next Eternity point in ${need.toLocaleString('en-US')} more earned platinum record${need==1?'':'s'} (at ${ehi.toLocaleString('en-US')}). Ascending banks your new records.`;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`This ends everything. Fans, band and gear, platinum records and perks, solo skill and techniques, bosses, achievements: all gone.<br>Your songs, pick skins and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
-  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
+  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,map:S.map,skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();
@@ -1398,7 +1465,7 @@ const bl=id=>S.bs[id]||0;
 const BOSS_REGEN=.01; // bosses heal 1% of their max HP per second
 const BOSS_TOP=999;   // stage 1000 is the last one; beating it again keeps you there
 const bossHP=k=>B(12000).mul(Big.pow10(k*LG(3))), bossDmg=()=>Big.pow10(LG(10*FX.boss)+bl('dmg')*(1+etl('slay'))*LG(2)),   // every Riff Damage level doubles boss damage, and every Boss Slayer level doubles that again
-       bossTime=()=>30+5*bl('time'), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
+       bossTime=()=>30+5*bl('time')+(mapHas(1)?10:0), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
       bossCd=()=>Math.max(600,(3600-300*bl('quick'))*.85**etl('quick')), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
 /* every 10th stage is a headliner: ten times the HP, it roams the arena and half of all automatic hits miss it,
    but it never heals and keeps its damage between fights (S.boss.hp), so it can be worn down over several attempts. */

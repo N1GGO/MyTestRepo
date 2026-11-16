@@ -1070,7 +1070,8 @@ function render(){
   const sc=$('skipCd'),scH=!(bcd>0&&!F),scT=`${ic('bolt')} Call the boss out now · ${skipCost()} ${ic('skill')}`;if(sc.hidden!==scH)sc.hidden=scH;setH(sc,scT);sc.disabled=S.skill<skipCost();
   tabBtns[3].classList.toggle('hot',S.boss.on?bcd<=0:S.records>=BOSS_COST);
   if(F)drawFight();
-  tabBtns[4].classList.toggle('hot',p<1&&etGain()>0&&!S.etSeen);   // shown until the Legend tab is opened once; transcending clears S.etSeenconst pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
+  tabBtns[4].classList.toggle('hot',p<1&&etGain()>0&&!S.etSeen);   /* the dot shows until the Legend tab is opened once; transcending clears S.etSeen */
+  const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
 /* ---------- shop: the Headbanger’s Road Case. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of

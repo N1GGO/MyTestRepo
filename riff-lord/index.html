@@ -464,7 +464,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   <h1><span data-ic="bolt"></span><span class="ttl"> Riff Lord</span></h1>
   <div id="hfans"></div>
   <div id="hbuffs" class="bufrow" hidden></div>
-  <div class="hbtns"><button id="setBtn" aria-label="Settings"><span data-ic="cog"></span><span class="lbl"> Settings</span></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button><button id="wipe"><span data-ic="trash"></span><span class="lbl"> Wipe save</span></button></div>
+  <div class="hbtns"><button id="setBtn" aria-label="Settings"><span data-ic="cog"></span><span class="lbl"> Settings</span></button><button id="help" aria-label="Guide"><span data-ic="guide"></span><span class="lbl"> Guide</span></button><button id="xfer" aria-label="Transfer save">⇄<span class="lbl"> Transfer</span></button></div>
 </header>
 <nav id="tabs">
   <button data-tab="gear" class="on"><span data-ic="tabBand"></span>Band</button>
@@ -1070,7 +1070,7 @@ function render(){
   const sc=$('skipCd'),scH=!(bcd>0&&!F),scT=`${ic('bolt')} Call the boss out now · ${skipCost()} ${ic('skill')}`;if(sc.hidden!==scH)sc.hidden=scH;setH(sc,scT);sc.disabled=S.skill<skipCost();
   tabBtns[3].classList.toggle('hot',S.boss.on?bcd<=0:S.records>=BOSS_COST);
   if(F)drawFight();
-  tabBtns[4].classList.toggle('hot',p<1&&etGain()>0);const pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
+  tabBtns[4].classList.toggle('hot',p<1&&etGain()>0&&!S.etSeen);   // shown until the Legend tab is opened once; transcending clears S.etSeenconst pn=p>=1?'+'+fmt(p):'';if(tabBtns[4].dataset.n!==pn){if(pn)tabBtns[4].dataset.n=pn;else delete tabBtns[4].dataset.n;}
 }
 const tabBtns=[...$('tabs').children];
 /* ---------- shop: the Headbanger’s Road Case. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
@@ -1102,7 +1102,7 @@ document.body.dataset.tab='gear';
 $('autoBtn').onclick=()=>{S.autoOff=S.autoOff?0:1;
   if(!S.autoOff){autoAcc=1;wakeAudio();fundMusic(false);}   // resume: first autoclick fires at once, and the audio is woken inside this tap (browsers only allow that from a real tap)
   render();save();};
-$('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.body.dataset.tab=b.dataset.tab;tabBtns.forEach(x=>x.classList.toggle('on',x===b));scrollTo({top:0,behavior:'smooth'});};
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.body.dataset.tab=b.dataset.tab;if(b.dataset.tab=='legend'&&etGain()>0&&!S.etSeen){S.etSeen=1;save();render();}tabBtns.forEach(x=>x.classList.toggle('on',x===b));scrollTo({top:0,behavior:'smooth'});};
 
 /* ---------- click ---------- */
 function riff(e,auto,cp,quiet){let v=cp||clickPow();const crit=Math.random()<.04+.01*tl('prec')+FX.crit;if(crit){v=v.mul(15+5*tl('brut'));S.crits++;}
@@ -1189,7 +1189,7 @@ $('xfer').onclick=async()=>{
     const band=d.gens.filter(n=>n>0).length,when=d.last?new Date(d.last).toLocaleString():'unknown';
     modal('Import This Save?',`The code holds:<br><b>${fmt(d.fans)}</b> fans · <b>${fmt(d.earned||0)}</b> platinum records earned · <b>${band}</b> band member${band==1?'':'s'} · <b>${fmt(d.et||0)}</b> ${ic('eternity')} Eternity<br>saved ${when}<br><br><b style="color:#ff9a9a">It replaces the game on this device.</b> This cannot be undone.`,
      [['Cancel'],['Import',()=>{noSave=true;try{localStorage.setItem('rifflord',JSON.stringify(d));}catch(e){noSave=false;toast('Could not store the save on this device');return;}location.reload();},1]]);};};
-$('wipe').onclick=()=>modal('Wipe everything?','This erases all progress including platinum records and Eternity.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;pickSong();upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();tourShow(0);},1]]);
+const wipeAsk=()=>modal('Wipe everything?','This erases all progress including platinum records and Eternity.',[['Cancel'],['Wipe',()=>{S=fresh();hype=0;pickSong();upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();tourShow(0);},1]]);   // opened from Settings
 
 /* ---------- toast ---------- */
 let toastT;function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
@@ -1374,8 +1374,10 @@ function checkAch(){let n=0,last;ACH.forEach(a=>{const v=a[3](),l=a[4].filter(t=
 /* ---------- settings: sound and number style. Both are saved with the game and survive transcending. ---------- */
 function openSettings(){const row=(id,ico,t,on,d)=>`<button class="pk" id="${id}"><span class="pe">${ic(ico)}</span><span><b>${t}</b> · <b style="color:${on?'#8fd04a':'#ff9a9a'}">${on?'ON':'OFF'}</b><br><i>${d}</i></span></button>`;
   modal(ic('cog')+' Settings',row('stSnd',S.mute?'soundOff':'soundOn','Sound',!S.mute,'Riffs, band music and effects. Tap to switch.')+
-    row('stSci','calc','Scientific numbers',!!S.sci,`From 1000 on, numbers show as ${fmtSci(1.53e10)} instead of 15.3B. Tap to switch.`),[['Close',null,1]]);
+    row('stSci','calc','Scientific numbers',!!S.sci,`From 1000 on, numbers show as ${fmtSci(1.53e10)} instead of 15.3B. Tap to switch.`)+
+    `<button class="pk" id="stWipe" style="border-color:#7a2a30"><span class="pe">${ic('trash')}</span><span><b style="color:#ff9a9a">Wipe save</b><br><i>Erase all progress and start over. Asks again first.</i></span></button>`,[['Close',null,1]]);
   $('stSnd').onclick=()=>{S.mute=!S.mute;if(!S.mute)wakeAudio();save();openSettings();};
+  $('stWipe').onclick=wipeAsk;
   $('stSci').onclick=()=>{S.sci=!S.sci;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();render();save();openSettings();};}
 $('setBtn').onclick=openSettings;
 
@@ -1697,18 +1699,19 @@ function openSongs(){const u=unlocked(),open=!!S.setPick;S.set=setSongs();
   const order=[...S.set,...u.filter(i=>!inSet(i))];   // the setlist first, then every other known song
   let h=`<div class="pf" style="color:#ffe9a8">Setlist bonus: all fans <b>×${songBonus().toFixed(2)}</b><br><span style="color:#a08c84">+1% per song you know · +10% per complete set</span></div><div class="setc">${SETS.map(x=>`<span class="${setHave(x)==x.ids.length?'ok':''}">${x.n} ${setHave(x)}/${x.ids.length}</span>`).join('')}</div>`;
   h+=`<div class="pf" id="setCnt" style="color:#d5b0ff"></div>`;
-  order.forEach(i=>h+=`<label class="sgr"><input type="checkbox" data-i="${i}"${inSet(i)?' checked':''}><span>${i==curSong?ic('soundOn')+' ':''}${SONGS[i].n}<small data-sl="${i}">${songInfo(i)}</small></span><button class="sgl" data-l="${i}" aria-label="Level up"${S.records<songCost(songLv(i))?' disabled':''}>▲ ${ic('rec')} ${fmt(songCost(songLv(i)))}</button><button class="sgp" data-p="${i}" aria-label="Play now"${inSet(i)?'':' hidden'}>▶</button></label>`);
-  h+=`<div class="pf" style="color:#a08c84;margin-top:8px">Tick up to ${SET_MAX} songs. Every song in the setlist gives both of its effects all the time, playing or not, and the band plays only those songs. ${open?'Once you lock it in, the setlist stays until your next ascension.':'The setlist is locked until your next ascension; you can only fill empty slots.'} ▲ levels a song up with platinum records, raising both of its effects (levels reset when you transcend). ${SONGS.length-u.length} more songs to find: every boss you beat teaches the band one, and a caught stage diver has a 0.5% chance.</div>`;
+  order.forEach((i,j)=>{if(!open&&(j==0||j==S.set.length))h+=`<div class="pf" style="color:#a08c84;margin:10px 0 4px">${j?'Other songs':'In your setlist'}</div>`;
+    h+=`<label class="sgr"${!open&&inSet(i)?' style="border-color:#ffd76a"':''}>${open?`<input type="checkbox" data-i="${i}"${inSet(i)?' checked':''}>`:''}<span>${i==curSong?ic('soundOn')+' ':''}${SONGS[i].n}<small data-sl="${i}">${songInfo(i)}</small></span><button class="sgl" data-l="${i}" aria-label="Level up"${S.records<songCost(songLv(i))?' disabled':''}>▲ ${ic('rec')} ${fmt(songCost(songLv(i)))}</button><button class="sgp" data-p="${i}" aria-label="Play now"${inSet(i)?'':' hidden'}>▶</button></label>`;});
+  h+=`<div class="pf" style="color:#a08c84;margin-top:8px">${open?`Tick up to ${SET_MAX} songs. `:''}Every song in the setlist gives both of its effects all the time, playing or not, and the band plays only those songs. ${open?'Once you lock it in, the setlist stays until your next ascension.':'The setlist is locked until your next ascension, when you pick a new one.'} ▲ levels a song up with platinum records, raising both of its effects (levels reset when you transcend). ${SONGS.length-u.length} more songs to find: every boss you beat teaches the band one, and a caught stage diver has a 0.5% chance.</div>`;
   const lock=()=>{if(!S.set.length){openSongs();return;}S.setPick=0;if(!inSet(curSong))pickSong();else showSong();save();toast(`${ic('note')} Setlist locked in: ${S.set.length} songs`);};
   modal(`Setlist · ${u.length}/${SONGS.length}`,h,open?[['Later'],['Lock in setlist',lock,1]]:[['Close']]);
   const box=$('mP'),refresh=()=>{const full=S.set.length>=SET_MAX;
     $('setCnt').innerHTML=`${open?'Choosing':'Locked'} · <b>${S.set.length}/${SET_MAX}</b> songs in the setlist`;
-    box.querySelectorAll('input').forEach(c=>{const i=+c.dataset.i,on=inSet(i);c.disabled=open?(!on&&full):(on||full);});
+    box.querySelectorAll('input').forEach(c=>{const i=+c.dataset.i,on=inSet(i);c.disabled=!on&&full;});
     box.querySelectorAll('.sgp').forEach(b=>b.hidden=!inSet(+b.dataset.p));};
   refresh();
   box.querySelectorAll('input').forEach(c=>c.onchange=()=>{const i=+c.dataset.i;
     if(c.checked){if(S.set.length<SET_MAX&&!inSet(i))S.set.push(i);else c.checked=false;}
-    else if(open)S.set=S.set.filter(j=>j!=i);else c.checked=true;
+    else S.set=S.set.filter(j=>j!=i);
     if(S.set.length&&!inSet(curSong))nextSong();else showSong();refresh();save();});
   box.querySelectorAll('.sgp').forEach(b=>b.onclick=e=>{e.preventDefault();curSong=+b.dataset.p;stepI=0;beatPos=0;showSong();fundMusic(false,5);});
   box.querySelectorAll('.sgl').forEach(b=>b.onclick=e=>{e.preventDefault();const i=+b.dataset.l,c=songCost(songLv(i));if(S.records<c)return;

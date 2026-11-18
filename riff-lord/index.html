@@ -1234,13 +1234,14 @@ function openOffer(){const o=(S.etOffer||[]).map(id=>ES.find(k=>k[0]==id)).filte
 function afterEt(){calcFx();buildEt();buildPerks();buildTech();buildBoss();upsDirty=true;render();save();}
 function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>0;if($('etBox').hidden===show)$('etBox').hidden=!show;if(!show)return;
   const g=etGain();setH($('etAmt'),ic('eternity')+' '+fmt(S.et));
-  const t=`Transcend to wipe fans, band, platinum records, perks, solo skill, boss skills, solo-career stars and achievements. Your boss stage and wins, gear, songs, pick skins, World Tour and Eternity stay.<br>`+(g?`Transcend now for <b>+${fmt(g)} ${ic('eternity')} Eternity</b>.`:`You need <b>${ET_NEED}</b> earned platinum records (you have ${fmt(S.earned)}).`);
+  const t=`Transcend to wipe fans, band, platinum records, perks, solo skill, boss skills and solo-career stars. Your achievements, boss stage and wins, gear, songs, pick skins, World Tour and Eternity stay.<br>`+(g?`Transcend now for <b>+${fmt(g)} ${ic('eternity')} Eternity</b>.`:`You need <b>${ET_NEED}</b> earned platinum records (you have ${fmt(S.earned)}).`);
   if($('etTxt').innerHTML!==t)$('etTxt').innerHTML=t;const [elo,ehi]=etRange();$('etBar').style.width=Math.min(100,Math.max(0,(S.earned-elo)/(ehi-elo)*100))+'%';
   const need=ehi-S.earned;$('etNext').textContent=`Next Eternity point in ${need.toLocaleString('en-US')} more earned platinum record${need==1?'':'s'} (at ${ehi.toLocaleString('en-US')}). Ascending banks your new records.`;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
-  modal('Transcend?',`Fans and band, platinum records and perks, solo skill and techniques, boss skills, solo-career stars and achievements: all gone.<br>Your boss stage and wins, gear, songs, pick skins, World Tour and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
+  modal('Transcend?',`Fans and band, platinum records and perks, solo skill and techniques, boss skills and solo-career stars: all gone.<br>Your achievements, boss stage and wins, gear, songs, pick skins, World Tour and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
   [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,map:S.map,boss:S.boss,items:S.items,eq:S.eq,af:S.af,afSkip:S.afSkip,   /* boss stage, wins and gear carry over, so the final boss is one long climb */
-      skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished,finN:S.finN,play:S.play};
+      skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished,finN:S.finN,play:S.play,
+      ach:S.ach,achL:S.achL,clicks:S.clicks,crits:S.crits,divers:S.divers,asc:S.asc,solos:S.solos,flawless:S.flawless,hyped:S.hyped};   /* achievements and their counters are never wiped by transcending */
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();

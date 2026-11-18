@@ -840,7 +840,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},map:{on:0,v:0,cur:-1,end:0,ver:2},stars:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},map:{on:0,v:0,cur:-1,end:0,ver:2},stars:{},af:1,afSkip:0,autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -1212,15 +1212,16 @@ const ES=[
  ['god','Stadium Gods','All fans ×10'],['steel','Fingers of Steel','Riff power ×10'],['plat','Platinum Factory','Platinum records from ascending +20%'],
  ['virt','Virtuoso','Solo skill earned ×3'],['slay','Boss Slayer','Riff Damage multiplier doubled'],['loot','Treasure Hunter','Epic and legendary drop chance ×2'],
  ['road','Roadie Legion','Band members 20% cheaper'],['hype','Eternal Hype','Max hype bonus +100%, hype drains 20% slower'],['night','Night Shift','Offline earnings ×2, offline limit +4 hours'],
- ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter (never below 10 min)'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%']];
-const ET_MAX=20, SLAY_MAX=80, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etMax=id=>id=='slay'?SLAY_MAX:ET_MAX;
+ ['start','Head Start','Tour starting fans ×1000 (level 1: 1B)'],['quick','Quick Rematch','Boss and solo cooldowns 15% shorter (never below 10 min)'],['crowd','Crowd Magnet','Stage divers and tour events 20% more often, rare crowd events +4%'],
+ ['afight','Battle Roadies','Your roadies fight every boss for you as soon as it is ready, also while you are away (one level, see Settings)']];
+const ET_MAX=20, SLAY_MAX=80, etOwned=()=>ES.filter(k=>etl(k[0])), etNewCost=()=>2**etOwned().length, etMax=id=>id=='slay'?SLAY_MAX:id=='afight'?1:ET_MAX;
 /* going from level l to l+1: 1, 2, 4, 8… Each level multiplies a lot, so its price doubles. Boss Slayer goes on past 20 up to 80
    (about level 77 is needed for the final boss); from level 20 on its price only grows 10% per level, starting at 288K */
 const etLvlCost=(l,id)=>id=='slay'&&l>=20?Math.round(2**18*1.1**(l-19)):2**(l-1);
 let etBtns=[];
 function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
   etOwned().forEach(k=>{const l=etl(k[0]),mx=l>=etMax(k[0]),c=etLvlCost(l,k[0]),b=document.createElement('button');b.className='etk'+(mx?' maxed':'');
-    b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}${k[0]=='slay'?'/'+SLAY_MAX:''}</small></div><div class="d">${k[0]=='slay'?`Every Riff Damage level: boss damage ×${fmt(2**(l+1))}${mx?'':` (next ×${fmt(2**(l+2))})`}`:k[2]+' per level'}</div><div class="c">${mx?'MAXED':ic('eternity')+' '+fmt(c)}</div>`;
+    b.innerHTML=`<div class="t">${k[1]} <small>Lv ${l}${k[0]=='slay'?'/'+SLAY_MAX:''}</small></div><div class="d">${k[0]=='afight'?`Auto-fights bosses: <b>${S.af?'ON':'OFF'}</b> · switch it in Settings`:k[0]=='slay'?`Every Riff Damage level: boss damage ×${fmt(2**(l+1))}${mx?'':` (next ×${fmt(2**(l+2))})`}`:k[2]+' per level'}</div><div class="c">${mx?'MAXED':ic('eternity')+' '+fmt(c)}</div>`;
     b.onclick=()=>{if(!mx&&S.et>=c){S.et-=c;S.ets[k[0]]=l+1;chord(2);afterEt();}};
     maxBtn(b,()=>etLvlCost(etl(k[0]),k[0]),()=>S.et,c=>{S.et-=c;S.ets[k[0]]=etl(k[0])+1;},afterEt,()=>etl(k[0])<etMax(k[0]));box.appendChild(b);etBtns.push({b,c,mx});});
   if(etOwned().length<ES.length){const c=etNewCost(),b=document.createElement('button');b.className='etk new';
@@ -1228,7 +1229,7 @@ function buildEt(){const box=$('etSk');box.innerHTML='';etBtns=[];
     b.onclick=()=>{if(!S.etOffer){if(S.et<c)return;S.et-=c;const pool=ES.filter(k=>!etl(k[0])).map(k=>k[0]).sort(()=>Math.random()-.5);S.etOffer=pool.slice(0,3);buildEt();save();render();}openOffer();};
     box.appendChild(b);etBtns.push({b,c:S.etOffer?0:c,mx:false});}}
 function openOffer(){const o=(S.etOffer||[]).map(id=>ES.find(k=>k[0]==id)).filter(Boolean);if(!o.length){S.etOffer=null;return;}
-  modal('Choose Your Eternity Skill',o.map(k=>`<button class="etc" data-id="${k[0]}"><b>${k[1]}</b><br>${k[2]} per level</button>`).join('')+'<span class="pf" style="color:#a08c84">You keep it forever and can level it with Eternity. The other two go back into the pool.</span>',[['Decide later']]);
+  modal('Choose Your Eternity Skill',o.map(k=>`<button class="etc" data-id="${k[0]}"><b>${k[1]}</b><br>${k[2]}${k[0]=='afight'?'':' per level'}</button>`).join('')+'<span class="pf" style="color:#a08c84">You keep it forever and can level it with Eternity. The other two go back into the pool.</span>',[['Decide later']]);
   $('mP').querySelectorAll('.etc').forEach(b=>b.onclick=()=>{S.ets[b.dataset.id]=1;S.etOffer=null;chord(4);$('modal').classList.remove('show');afterEt();});}
 function afterEt(){calcFx();buildEt();buildPerks();buildTech();buildBoss();upsDirty=true;render();save();}
 function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>0;if($('etBox').hidden===show)$('etBox').hidden=!show;if(!show)return;
@@ -1238,7 +1239,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
   const need=ehi-S.earned;$('etNext').textContent=`Next Eternity point in ${need.toLocaleString('en-US')} more earned platinum record${need==1?'':'s'} (at ${ehi.toLocaleString('en-US')}). Ascending banks your new records.`;$('etBtn').disabled=!g||!!F;etBtns.forEach(x=>x.b.classList.toggle('ok',!x.mx&&S.et>=x.c));}
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`Fans and band, platinum records and perks, solo skill and techniques, boss skills, solo-career stars and achievements: all gone.<br>Your boss stage and wins, gear, songs, pick skins, World Tour and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
-  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,map:S.map,boss:S.boss,items:S.items,eq:S.eq,   /* boss stage, wins and gear carry over, so the final boss is one long climb */
+  [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,map:S.map,boss:S.boss,items:S.items,eq:S.eq,af:S.af,afSkip:S.afSkip,   /* boss stage, wins and gear carry over, so the final boss is one long climb */
       skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
@@ -1453,9 +1454,12 @@ function checkAch(){let n=0,last;ACH.forEach(a=>{const v=a[3](),l=a[4].filter(t=
 function openSettings(){const row=(id,ico,t,on,d)=>`<button class="pk" id="${id}"><span class="pe">${ic(ico)}</span><span><b>${t}</b> · <b style="color:${on?'#8fd04a':'#ff9a9a'}">${on?'ON':'OFF'}</b><br><i>${d}</i></span></button>`;
   modal(ic('cog')+' Settings',row('stSnd',S.mute?'soundOff':'soundOn','Sound',!S.mute,'Riffs, band music and effects. Tap to switch.')+
     row('stSci','calc','Scientific numbers',!!S.sci,`From 1000 on, numbers show as ${fmtSci(1.53e10)} instead of 15.3B. Tap to switch.`)+
+    (etl('afight')?row('stAf','swords','Auto-fight bosses',!!S.af,'Battle Roadies fight every boss as soon as it is ready, also while you are away. Tap to switch.')+
+      row('stAfSk','skill','Call bosses early with solo skill',!!S.afSkip,'After an auto-fight win, spend solo skill to call the next boss right away instead of waiting. Tap to switch.'):'')+
     `<button class="pk" id="stWipe" style="border-color:#7a2a30"><span class="pe">${ic('trash')}</span><span><b style="color:#ff9a9a">Wipe save</b><br><i>Erase all progress and start over. Asks again first.</i></span></button>`,[['Close',null,1]]);
   $('stSnd').onclick=()=>{S.mute=!S.mute;if(!S.mute)wakeAudio();save();openSettings();};
   $('stWipe').onclick=wipeAsk;
+  if(etl('afight')){$('stAf').onclick=()=>{S.af=!S.af;buildEt();save();openSettings();};$('stAfSk').onclick=()=>{S.afSkip=!S.afSkip;save();openSettings();};}
   $('stSci').onclick=()=>{S.sci=!S.sci;upsDirty=true;buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();render();save();openSettings();};}
 $('setBtn').onclick=openSettings;
 
@@ -1540,18 +1544,51 @@ function hitBoss(auto,quiet){if(!F)return;
   if(!auto||Math.random()<.4)bossFloat((crit?'CRIT! ':'')+'-'+fmt(d),crit);
   if(!auto&&(!quiet||sndOk()))chord(crit?2:.6);
   if(!(F.hp.m>0))endFight(true);else if(!auto)drawFight();}
+/* the rewards of a won boss fight, shared by real fights and auto-fights. A won fight pays no fans or solo skill:
+   gear, songs, skins, headliner records and +15% riff power are the reward */
+function winBoss(k,sp){S.boss.lvl=Math.min(BOSS_TOP,S.boss.lvl+1);S.boss.wins++;const hr=sp?headRecs(k):0;
+  if(hr){S.records+=hr;S.earned+=hr;S.gift=(S.gift||0)+hr;buildPerks();}
+  const skn=sp||Math.random()<.25?dropSkin():null,it=rollLoot(sp),eqd=giveItem(it);drawSlots();
+  return {hr,skn,it,eqd,sg:unlockSong()};}
 function endFight(win,fled){if(F.daily)return endDaily(win);const k=F.k,left=Math.max(0,hpFrac()),b=bossOf(k),sp=F.sp;if(sp){if(win)delete S.boss.hp;else S.boss.hp=Big.max(F.hp,1);}F=null;$('fight').classList.remove('show','roam');$('fRing').style.transform='';S.cd.boss=Date.now()+bossCd()*1e3;
   if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>${sp?'A headliner does not heal: the damage you dealt stays for the next fight.':'Spend platinum records on Riff Damage or Extended Set and come back.'}`,[['Retreat',null,1]]);buildBoss();render();save();return;}
   const fin=k===BOSS_TOP&&!S.finished;if(fin)S.finished=Date.now();   // first win against the final boss: the finale screen follows the victory popup
-  S.boss.lvl=Math.min(BOSS_TOP,S.boss.lvl+1);S.boss.wins++;const hr=sp?headRecs(k):0;   // a won fight pays no fans or solo skill: gear, songs, skins, headliner records and +15% riff power are the reward
-  if(hr){S.records+=hr;S.earned+=hr;S.gift=(S.gift||0)+hr;buildPerks();}
-  const skn=sp||Math.random()<.25?dropSkin():null;
-  const it=rollLoot(sp),eqd=giveItem(it),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');drawSlots();
+  const {hr,skn,it,eqd,sg}=winBoss(k,sp),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
-  const sg=unlockSong();
   modal('Boss Defeated!',`${b.e} ${b.n} is down.${hr?`<br>+${hr} ${ic('rec')}`:''}${loot}${sg?`<br><br>${ic('note')} <b style="color:#d5b0ff">New song for the setlist</b><br>${sg.n}`:''}${skn?`<br><br>${ic('palette')} <b style="color:#ffd76a">New pick skin</b><br>${skn.n} · ${skn.d}`:''}<br><br>${ic('swords')} Riff power +15% for good`,[[fin?'Continue':'Rock on',fin?showFinale:null,1]]);buildBoss();render();save();}
 $('skipCd').onclick=()=>{const c=skipCost();if((S.cd.boss||0)<=Date.now()||S.skill<c)return;S.skill-=c;S.cd.boss=0;chord(3);toast(ic('bolt')+' <b>The boss accepts your challenge</b>');render();save();};
-$('fightBtn').onclick=startFight;$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
+$('fightBtn').onclick=startFight;
+/* ---------- Battle Roadies (Eternity): auto-fights. A fight is worked out at once from the same rules as a real one: the roadies
+   tap 5 times a second (building combo), plus your autoclickers and Backing Band; crits count at their average; Final Chorus
+   below 30% HP; normal bosses heal 1%/s and headliners keep their damage and dodge half of all automatic hits. ---------- */
+const AF_TAPS=5;
+function simFight(){const k=S.boss.lvl,sp=isHead(k),max=bossMax(k),dur=bossTime(),dt=.25,miss=sp?.5:1;let hp=bossLeft(k),combo=0;
+  const base=bossDmg().mul(1+3*Math.min(1,bossCrit())),clk=AF_TAPS+(S.autoOff?0:autoRate())*miss,band=bl('band')*miss;
+  for(let t=0;t<dur;t+=dt){combo+=(AF_TAPS+(S.autoOff?0:autoRate()))*dt;const fin=hp.div(max).toNumber()<.3?1+bl('final'):1;
+    hp=hp.sub(base.mul(((1+Math.min(combo*.02,.5*bl('combo')))*clk+band)*fin*dt));if(!(hp.m>0))return {win:true,sp,k};
+    if(!sp){hp=hp.add(max.mul(BOSS_REGEN*dt));if(max.lt(hp))hp=max;}}
+  return {win:false,sp,k,hp,left:hp.div(max).toNumber()};}
+/* one auto-fight at time `when` (ms). Returns what happened, for the toast or the welcome-back summary */
+function autoFight(when){const r=simFight(),b=bossOf(r.k);r.b=b;S.cd.boss=when+bossCd()*1e3;
+  if(r.win){if(r.sp)delete S.boss.hp;r.fin=r.k===BOSS_TOP&&!S.finished;if(r.fin)S.finished=Date.now();Object.assign(r,winBoss(r.k,r.sp));
+    if(S.afSkip&&S.skill>=skipCost()){S.skill-=skipCost();S.cd.boss=when;r.skip=1;}}   // spend solo skill to call the next boss right away
+  else if(r.sp)S.boss.hp=Big.max(r.hp,1);   // a headliner keeps the damage
+  return r;}
+const afOn=()=>etl('afight')&&S.af&&S.boss.on&&!F;
+/* while playing: one auto-fight per frame at most, shown as a toast */
+function afTick(now){if(!afOn()||(S.cd.boss||0)>now)return;const r=autoFight(now);
+  toast(r.win?`${ic('swords')} Battle Roadies beat <b>${r.b.n}</b> (stage ${r.k+1}) · ${r.it?r.it.n:''}${r.sg?' · new song':''}${r.skn?' · new skin':''}`:`${ic('swords')} Battle Roadies lost to <b>${r.b.n}</b> (${Math.ceil(r.left*100)}% HP left)`);
+  buildBoss();render();save();if(r.fin)showFinale();}
+/* while away: every fight that fits into the gap, at most 300 */
+function afAway(t0,t1){const L=[];if(!afOn())return L;let t=Math.max(t0,S.cd.boss||0);while(t<=t1&&L.length<300){L.push(autoFight(t));t=Math.max(t,S.cd.boss);}return L;}
+function afSummary(L){if(!L.length)return '';const W=L.filter(r=>r.win),lost=L.length-W.length,recs=W.reduce((a,r)=>a+(r.hr||0),0),songs=W.filter(r=>r.sg),skins=W.filter(r=>r.skn);
+  let h=`<br><br>${ic('swords')} <b>Battle Roadies</b> fought ${L.length} time${L.length>1?'s':''}: <b style="color:#8fd04a">${W.length} won</b>${lost?` · ${lost} lost`:''}${W.some(r=>r.skip)?' · solo skill used to call bosses early':''}`;
+  if(W.length)h+=`<div class="pf" style="margin-top:4px">${W.slice(0,12).map(r=>`${r.b.e} ${r.b.n} · stage ${r.k+1}`).join('<br>')}${W.length>12?`<br>…and ${W.length-12} more`:''}</div>`;
+  if(recs||songs.length||skins.length)h+=`<div class="pf" style="margin-top:6px">${recs?`+${fmt(recs)} ${ic('rec')} `:''}${songs.map(r=>`<br>${ic('note')} New song: ${r.sg.n}`).join('')}${skins.map(r=>`<br>${ic('palette')} New skin: ${r.skn.n}`).join('')}</div>`;
+  if(W.length)h+=`<div style="margin-top:8px">${W.slice(0,6).map(r=>itemCard(r.it)+(r.eqd?'<br><small>Equipped automatically.</small>':'')).join('<br>')}${W.length>6?`<div class="pf">+${W.length-6} more items in your gear</div>`:''}</div>`;
+  if(L.length&&!L[L.length-1].win)h+=`<div class="pf" style="color:#a08c84;margin-top:6px">Last fight: ${L[L.length-1].b.n} kept ${Math.ceil(L[L.length-1].left*100)}% HP.</div>`;
+  return h;}
+$('fBoss').onclick=()=>hitBoss(false);$('fFlee').onclick=()=>{if(F)endFight(false,true);};
 /* automatic riffs (Auto-Shredder) and automatic boss hits (Auto-Shredder + Backing Band) */
 /* Autoclickers click whatever a mouse would: the pick normally, the boss during a fight (full hits that build combo).
    Backing Band adds its own plain automatic boss hits on top. */
@@ -1813,11 +1850,13 @@ function draw(){cx.clearRect(0,0,cv.width,cv.height);if(P.length<70&&Math.random
    is paid out at 50% of the current rate, capped at 8 hours. Wall-clock based, so it also
    covers a page that was frozen in the background and never reloaded. */
 const AWAY=90, CAP=8*3600;
-function away(sec){hype=0;const cap=CAP+4*3600*etl('night'),dt=Math.min(sec,cap),g=baseFps().mul(dt*Math.min(1,.5+FX.off)*2**etl('night')); if(!(g.m>0))return; gain(g);
-  modal('Welcome back!',`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>cap?` (the ${cap/3600} hour limit)`:''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`,[['Rock on',null,1]]);}
+function away(sec){hype=0;const cap=CAP+4*3600*etl('night'),dt=Math.min(sec,cap),g=baseFps().mul(dt*Math.min(1,.5+FX.off)*2**etl('night')),now=Date.now();
+  const L=afAway(now-sec*1e3,now),fin=L.some(r=>r.fin);if(L.length){buildBoss();save();}   // Battle Roadies fight through the whole gap (no 8-hour limit)
+  if(!(g.m>0)&&!L.length)return; if(g.m>0)gain(g);
+  modal('Welcome back!',(g.m>0?`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>cap?` (the ${cap/3600} hour limit)`:''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`:'Welcome back!')+afSummary(L),[[fin?'Continue':'Rock on',fin?showFinale:null,1]]);}
 let prev=S.last||Date.now();
 function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
-  if(dt>AWAY)away(dt);else if(dt>0){gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp){const h=F.hp.add(F.max.mul(BOSS_REGEN*dt));F.hp=h.lt(F.max)?h:F.max;}if(F.sp&&Date.now()>F.nm)roam();}}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
+  if(dt>AWAY)away(dt);else if(dt>0){gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp){const h=F.hp.add(F.max.mul(BOSS_REGEN*dt));F.hp=h.lt(F.max)?h:F.max;}if(F.sp&&Date.now()>F.nm)roam();}afTick(now);}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
   if(F&&now>F.end)endFight(false);
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();drawDaily();drawEt();}evTick(now);

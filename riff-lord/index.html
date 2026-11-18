@@ -840,7 +840,7 @@ class Big{
 }
 Big.Z=new Big(0,0);
 const B=Big.of, LG=Math.log10;
-const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},map:{on:0,v:0,cur:-1,end:0},stars:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
+const fresh=()=>({fans:Big.Z,run:Big.Z,total:Big.Z,clicks:0,gens:GENS.map(()=>0),ups:{},records:0,earned:0,perks:{},asc:0,last:Date.now(),mute:false,ach:{},buffs:{},cd:{},divers:0,crits:0,hyped:0,skill:0,tech:{},solos:0,boss:{on:false,lvl:0,wins:0},bs:{},items:{},eq:{},tut:0,songs:{0:1,1:1,2:1,3:1,4:1},set:[0,1,2,3,4],setPick:1,chest:{n:1,t:Date.now()},map:{on:0,v:0,cur:-1,end:0,ver:2},stars:{},autoOff:0,guest:{},skins:{0:1},skin:0,achL:{},gift:0,met:{},dday:-9,dstreak:0,et:0,etT:0,ets:{},etOffer:null,trans:0,songLv:{},rawE:0,v:10});
 let S=fresh(), qty=1, hype=0, achBonus=0, migrated=0;
 try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object.assign(fresh(),d);while(S.gens.length<GENS.length)S.gens.push(0);S.gens.forEach((n,i)=>{if(n>0)S.met[i]=1;});
   if((d.v||1)<2){ // save from before the band rework: old gear is gone, so refund this tour's fans and convert old epics to epic items
@@ -858,7 +858,7 @@ try{const d=JSON.parse(localStorage.getItem('rifflord')||'null'); if(d){S=Object
   if((S.v||0)<9)S.rawFix=1;   // v9: record bonuses only multiply new records. The raw records banked so far are worked out after fixNums()
   if((S.v||0)<10){const off=S.songOff||{},lv=S.songLv||{};S.set=Object.keys(S.songs).map(Number).filter(i=>S.songs[i]&&!off[i]).sort((a,b)=>(lv[b]||0)-(lv[a]||0)).slice(0,10);S.setPick=1;delete S.songOff;}   // v10: songs work as a setlist of up to 10, all always on. Old saves start with their best songs and may pick freely once
   if(!S.chest||typeof S.chest.n!='number')S.chest={n:1,t:Date.now()};   // the Headbanger’s Road Case: everyone starts with one ready
-  if(!S.map)S.map={on:0,v:0,cur:-1,end:0};if(!S.stars)S.stars={};for(const i in S.stars)if(S.stars[i]>1)S.stars[i]=1;   // one star per member   // World Tour map and solo-career stars
+  if(!S.map)S.map={on:0,v:0,cur:-1,end:0,ver:2};if(!S.map.ver){if(S.map.v>7)S.map.v+=8;if(S.map.cur>=7)S.map.cur+=8;S.map.ver=2;}   /* festivals inserted after Antarctica */if(!S.stars)S.stars={};for(const i in S.stars)if(S.stars[i]>1)S.stars[i]=1;   // one star per member   // World Tour map and solo-career stars
   S.v=10;
   while(S.gens.length<GENS.length)S.gens.push(0);S.gens.length=GENS.length;}}catch(e){}
 let noSave=false;   // set while an imported save is waiting for the reload
@@ -1100,7 +1100,7 @@ function render(){
 const tabBtns=[...$('tabs').children];
 /* ---------- shop: the Headbanger’s Road Case. One becomes ready every 6 hours (also while away), up to 3 stored. Each holds 10 minutes of
    fans for sure, and with some luck solo skill, platinum records (they count as earned, like every other drop) or a new song. ---------- */
-const chestMs=()=>(mapHas(2)?5:6)*36e5, chestMax=()=>mapHas(8)?5:3;   // Tokyo Dome and Mars Colosseum improve the case
+const chestMs=()=>(vHas('Tokyo Dome')?5:6)*36e5, chestMax=()=>vHas('Mars Colosseum')?5:3;   // Tokyo Dome and Mars Colosseum improve the case
 function chestTick(){const c=S.chest,now=Date.now();while(c.n<chestMax()&&now-c.t>=chestMs()){c.n++;c.t+=chestMs();}if(c.n>=chestMax())c.t=now;}
 /* solo skill: 10% of the most one solo could pay right now (top accuracy, flawless, with every solo bonus);
    records: 10% of the platinum records earned this transcension (at least 1 each) */
@@ -1127,13 +1127,22 @@ $('chestBtn').onclick=()=>{chestTick();if(S.chest.n<1)return;
    unique bonus that stays through ascensions and transcensions. [name, emoji, hours, bonus text] , venue j needs 10^(100+10j) fans ---------- */
 const VENUES=[['Wacken Fields','🤘',1,'All fans ×1,000,000'],['Red Rocks Amphitheatre','🪨',2,'Boss fights last 10 s longer'],
  ['Tokyo Dome','🏯',3,'A Road Case every 5 hours instead of 6'],['Glastonbury Mud Pit','🌧️',4,'Solo skill from solos ×2'],
- ['Rio Beach Stage','🏖️',5,'Stage divers come twice as often'],['Hellfest Altar','🔥',6,'Boss damage ×1,000'],
- ['Antarctic Ice Stage','🧊',8,'Offline earnings +25%'],['Moon Base Alpha','🌕',10,'Solo career stars ×10,000 instead of ×1,000'],
- ['Mars Colosseum','🔴',12,'Road Case storage 5 instead of 3'],['Saturn’s Rings','🪐',16,'Max crowd hype bonus +100%'],
- ['The Black Hole Bar','🕳️',20,'All fans ×1e20'],['Edge of the Universe','🌌',24,'All fans ×1e30']];
+ ['Rock in Rio','🏖️',5,'Stage divers come twice as often'],['Hellfest Altar','🔥',6,'Boss damage ×1,000'],
+ ['Antarctic Ice Stage','🧊',8,'Offline earnings +25%'],
+ ['Woodstock ’69','🕊️',10,'Riff power ×1e10'],['Isle of Wight ’70','🏝️',10,'Autoclickers +2 clicks/s each'],
+ ['Live Aid, Wembley','🎤',12,'Singer fans ×1e9'],['Monsters of Rock, Donington','👹',12,'Crit chance +10%'],
+ ['Rock am Ring','🏁',14,'Crowd hype drains half as fast'],['Roskilde Orange Stage','🟠',14,'All fans ×1e10'],
+ ['Download Festival','⬇️',16,'Boss damage ×1,000,000'],['Monsters of Rock, Moscow ’91','🏰',16,'Solo skill from solos ×3'],
+ ['Moon Base Alpha','🌕',18,'Solo career stars ×10,000 instead of ×1,000'],
+ ['Mars Colosseum','🔴',20,'Road Case storage 5 instead of 3'],['Saturn’s Rings','🪐',22,'Max crowd hype bonus +100%'],
+ ['The Black Hole Bar','🕳️',24,'All fans ×1e20'],['Edge of the Universe','🌌',30,'All fans ×1e30']];
+/* the legendary festivals (Woodstock to Moscow) were added after Antarctica, so older saves keep their progress: see the load fix (map.ver) */
+const MAP_NEW=8, vHas=n=>mapHas(VENUES.findIndex(v=>v[0]==n));
 const venueNeed=j=>Big.pow10(100+10*j), mapHas=j=>(S.map&&S.map.v||0)>j;
-const mapFansLog=()=>(mapHas(0)?6:0)+(mapHas(10)?20:0)+(mapHas(11)?30:0);
-function mapFx(f){if(mapHas(3))f.solo*=2;if(mapHas(4))f.diver*=.5;if(mapHas(5))f.boss*=1000;if(mapHas(6))f.off+=.25;if(mapHas(9))f.hype+=1;}
+const mapFansLog=()=>(vHas('Wacken Fields')?6:0)+(vHas('Roskilde Orange Stage')?10:0)+(vHas('The Black Hole Bar')?20:0)+(vHas('Edge of the Universe')?30:0);
+function mapFx(f){if(vHas('Glastonbury Mud Pit'))f.solo*=2;if(vHas('Rock in Rio'))f.diver*=.5;if(vHas('Hellfest Altar'))f.boss*=1000;if(vHas('Antarctic Ice Stage'))f.off+=.25;
+  if(vHas('Woodstock ’69'))f.click*=1e10;if(vHas('Isle of Wight ’70'))f.auto+=2;if(vHas('Live Aid, Wembley'))f.m[5]*=1e9;if(vHas('Monsters of Rock, Donington'))f.crit+=.1;
+  if(vHas('Rock am Ring'))f.hypeKeep*=.5;if(vHas('Download Festival'))f.boss*=1e6;if(vHas('Monsters of Rock, Moscow ’91'))f.solo*=3;if(vHas('Saturn’s Rings'))f.hype+=1;}
 function mapTick(){const m=S.map;if(!m)return;if(!m.on&&S.run.gte(venueNeed(0))){m.on=1;$('mapTab').hidden=false;$('pMap').hidden=false;
     toast(`${ic('globe')} <b>The World Tour map is open!</b> Find it in the Map tab.`);}
   if(m.cur>=0&&Date.now()>=m.end){const j=m.cur;m.v=j+1;m.cur=-1;mapDirty=true;calcFx();chord(4);save();
@@ -1160,7 +1169,7 @@ $('mapGo').onclick=()=>{const m=S.map,j=m.v;if(m.cur>=0||j>=VENUES.length||!S.ru
 /* ---------- solo careers: a member at level 1000+ can leave for a solo career, once. Their level and their member upgrades
    start over, and they become a star: ×1,000 for that member (×10,000 after Moon Base Alpha), while their levels cost ×10.
    The star stays through ascensions and is lost when transcending. ---------- */
-const SOLO_LV=1000, STAR_COST=10, starX=()=>mapHas(7)?4:3, stars=i=>(S.stars||{})[i]||0, starLog=i=>stars(i)*starX();
+const SOLO_LV=1000, STAR_COST=10, starX=()=>vHas('Moon Base Alpha')?4:3, stars=i=>(S.stars||{})[i]||0, starLog=i=>stars(i)*starX();
 function goSolo(i){const g=GENS[i];if(S.gens[i]<SOLO_LV||stars(i))return;
   modal(`${g[0]} ${g[1]} goes solo?`,`${g[1]} leaves for a solo career and comes back a star.<br><br>Level <b>${S.gens[i]} → 0</b> and their member upgrades have to be bought again, but they become a <b>★ star</b>: their fans ×${fmt(Big.pow10(starX()))} for good (until you transcend), while their levels cost ×${STAR_COST}.<br><br>Each member can go solo only once. Gear stays equipped.`,
     [['Stay in the band'],['Go solo ★',()=>{S.stars=S.stars||{};S.stars[i]=1;S.gens[i]=0;TIERS.forEach((_,t)=>delete S.ups['g'+i+'t'+t]);upsDirty=true;chord(4);
@@ -1465,7 +1474,7 @@ const bl=id=>S.bs[id]||0;
 const BOSS_REGEN=.01; // bosses heal 1% of their max HP per second
 const BOSS_TOP=999;   // stage 1000 is the last one; beating it again keeps you there
 const bossHP=k=>B(12000).mul(Big.pow10(k*LG(3))), bossDmg=()=>Big.pow10(LG(10*FX.boss)+bl('dmg')*(1+etl('slay'))*LG(2)),   // every Riff Damage level doubles boss damage, and every Boss Slayer level doubles that again
-       bossTime=()=>30+5*bl('time')+(mapHas(1)?10:0), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
+       bossTime=()=>30+5*bl('time')+(vHas('Red Rocks Amphitheatre')?10:0), bossDrop=()=>Math.min(.9,(.02+.03*bl('loot'))*2**etl('loot')),
       bossCd=()=>Math.max(600,(3600-300*bl('quick'))*.85**etl('quick')), bossCrit=()=>.05+.05*bl('weak'), bossAuto=()=>autoRate()+bl('band');
 /* every 10th stage is a headliner: ten times the HP, it roams the arena and half of all automatic hits miss it,
    but it never heals and keeps its damage between fights (S.boss.hp), so it can be worn down over several attempts. */

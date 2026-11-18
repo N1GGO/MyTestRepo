@@ -1240,7 +1240,7 @@ function drawEt(){const show=S.trans>0||S.et>0||S.earned>=100||etOwned().length>
 $('etBtn').onclick=()=>{const g=etGain();if(!g||F||RS)return;
   modal('Transcend?',`Fans and band, platinum records and perks, solo skill and techniques, boss skills, solo-career stars and achievements: all gone.<br>Your boss stage and wins, gear, songs, pick skins, World Tour and eternity skills stay, and you gain <b style="color:#e9c6ff">${fmt(g)} ${ic('eternity')} Eternity</b>.`,
   [['Not yet'],['Transcend',()=>{const k={songs:S.songs,set:S.set,setPick:1,chest:S.chest,map:S.map,boss:S.boss,items:S.items,eq:S.eq,af:S.af,afSkip:S.afSkip,   /* boss stage, wins and gear carry over, so the final boss is one long climb */
-      skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished};
+      skins:S.skins,skin:S.skin,mute:S.mute,sci:S.sci,tut:S.tut,et:S.et+g,etT:(S.etT||0)+g,ets:S.ets,etOffer:S.etOffer,trans:(S.trans||0)+1,finished:S.finished,finN:S.finN,play:S.play};
     S=Object.assign(fresh(),k);S.fans=startFans();hype=0;curEv=null;$('evBtn').hidden=true;
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
     pickSong();upsDirty=true;calcFx();buildPerks();buildAch();buildTech();buildBoss();buildEt();drawSlots();applySkin();render();save();
@@ -1516,11 +1516,12 @@ function drawFight(){const now=Date.now(),tl_=Math.max(0,F.end-now)/1e3;if(now-F
   $('fInfo').innerHTML=F.daily?`<b>${Math.ceil(Math.max(0,F.hp))}</b> taps to go`:`Hit <b>${fmt(bossDmg())}</b>${bl('combo')?` · combo <b>×${cm.toFixed(2)}</b>`:''}${bossAuto()?` · <b>${bossAuto()}</b> auto hits/s`:''}${hpFrac()<.3&&bl('final')?' · <b>FINAL CHORUS</b>':''}`;}
 const hpFrac=()=>F.daily?F.hp/F.max:F.hp.div(F.max).toNumber();   // daily gig taps are plain numbers, boss HP is a Big
 /* the end of the game: shown once, the first time the final boss (stage 1000) goes down */
+const playFmt=s=>{s=Math.floor(s||0);const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?`${d}d ${h}h ${m}m`:h?`${h}h ${m}m`:`${m}m`;};   // active play time: only while the game is open
 function showFinale(){const st=(n,l)=>`<div><b>${n}</b><span>${l}</span></div>`;
   modal(`${ic('trophy')} You Finished Riff Lord!`,`<div class="finbig">${ic('m3')}${ic('trophy')}${ic('m19')}</div>
     <p>The final boss is down. Stage 1000 is yours, the underworld has gone quiet, and every venue on Earth (and a few beyond it) knows your name.</p>
     <p><b style="color:#ffd76a">You are the Riff Lord.</b></p>
-    <div class="finst">${st(fmt(S.boss.wins),'bosses beaten')}${st(S.trans||0,'transcensions')}${st(unlocked().length+'/'+SONGS.length,'songs learned')}${st(itemCount()+'/'+ITEM_IDS.length,'gear kinds found')}${st(fmt(S.total),'fans this transcension')}${st(fmt(S.etT||0),'Eternity earned')}</div>
+    <div class="finst">${st(playFmt(S.play),'play time')}${st(S.finN||1,'final boss wins')}${st(fmt(S.boss.wins),'bosses beaten')}${st(S.trans||0,'transcensions')}${st(unlocked().length+'/'+SONGS.length,'songs learned')}${st(itemCount()+'/'+ITEM_IDS.length,'gear kinds found')}${st(fmt(S.total),'fans this transcension')}${st(fmt(S.etT||0),'Eternity earned')}</div>
     <p class="pf" style="color:#a08c84">Thank you for playing! The show goes on: the final boss keeps dropping loot, and there are still songs, gear and Eternity to collect.</p>`,[['Keep rocking',null,1]]);
   $('modal').classList.add('fin');chord(4);setTimeout(()=>chord(4),400);setTimeout(()=>chord(4),800);
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');
@@ -1552,7 +1553,7 @@ function winBoss(k,sp){S.boss.lvl=Math.min(BOSS_TOP,S.boss.lvl+1);S.boss.wins++;
   return {hr,skn,it,eqd,sg:unlockSong()};}
 function endFight(win,fled){if(F.daily)return endDaily(win);const k=F.k,left=Math.max(0,hpFrac()),b=bossOf(k),sp=F.sp;if(sp){if(win)delete S.boss.hp;else S.boss.hp=Big.max(F.hp,1);}F=null;$('fight').classList.remove('show','roam');$('fRing').style.transform='';S.cd.boss=Date.now()+bossCd()*1e3;
   if(!win){modal(fled?'You Fled':'Booed Off Stage',`${b.e} ${b.n} survives with ${Math.ceil(left*100)}% HP.<br>${sp?'A headliner does not heal: the damage you dealt stays for the next fight.':'Spend platinum records on Riff Damage or Extended Set and come back.'}`,[['Retreat',null,1]]);buildBoss();render();save();return;}
-  const fin=k===BOSS_TOP&&!S.finished;if(fin)S.finished=Date.now();   // first win against the final boss: the finale screen follows the victory popup
+  const fin=k===BOSS_TOP;if(fin){if(!S.finished)S.finished=Date.now();S.finN=(S.finN||0)+1;}   // every win against the final boss: the finale screen follows the victory popup
   const {hr,skn,it,eqd,sg}=winBoss(k,sp),loot='<br><br>'+itemCard(it)+(eqd?'<br>Equipped automatically.':'');
   $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');chord(4);
   modal('Boss Defeated!',`${b.e} ${b.n} is down.${hr?`<br>+${hr} ${ic('rec')}`:''}${loot}${sg?`<br><br>${ic('note')} <b style="color:#d5b0ff">New song for the setlist</b><br>${sg.n}`:''}${skn?`<br><br>${ic('palette')} <b style="color:#ffd76a">New pick skin</b><br>${skn.n} · ${skn.d}`:''}<br><br>${ic('swords')} Riff power +15% for good`,[[fin?'Continue':'Rock on',fin?showFinale:null,1]]);buildBoss();render();save();}
@@ -1570,7 +1571,7 @@ function simFight(){const k=S.boss.lvl,sp=isHead(k),max=bossMax(k),dur=bossTime(
   return {win:false,sp,k,hp,left:hp.div(max).toNumber()};}
 /* one auto-fight at time `when` (ms). Returns what happened, for the toast or the welcome-back summary */
 function autoFight(when){const r=simFight(),b=bossOf(r.k);r.b=b;S.cd.boss=when+bossCd()*1e3;
-  if(r.win){if(r.sp)delete S.boss.hp;r.fin=r.k===BOSS_TOP&&!S.finished;if(r.fin)S.finished=Date.now();Object.assign(r,winBoss(r.k,r.sp));
+  if(r.win){if(r.sp)delete S.boss.hp;r.fin=r.k===BOSS_TOP;if(r.fin){if(!S.finished)S.finished=Date.now();S.finN=(S.finN||0)+1;}Object.assign(r,winBoss(r.k,r.sp));
     if(S.afSkip&&S.skill>=skipCost()){S.skill-=skipCost();S.cd.boss=when;r.skip=1;}}   // spend solo skill to call the next boss right away
   else if(r.sp)S.boss.hp=Big.max(r.hp,1);   // a headliner keeps the damage
   return r;}
@@ -1856,7 +1857,7 @@ function away(sec){hype=0;const cap=CAP+4*3600*etl('night'),dt=Math.min(sec,cap)
   modal('Welcome back!',(g.m>0?`Your band kept gigging for ${dt<3600?Math.round(dt/60)+' minutes':(dt/3600).toFixed(1)+' hours'}${sec>cap?` (the ${cap/3600} hour limit)`:''} and won <b style="color:#ffd76a">${fmt(g)} fans</b>.`:'Welcome back!')+afSummary(L),[[fin?'Continue':'Rock on',fin?showFinale:null,1]]);}
 let prev=S.last||Date.now();
 function tick(){const now=Date.now(),dt=(now-prev)/1000;prev=now;
-  if(dt>AWAY)away(dt);else if(dt>0){gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp){const h=F.hp.add(F.max.mul(BOSS_REGEN*dt));F.hp=h.lt(F.max)?h:F.max;}if(F.sp&&Date.now()>F.nm)roam();}afTick(now);}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
+  if(dt>AWAY)away(dt);else if(dt>0){S.play=(S.play||0)+dt;gain(fps().mul(dt));hype=Math.max(0,hype-dt*(.03+.12*hype)*FX.hypeKeep*.8**etl('hype'));autoTick(dt);if(F){if(F.daily)F.hp=Math.min(F.max,F.hp+F.rg*dt);else if(!F.sp){const h=F.hp.add(F.max.mul(BOSS_REGEN*dt));F.hp=h.lt(F.max)?h:F.max;}if(F.sp&&Date.now()>F.nm)roam();}afTick(now);}   // hype drains faster the fuller it is: ~2 clicks/s holds 8%, 6/s holds 75%, 8/s holds it full
   if(F&&now>F.end)endFight(false);
   if(!diverEl&&now>nextDiver&&!document.hidden)spawnDiver();
   if(now-lastAch>1000){lastAch=now;checkAch();drawDaily();drawEt();}evTick(now);
